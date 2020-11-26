@@ -1,9 +1,9 @@
 from pipen import Proc, Pipen
-from pipen_args import params
+import pipen_args
 
 class Process(Proc):
     input_keys = 'a'
     input = range(10)
     script = 'echo {{in.a}}'
 
-Pipen(starts=Process).run()
+Pipen(desc='Pipeline description.').starts(Process).run()

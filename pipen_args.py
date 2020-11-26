@@ -1,162 +1,246 @@
 """Command line argument parser for pipen"""
+import sys
+from io import StringIO
 from pyparam import Params
 from pipen.plugin import plugin
-from pipen.utils import logger
+from pipen.utils import logger, _logger_handler
 
 __version__ = '0.0.0'
-__all__ = ['params']
+__all__ = ['args']
 
-name = 'args'
+class Args(Params):
 
-params = Params(help_on_void=False)
+    INST = None
+
+    def __new__(cls, pipen_opt_group=None, *args, **kwargs):
+        if cls.INST is None:
+            cls.INST = super().__new__(cls)
+            return cls.INST
+
+        help_desc = kwargs.get('desc', None)
+        if help_desc is not None:
+            cls.INST.desc = (list(help_desc)
+                             if isinstance(help_desc, (tuple, list))
+                             else [help_desc])
+        if pipen_opt_group is not None:
+            group, params = list(cls.INST.param_groups.items())[0]
+            cls.INST.param_groups.pop(group)
+            cls.INST.param_groups[pipen_opt_group.upper()] = params
+        return cls.INST
+
+    def __init__(self, pipen_opt_group=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.pipen_opt_group = pipen_opt_group
+        self.init()
+        self.parsed = None
+        _logger_handler.console.file = self.file = StringIO()
+
+    def parse(self, args=None, ignore_required=False):
+        print('arparse')
+        if not self.parsed:
+            try:
+                print('arparse1')
+                self.parsed = super().parse(args, ignore_required)
+                print('arparse2')
+                sys.stdout.write(self.file.getvalue())
+            except SystemExit:
+                raise
+            finally:
+                _logger_handler.console.file = sys.stdout
+        return self.parsed
+
+    def init(self):
+        group_arg = {}
+        if self.pipen_opt_group is not None:
+            group_arg['group'] = self.pipen_opt_group.upper()
+        self.add_param(
+            'profile',
+            default='default',
+            desc=(
+                'The default profile from the configuration to run the ',
+                'pipeline. This profile will be used unless a profile is '
+                'specified in the process or in the .run method of pipen.'
+            ),
+            **group_arg
+        )
+        self.add_param(
+            'loglevel',
+            default=None,
+            desc=('The logging level for the main logger, only takes effect '
+                  'after pipeline is initialized.',
+                  'Default: <from config>'),
+            callback=lambda val: val and val.upper(),
+            **group_arg
+        )
+        self.add_param(
+            'cache',
+            default=None,
+            type=bool,
+            desc=('Whether enable caching for processes.',
+                  'Default: <from config>'),
+            **group_arg
+        )
+        self.add_param(
+            'dirsig',
+            default=None,
+            type=int,
+            desc=(
+                'The depth to check the Last Modification Time of a directory.',
+                'Since modifying the content won\'t change its LMT.',
+                'Default: <from config>'
+            ),
+            **group_arg
+        )
+        self.add_param(
+            'error_strategy',
+            default=None,
+            type='choice',
+            choices=['ignore', 'halt', 'retry'],
+            desc=('How we should deal with job errors.',
+                ' - `ignore`: Let other jobs keep running. '
+                'But the process is still failing when done.',
+                ' - `halt`: Halt the pipeline, other running jobs will be '
+                'killed.',
+                ' - `retry`: Retry this job on the scheduler system.',
+                'Default: <from config>'),
+            **group_arg
+        )
+        self.add_param(
+            'num_retries',
+            default=None,
+            type=int,
+            desc=('How many times to retry the job when failed.',
+                  'Default: <from config>'),
+            **group_arg
+        )
+        self.add_param(
+            'forks',
+            default=None,
+            type=int,
+            desc=('How many jobs to run simultaneously by the scheduler.',
+                  'Default: <from config>'),
+            **group_arg
+        )
+        self.add_param(
+            'submission_batch',
+            default=None,
+            type=int,
+            desc=('How many jobs to submit simultaneously to '
+                  'the scheduler system.',
+                  'Default: <from config>'),
+            **group_arg
+        )
+        self.add_param(
+            'workdir',
+            default=None,
+            type='path',
+            desc=('The workdir for the pipeline.',
+                  'Default: <from config>'),
+            **group_arg
+        )
+        self.add_param(
+            'envs',
+            default=None,
+            type='json',
+            desc=('The env variables for template rendering. ',
+                  'Will update to the default one.',
+                  'Default: <from config>'),
+            **group_arg
+        )
+        self.add_param(
+            'scheduler',
+            default=None,
+            type=str,
+            desc='The default scheduler. Default: <from config>',
+            **group_arg
+        )
+        self.add_param(
+            'scheduler_opts',
+            default=None,
+            type='json',
+            desc=('The default scheduler options. '
+                  'Will update to the default one.',
+                  'Default: <from config>'),
+            **group_arg
+        )
+        self.add_param(
+            'plugins',
+            type=list,
+            desc=(
+                'A list of plugins to only enabled or disabled for '
+                'this pipeline.',
+                'To disable plugins, use `no:<plugin_name>`',
+                'Default: <from config>'
+            ),
+            **group_arg
+        )
+        self.add_param(
+            'plugin_opts',
+            default=None,
+            type='json',
+            desc=('Plugin options. Will update to the default one.',
+                  'Default: <from config>'),
+            **group_arg
+        )
+        self.add_param(
+            'outdir',
+            default=None,
+            type='path',
+            desc=('The output directory for the pipeline.',
+                  'Default: <from config>'),
+            **group_arg
+        )
+
+args = Args(help_on_void=False)
 
 @plugin.impl
 def on_init(pipen):
-    """Setup and parse the arguments when the pipeline is initialized."""
+    """Parse and update the config"""
     config = pipen.config
-    params.add_param(
-        'profile',
-        default='default',
-        desc=('The default profile from the configuration to run the pipeline.',
-              'This profile will be used unless a profile is specified in the '
-              'process or in the .run method of pipen.')
-    )
-    params.add_param(
-        'loglevel',
-        default=config.loglevel,
-        desc=('The logging level for the main logger, only takes effect '
-              'after pipeline is initialized.'),
-        callback=lambda val: val and val.upper()
-    )
-    params.add_param(
-        'cache',
-        default=config.cache,
-        type=bool,
-        desc=('Whether enable caching for processes.')
-    )
-    params.add_param(
-        'dirsig',
-        default=config.dirsig,
-        type=int,
-        desc=('The depth to check the Last Modification Time of a directory.',
-              'Since modify the content of a directory won\'t change its LMT.')
-    )
-    params.add_param(
-        'error_strategy',
-        default=config.error_strategy,
-        type='choice',
-        choices=['ignore', 'halt', 'retry'],
-        desc=('How we should deal with job errors.',
-              ' - `ignore`: Let other jobs keep running. '
-              'But the process is still failing when done.',
-              ' - `halt`: Halt the pipeline, other running jobs will be '
-              'killed.',
-              ' - `retry`: Retry this job on the scheduler system.')
-    )
-    params.add_param(
-        'num_retries',
-        default=config.num_retries,
-        type=int,
-        desc='How many times to retry the job when failed.'
-    )
-    params.add_param(
-        'forks',
-        default=config.forks,
-        type=int,
-        desc='How many jobs to run simultaneously on the scheduler system.'
-    )
-    params.add_param(
-        'submission_batch',
-        default=config.submission_batch,
-        type=int,
-        desc='How many jobs to submit simultaneously to the scheduler system.'
-    )
-    params.add_param(
-        'workdir',
-        default=config.workdir,
-        type='path',
-        desc='The workdir for the pipeline.'
-    )
-    params.add_param(
-        'envs',
-        default=config.envs,
-        type='json',
-        desc=('The env variables for template rendering. ',
-              'Will update to the default one.')
-    )
-    params.add_param(
-        'scheduler',
-        default=config.scheduler,
-        type=str,
-        desc='The default scheduler'
-    )
-    params.add_param(
-        'scheduler_opts',
-        default=config.scheduler_opts,
-        type='json',
-        desc='The default scheduler options. Will update to the default one.'
-    )
-    params.add_param(
-        'plugins',
-        default=config.plugins,
-        type=list,
-        desc=(
-            'A list of plugins to only enabled or disabled for this pipeline.',
-            'To disable plugins, use `no:<plugin_name>`'
-        )
-    )
-    params.add_param(
-        'plugin_opts',
-        default=config.plugin_opts,
-        type='json',
-        desc='Plugin options. Will update to the default one.'
-    )
-    params.add_param(
-        'outdir',
-        default=pipen.outdir,
-        type='path',
-        desc='The output directory for the pipeline.'
-    )
 
-    params.desc = [pipen.desc]
-    parsed = params.parse()
-    pipen.profile = parsed.profile
-    pipen.outdir = parsed.outdir
-    if parsed.loglevel != config.loglevel:
+    if args.desc == ['Not described.']:
+        args.desc = [pipen.desc]
+
+    parsed = args.parse()
+    if parsed.profile is not None:
+        pipen.profile = parsed.profile
+    if parsed.outdir is not None:
+        pipen.outdir = parsed.outdir
+    if parsed.loglevel is not None:
         logger.setLevel(parsed.loglevel)
 
-    args = {'default': {}}
-    if parsed.cache != config.cache:
-        args['default']['cache'] = parsed.cache
-    if parsed.dirsig != config.dirsig:
-        args['default']['dirsig'] = parsed.dirsig
-    if parsed.error_strategy != config.error_strategy:
-        args['default']['error_strategy'] = parsed.error_strategy
-    if parsed.num_retries != config.num_retries:
-        args['default']['num_retries'] = parsed.num_retries
-    if parsed.forks != config.forks:
-        args['default']['forks'] = parsed.forks
-    if parsed.submission_batch != config.submission_batch:
-        args['default']['submission_batch'] = parsed.submission_batch
-    if parsed.workdir != config.workdir:
-        args['default']['workdir'] = parsed.workdir
-    if parsed.envs != config.envs:
+    config_args = {'default': {}}
+    if parsed.cache is not None:
+        config_args['default']['cache'] = parsed.cache
+    if parsed.dirsig is not None:
+        config_args['default']['dirsig'] = parsed.dirsig
+    if parsed.error_strategy is not None:
+        config_args['default']['error_strategy'] = parsed.error_strategy
+    if parsed.num_retries is not None:
+        config_args['default']['num_retries'] = parsed.num_retries
+    if parsed.forks is not None:
+        config_args['default']['forks'] = parsed.forks
+    if parsed.submission_batch is not None:
+        config_args['default']['submission_batch'] = parsed.submission_batch
+    if parsed.workdir is not None:
+        config_args['default']['workdir'] = parsed.workdir
+    if parsed.envs is not None:
         envs = config.envs.copy()
         envs.update(parsed.envs)
-        args['default']['envs'] = envs
-    if parsed.scheduler != config.scheduler:
-        args['default']['scheduler'] = parsed.scheduler
-    if parsed.scheduler_opts != config.scheduler_opts:
+        config_args['default']['envs'] = envs
+    if parsed.scheduler is not None:
+        config_args['default']['scheduler'] = parsed.scheduler
+    if parsed.scheduler_opts is not None:
         scheduler_opts = config.scheduler_opts.copy()
         scheduler_opts.update(parsed.scheduler_opts)
-        args['default']['scheduler_opts'] = scheduler_opts
-    if parsed.plugins != config.plugins:
-        args['default']['plugins'] = parsed.plugins
-    if parsed.plugin_opts != config.plugin_opts:
+        config_args['default']['scheduler_opts'] = scheduler_opts
+    if not parsed.plugins:
+        config_args['default']['plugins'] = parsed.plugins
+    if parsed.plugin_opts is not None:
         plugin_opts = config.plugin_opts.copy()
         plugin_opts.update(parsed.plugin_opts)
-        args['default']['plugin_opts'] = plugin_opts
+        config_args['default']['plugin_opts'] = plugin_opts
 
-    pipen.config._load(args)
+    pipen.config._load(config_args)
 
 plugin.register(__name__)
