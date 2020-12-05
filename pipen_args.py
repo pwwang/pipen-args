@@ -35,16 +35,13 @@ class Args(Params):
         self.parsed = None
         _logger_handler.console.file = self.file = StringIO()
 
-    def parse(self, args=None, ignore_required=False):
-        print('arparse')
+    def parse(self, args=None, ignore_errors=False):
         if not self.parsed:
+            if ignore_errors:
+                return super().parse(args, True)
             try:
-                print('arparse1')
-                self.parsed = super().parse(args, ignore_required)
-                print('arparse2')
+                self.parsed = super().parse(args, False)
                 sys.stdout.write(self.file.getvalue())
-            except SystemExit:
-                raise
             finally:
                 _logger_handler.console.file = sys.stdout
         return self.parsed
