@@ -5,7 +5,7 @@ from pyparam import Params
 from pipen.plugin import plugin
 from pipen.utils import logger, _logger_handler
 
-__version__ = '0.0.0'
+__version__ = '0.0.2'
 __all__ = ['args']
 
 class Args(Params):
