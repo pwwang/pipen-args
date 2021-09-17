@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "pipen-args"
-version = "0.0.2"
-description = "Provide command-line argument parser for pipen."
+version = "0.0.3"
+description = "Command-line argument parser for pipen."
 authors = ["pwwang <pwwang@pwwang.com>"]
 license = "MIT"
 readme = "README.md"
@@ -9,7 +9,7 @@ homepage = "https://github.com/pwwang/pipen-args"
 repository = "https://github.com/pwwang/pipen-args"
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.7.1"
 pyparam = "*"
 pipen = "*"
 diot = "*"
@@ -19,3 +19,9 @@ diot = "*"
 [build-system]
 requires = ["poetry>=0.12"]
 build-backend = "poetry.masonry.api"
+
+
+[tool.black]
+line-length = 80
+target-version = ['py37', 'py38', 'py39']
+include = '\.pyi?$'

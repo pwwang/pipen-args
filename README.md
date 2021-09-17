@@ -5,83 +5,78 @@ Command line argument parser for [pipen][1]
 ## Usage
 ```python
 from pipen import Proc, Pipen
-from pipen_args import params
+import pipen_args
 
 class Process(Proc):
-    input_keys = 'a'
-    input = range(10)
+    input = 'a'
+    input_data = range(10)
     script = 'echo {{in.a}}'
 
-Pipen(starts=Process).run()
+Pipen().run(Process)
 ```
 
 ```
 > python example.py --help
-11-04 11:46:08 I /main                        _____________________________________   __
-               I /main                        ___  __ \___  _/__  __ \__  ____/__  | / /
-               I /main                        __  /_/ /__  / __  /_/ /_  __/  __   |/ /
-               I /main                        _  ____/__/ /  _  ____/_  /___  _  /|  /
-               I /main                        /_/     /___/  /_/     /_____/  /_/ |_/
-               I /main
-               I /main                                     version: 0.0.1
-               I /main
-               I /main    ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ pipeline-0 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-               I /main    ┃ Undescribed.                                                                 ┃
-               I /main    ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
-               I /main    Enabled plugins: ['verbose', 'main-0.0.1', 'args-0.0.0']
-               I /main    Loaded processes: 1
 
 DESCRIPTION:
-  Undescribed.
+  Pipeline description.
 
 USAGE:
   example.py [OPTIONS]
 
 OPTIONAL OPTIONS:
   --profile <STR>                 - The default profile from the configuration
-                                    to run the pipeline. Default: default
-                                    This profile will be used unless a profile
-                                    is specified in the process or in the .run
-                                    method of pipen.
-  --loglevel <STR>                - The logging level for the main logger, only
+                                    to run the pipeline. This profile will be
+                                    used unless a profile is specified in the
+                                    process or in the .run method of pipen.
+                                    Default: default
+  --loglevel <AUTO>               - The logging level for the main logger, only
                                     takes effect after pipeline is initialized.
-                                    Default: debug
+                                    Default: <from config>
   --cache [BOOL]                  - Whether enable caching for processes.
-                                    Default: True
+                                    Default: <from config>
   --dirsig <INT>                  - The depth to check the Last Modification
-                                    Time of a directory. Default: 1
-                                    Since modify the content of a directory
-                                    won't change its LMT.
+                                    Time of a directory.
+                                    Since modifying the content won't change its
+                                    LMT.
+                                    Default: <from config>
   --error_strategy <CHOICE>       - How we should deal with job errors.
-                                    Default: ignore
                                      - ignore: Let other jobs keep running.
                                     But the process is still failing when done.
                                      - halt: Halt the pipeline, other running
                                     jobs will be killed.
                                      - retry: Retry this job on the scheduler
                                     system.
+                                    Default: <from config>
   --num_retries <INT>             - How many times to retry the job when failed.
-                                    Default: 3
-  --forks <INT>                   - How many jobs to run simultaneously on the
-                                    scheduler system. Default: 1
+                                    Default: <from config>
+  --forks <INT>                   - How many jobs to run simultaneously by the
+                                    scheduler.
+                                    Default: <from config>
   --submission_batch <INT>        - How many jobs to submit simultaneously to
-                                    the scheduler system. Default: 8
+                                    the scheduler system.
+                                    Default: <from config>
   --workdir <PATH>                - The workdir for the pipeline.
-                                    Default: ./.pipen
-  --envs <JSON>                   - The env variables for template rendering.
-                                    Default: {}
-                                    Will update to the default one.
-  --scheduler <STR>               - The default scheduler Default: local
+                                    Default: <from config>
+  --scheduler <STR>               - The default scheduler.
+                                    Default: <from config>
   --scheduler_opts <JSON>         - The default scheduler options. Will update
-                                    to the default one. Default: {}
+                                    to the default one.
+                                    Default: <from config>
   --plugins <LIST>                - A list of plugins to only enabled or
-                                    disabled for this pipeline. Default: []
+                                    disabled for this pipeline.
                                     To disable plugins, use no:<plugin_name>
-  --plugin_opts <JSON>            - Plugin options. Will update to the default
-                                    one. Default: {}
+                                    Default: <from config>
+  --plugin_opts <JSON>            - Plugin options. Will update to the default.
+                                    Default: <from config>
+  --template_opts <JSON>          - Template options. Will update to the
+                                    default.
+                                    Default: <from config>
   --outdir <PATH>                 - The output directory for the pipeline.
-                                    Default: ./pipeline-0-output
+                                    Default: <from config>
   -h, --help                      - Print help information for this command
 ```
+
+See more examples in `examples/` folder.
 
 [1]: https://github.com/pwwang/pipen

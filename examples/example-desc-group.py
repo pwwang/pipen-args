@@ -6,8 +6,8 @@ Args(desc='Pipeline description',
      help_on_void=False)
 
 class Process(Proc):
-    input_keys = 'a'
-    input = range(10)
+    input = 'a'
+    # input_data = range(10)
     script = 'echo {{in.a}}'
 
-Pipen().starts(Process).run()
+Pipen().run(Process)
