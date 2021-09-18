@@ -1,5 +1,5 @@
 from pipen import Proc, Pipen
-import pipen_args
+from pipen_args import args
 
 class Process(Proc):
     input = 'a'

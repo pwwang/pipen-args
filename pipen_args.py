@@ -1,4 +1,5 @@
 """Command line argument parser for pipen"""
+
 import sys
 from io import StringIO
 from pathlib import Path
@@ -10,9 +11,9 @@ from pyparam import Params
 from simpleconf import Config
 
 __version__ = "0.0.3"
-__all__ = ["args", "Args"]
 
 # pylint:disable=redefined-outer-name, unused-argument
+
 
 class Args(Params):
     """Subclass of Params to fit for pipen
@@ -34,24 +35,11 @@ class Args(Params):
             cls.INST = super().__new__(cls)
             return cls.INST
 
-        help_desc = kwargs.get("desc", None)
-        if help_desc is not None:
-            cls.INST.desc = (
-                list(help_desc)
-                if isinstance(help_desc, (tuple, list))
-                else [help_desc]
-            )
-        group, params = list(cls.INST.param_groups.items())[0]
-
-        if pipen_opt_group is not None:
-            cls.INST.param_groups.pop(group)
-            cls.INST.param_groups[pipen_opt_group.upper()] = params
-
-        hide_args = hide_args or ()
-        for param in params:
-            param.show = bool(set(param.names) - set(hide_args))
-
-        return cls.INST
+        raise ValueError(
+            "Class Args should only instantiate once. \n"
+            "If you want to access the instance, use `Args.INST` or "
+            "`from pipen_args import args`"
+        )
 
     def __init__(self, *args, pipen_opt_group=None, hide_args=None, **kwargs):
         """Constructor"""
@@ -59,6 +47,7 @@ class Args(Params):
             return
         super().__init__(*args, **kwargs)
         self.pipen_opt_group = pipen_opt_group
+        self.hide_args = hide_args or ()
         self.init()
         self.parsed = None
         _logger_handler.console.file = self.file = StringIO()
@@ -80,6 +69,7 @@ class Args(Params):
         group_arg = {}
         if self.pipen_opt_group is not None:
             group_arg["group"] = self.pipen_opt_group.upper()
+
         self.add_param(
             "profile",
             default="default",
@@ -88,6 +78,7 @@ class Args(Params):
                 "pipeline. This profile will be used unless a profile is "
                 "specified in the process or in the .run method of pipen.",
             ),
+            show="profile" not in self.hide_args,
             **group_arg,
         )
         self.add_param(
@@ -98,6 +89,7 @@ class Args(Params):
                 "after pipeline is initialized.",
                 "Default: <from config>",
             ),
+            show="loglevel" not in self.hide_args,
             callback=lambda val: val and val.upper(),
             **group_arg,
         )
@@ -109,6 +101,7 @@ class Args(Params):
                 "Whether enable caching for processes.",
                 "Default: <from config>",
             ),
+            show="cache" not in self.hide_args,
             **group_arg,
         )
         self.add_param(
@@ -120,6 +113,7 @@ class Args(Params):
                 "Since modifying the content won't change its LMT.",
                 "Default: <from config>",
             ),
+            show="dirsig" not in self.hide_args,
             **group_arg,
         )
         self.add_param(
@@ -136,6 +130,8 @@ class Args(Params):
                 " - `retry`: Retry this job on the scheduler system.",
                 "Default: <from config>",
             ),
+            show="error_strategy" not in self.hide_args
+            and "error-strategy" not in self.hide_args,
             **group_arg,
         )
         self.add_param(
@@ -146,6 +142,8 @@ class Args(Params):
                 "How many times to retry the job when failed.",
                 "Default: <from config>",
             ),
+            show="num_retries" not in self.hide_args
+            and "num-retries" not in self.hide_args,
             **group_arg,
         )
         self.add_param(
@@ -156,6 +154,7 @@ class Args(Params):
                 "How many jobs to run simultaneously by the scheduler.",
                 "Default: <from config>",
             ),
+            show="forks" not in self.hide_args,
             **group_arg,
         )
         self.add_param(
@@ -167,6 +166,8 @@ class Args(Params):
                 "the scheduler system.",
                 "Default: <from config>",
             ),
+            show="submission-batch" not in self.hide_args
+            and "submission_batch" not in self.hide_args,
             **group_arg,
         )
         self.add_param(
@@ -174,6 +175,7 @@ class Args(Params):
             default=None,
             type="path",
             desc=("The workdir for the pipeline.", "Default: <from config>"),
+            show="workdir" not in self.hide_args,
             **group_arg,
         )
         self.add_param(
@@ -181,6 +183,7 @@ class Args(Params):
             default=None,
             type=str,
             desc="The default scheduler. Default: <from config>",
+            show="scheduler" not in self.hide_args,
             **group_arg,
         )
         self.add_param(
@@ -192,6 +195,8 @@ class Args(Params):
                 "Will update to the default one.",
                 "Default: <from config>",
             ),
+            show="scheduler_opts" not in self.hide_args
+            and "scheduler-opts" not in self.hide_args,
             **group_arg,
         )
         self.add_param(
@@ -203,6 +208,7 @@ class Args(Params):
                 "To disable plugins, use `no:<plugin_name>`",
                 "Default: <from config>",
             ),
+            show="plugins" not in self.hide_args,
             **group_arg,
         )
         self.add_param(
@@ -213,6 +219,8 @@ class Args(Params):
                 "Plugin options. Will update to the default.",
                 "Default: <from config>",
             ),
+            show="plugin_opts" not in self.hide_args
+            and "plugin-opts" not in self.hide_args,
             **group_arg,
         )
         self.add_param(
@@ -223,6 +231,8 @@ class Args(Params):
                 "Template options. Will update to the default.",
                 "Default: <from config>",
             ),
+            show="template_opts" not in self.hide_args
+            and "template-opts" not in self.hide_args,
             **group_arg,
         )
         self.add_param(
@@ -237,18 +247,35 @@ class Args(Params):
         )
 
 
-args = Args(help_on_void=False)
+def __getattr__(name: str) -> Args:
+    """Instantiate the instance only on import"""
+    # to avoid this function to be called twice
+    if name == "__path__":
+        raise AttributeError
+    if name == "args":
+        Args.INST = Args(help_on_void=False)
+        return Args.INST
 
 
 @plugin.impl
 async def on_init(pipen):
     """Parse and update the config"""
+    if Args.INST is None:
+        raise ImportError(
+            "[pipen-args] Args class is not instantiated. \n"
+            "Either do:\n"
+            "   >>> from pipen_args import args\n"
+            "or\n"
+            "   >>> from pipen_args import Args\n"
+            "   >>> args = Args(...)\n"
+        )
+
     config = pipen.config
 
-    if args.desc == ["Not described."]:
-        args.desc = [pipen.desc]
+    if Args.INST.desc == ["Not described."]:
+        Args.INST.desc = [pipen.desc]
 
-    parsed = args.parse()
+    parsed = Args.INST.parse()
     if parsed.profile is not None:
         pipen.profile = parsed.profile
         fileconfs = Config()
@@ -263,25 +290,26 @@ async def on_init(pipen):
         "loglevel",
         "cache",
         "dirsig",
-        "error_strategy",
-        "num_retries",
+        "error-strategy",
+        "num-retries",
         "forks",
-        "submission_batch",
+        "submission-batch",
         "workdir",
         "scheduler",
         "plugins",
     ):
         if parsed[key] is not None:
-            config[key] = parsed[key]
+            config[key.replace("-", "_")] = parsed[key]
 
     for key in (
-        "plugin_opts",
-        "template_opts",
-        "scheduler_opts",
+        "plugin-opts",
+        "template-opts",
+        "scheduler-opts",
     ):
-        old = copy_dict(config[key] or {}, 3)
+        us_key = key.replace("-", "_")
+        old = copy_dict(config[us_key] or {}, 3)
         old.update(parsed[key] or {})
-        config[key] = old
+        config[us_key] = old
 
 
 plugin.register(__name__)
