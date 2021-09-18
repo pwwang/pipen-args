@@ -10,17 +10,26 @@ from pyparam import Params
 from simpleconf import Config
 
 __version__ = "0.0.3"
-__all__ = ["args"]
+__all__ = ["args", "Args"]
 
 # pylint:disable=redefined-outer-name, unused-argument
 
 class Args(Params):
-    """Subclass of Params to fit for pipen"""
+    """Subclass of Params to fit for pipen
+
+    Args:
+        pipen_opt_group: The group name to gather all the parameters on
+            help page
+        hide_args: Hide some arguments in help page
+    """
 
     INST = None
 
-    def __new__(cls, *args, pipen_opt_group=None, **kwargs):
-        """Singleton"""
+    def __new__(cls, *args, pipen_opt_group=None, hide_args=None, **kwargs):
+        """Make class as singleton
+
+        As we want external instantiation returns the same instance.
+        """
         if cls.INST is None:
             cls.INST = super().__new__(cls)
             return cls.INST
@@ -32,19 +41,28 @@ class Args(Params):
                 if isinstance(help_desc, (tuple, list))
                 else [help_desc]
             )
+        group, params = list(cls.INST.param_groups.items())[0]
+
         if pipen_opt_group is not None:
-            group, params = list(cls.INST.param_groups.items())[0]
             cls.INST.param_groups.pop(group)
             cls.INST.param_groups[pipen_opt_group.upper()] = params
+
+        hide_args = hide_args or ()
+        for param in params:
+            param.show = bool(set(param.names) - set(hide_args))
+
         return cls.INST
 
-    def __init__(self, *args, pipen_opt_group=None, **kwargs):
+    def __init__(self, *args, pipen_opt_group=None, hide_args=None, **kwargs):
         """Constructor"""
+        if getattr(self, "_inited", False):
+            return
         super().__init__(*args, **kwargs)
         self.pipen_opt_group = pipen_opt_group
         self.init()
         self.parsed = None
         _logger_handler.console.file = self.file = StringIO()
+        self._inited = True
 
     def parse(self, args=None, ignore_errors=False):
         if not self.parsed:
@@ -105,7 +123,7 @@ class Args(Params):
             **group_arg,
         )
         self.add_param(
-            "error_strategy",
+            "error-strategy",
             default=None,
             type="choice",
             choices=["ignore", "halt", "retry"],
@@ -121,7 +139,7 @@ class Args(Params):
             **group_arg,
         )
         self.add_param(
-            "num_retries",
+            "num-retries",
             default=None,
             type=int,
             desc=(
@@ -141,7 +159,7 @@ class Args(Params):
             **group_arg,
         )
         self.add_param(
-            "submission_batch",
+            "submission-batch",
             default=None,
             type=int,
             desc=(
@@ -166,7 +184,7 @@ class Args(Params):
             **group_arg,
         )
         self.add_param(
-            "scheduler_opts",
+            "scheduler-opts",
             default=None,
             type="json",
             desc=(
@@ -188,7 +206,7 @@ class Args(Params):
             **group_arg,
         )
         self.add_param(
-            "plugin_opts",
+            "plugin-opts",
             default=None,
             type="json",
             desc=(
@@ -198,7 +216,7 @@ class Args(Params):
             **group_arg,
         )
         self.add_param(
-            "template_opts",
+            "template-opts",
             default=None,
             type="json",
             desc=(
