@@ -6,4 +6,4 @@ class Process(Proc):
     input_data = range(10)
     script = 'echo {{in.a}}'
 
-Pipen(desc='Pipeline description.').run(Process)
+Pipen(desc='Pipeline description.').set_start(Process).run()

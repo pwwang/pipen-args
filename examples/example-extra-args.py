@@ -12,4 +12,4 @@ class Process(Proc):
     input = range(10)
     script = 'echo {{in.a}}'
 
-Pipen().starts(Process).run()
+Pipen().set_starts(Process).run()

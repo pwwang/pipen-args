@@ -22,4 +22,4 @@ class Process(Proc):
     script = "echo {{in.a}}"
 
 
-Pipen().run(Process)
+Pipen().set_starts(Process).run()
