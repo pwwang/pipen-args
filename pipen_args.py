@@ -10,9 +10,7 @@ from pipen.utils import _logger_handler, copy_dict
 from pyparam import Params
 from simpleconf import Config
 
-__version__ = "0.0.3"
-
-# pylint:disable=redefined-outer-name, unused-argument
+__version__ = "0.0.4"
 
 
 class Args(Params):
@@ -273,7 +271,7 @@ async def on_init(pipen):
     config = pipen.config
 
     if Args.INST.desc == ["Not described."]:
-        Args.INST.desc = [pipen.desc]
+        Args.INST.desc = [pipen.desc or "Undescripbed."]
 
     parsed = Args.INST.parse()
     if parsed.profile is not None:
