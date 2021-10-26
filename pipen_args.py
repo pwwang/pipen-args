@@ -8,9 +8,13 @@ from pipen import plugin
 from pipen.defaults import CONFIG_FILES
 from pipen.utils import _logger_handler, copy_dict
 from pyparam import Params
+from pyparam.defaults import PARAM
 from simpleconf import Config
 
 __version__ = "0.0.4"
+
+# Allow type to be overriden from command line
+PARAM.type_frozen = False
 
 
 class Args(Params):
