@@ -11,7 +11,7 @@ from pyparam import Params
 from pyparam.defaults import PARAM
 from simpleconf import Config
 
-__version__ = "0.0.4"
+__version__ = "0.0.5"
 
 # Allow type to be overriden from command line
 PARAM.type_frozen = False
