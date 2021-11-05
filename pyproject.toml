@@ -10,7 +10,7 @@ repository = "https://github.com/pwwang/pipen-args"
 
 [tool.poetry.dependencies]
 python = "^3.7.1"
-pyparam = "*"
+pyparam = "^0.4.15"
 pipen = "*"
 diot = "*"
 

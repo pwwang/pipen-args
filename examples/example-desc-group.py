@@ -2,7 +2,7 @@ from pipen import Proc, Pipen
 from pipen_args import Args
 
 Args(desc='Pipeline description',
-     pipen_opt_group='Pipeline options',
+     pipen_opt_group='A lot of pipeline options',
      help_on_void=False)
 
 class Process(Proc):

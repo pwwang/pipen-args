@@ -4,17 +4,104 @@ import sys
 from io import StringIO
 from pathlib import Path
 
+from pardoc import google_parser
+from pardoc.parsed import ParsedItem
 from pipen import plugin
 from pipen.defaults import CONFIG_FILES
 from pipen.utils import _logger_handler, copy_dict
-from pyparam import Params
-from pyparam.defaults import PARAM
+from pyparam import Params, defaults
 from simpleconf import Config
 
 __version__ = "0.0.5"
 
 # Allow type to be overriden from command line
-PARAM.type_frozen = False
+defaults.PARAM.type_frozen = False
+defaults.CONSOLE_WIDTH = 99
+
+PARAM_DESCRS = {
+    "profile": (
+        "The default profile from the configuration to run the "
+        "pipeline. This profile will be used unless a profile is "
+        "specified in the process or in the .run method of pipen."
+    ),
+    "outdir": "The output directory of the pipeline",
+    "loglevel": (
+        "The logging level for the main logger, only takes effect "
+        "after pipeline is initialized."
+    ),
+    "cache": "Whether enable caching for processes.",
+    "dirsig": (
+        "The depth to check the Last Modification Time of a directory.",
+        "Since modifying the content won't change its LMT."
+    ),
+    "error_strategy": (
+        "How we should deal with job errors.",
+        " - `ignore`: Let other jobs keep running. "
+        "But the process is still failing when done.",
+        " - `halt`: Halt the pipeline, other running jobs will be " "killed.",
+        " - `retry`: Retry this job on the scheduler system.",
+    ),
+    "num_retries": "How many times to retry the job when failed.",
+    "forks": "How many jobs to run simultaneously by the scheduler.",
+    "submission_batch": (
+        "How many jobs to submit simultaneously to the scheduler system."
+    ),
+    "workdir": "The workdir for the pipeline.",
+    "scheduler": "The scheduler to run the jobs.",
+    "scheduler_opts": (
+        "The default scheduler options. Will update to the default one."
+    ),
+    "plugins": (
+        "A list of plugins to only enabled or disabled for this pipeline.",
+        "To disable plugins, use `no:<plugin_name>`"
+    ),
+    "plugin_opts": "Plugin options. Will update to the default.",
+    "template_opts": "Template options. Will update to the default.",
+}
+
+HIDDEN_ARGS = (
+    "scheduler_opts",
+    "plugin_opts",
+    "template_opts",
+    "dirsig",
+    "cache",
+    "forks",
+    "error_strategy",
+    "num_retries",
+    "loglevel",
+    "plugins",
+    "submission_batch",
+)
+
+
+def _annotate_process(proc):
+    """Annotate the process with docstrings"""
+    parsed = google_parser.parse(proc.__doc__ or "")
+    keys = ("Input", "Output", "Envs")
+
+    out = {}
+    for key in keys:
+        out[key] = {}
+        if key not in parsed:
+            continue
+        for item in parsed[key].section:
+            if not isinstance(item, ParsedItem):  # pragma: no cover
+                continue
+
+            out[key][item.name] = item.desc
+
+    return out
+
+
+def _doc_to_summary(docstr):
+    """Get the first line of docstring as summary"""
+    out = []
+    for i, line in enumerate(docstr.splitlines()):
+        line = line.strip()
+        if not line and i > 0:
+            break
+        out.append(line)
+    return " ".join(out)
 
 
 class Args(Params):
@@ -23,12 +110,19 @@ class Args(Params):
     Args:
         pipen_opt_group: The group name to gather all the parameters on
             help page
-        hide_args: Hide some arguments in help page
+        hidden_args: Hide some arguments in help page
     """
 
     INST = None
 
-    def __new__(cls, *args, pipen_opt_group=None, hide_args=None, **kwargs):
+    def __new__(
+        cls,
+        *args,
+        pipen_opt_group="PIPELINE OPTIONS",
+        hidden_args=HIDDEN_ARGS,
+        flatten_proc_args="auto",
+        **kwargs,
+    ):
         """Make class as singleton
 
         As we want external instantiation returns the same instance.
@@ -43,16 +137,37 @@ class Args(Params):
             "`from pipen_args import args`"
         )
 
-    def __init__(self, *args, pipen_opt_group=None, hide_args=None, **kwargs):
+    def __init__(
+        self,
+        *args,
+        pipen_opt_group="PIPELINE OPTIONS",
+        hidden_args=HIDDEN_ARGS,
+        flatten_proc_args="auto",
+        **kwargs,
+    ):
         """Constructor"""
         if getattr(self, "_inited", False):
             return
+
+        self.pipen_opt_group = pipen_opt_group and pipen_opt_group.upper()
+
+        def help_callback(helps):
+            helps.insert(
+                None, self.pipen_opt_group, helps.pop(self.pipen_opt_group)
+            )
+            user_callback = kwargs.pop("help_callback", None)
+            if callable(user_callback):
+                user_callback(helps)
+
+        kwargs["help_callback"] = help_callback
         super().__init__(*args, **kwargs)
-        self.pipen_opt_group = pipen_opt_group
-        self.hide_args = hide_args or ()
-        self.init()
+
+        self.hidden_args = hidden_args or ()
+        self.flatten_proc_args = flatten_proc_args
+        # self.init()
         self.parsed = None
         _logger_handler.console.file = self.file = StringIO()
+
         self._inited = True
 
     def parse(self, args=None, ignore_errors=False):
@@ -66,187 +181,190 @@ class Args(Params):
                 _logger_handler.console.file = sys.stdout
         return self.parsed
 
-    def init(self):
+    def init(self, pipen):
         """Define arguments"""
-        group_arg = {}
-        if self.pipen_opt_group is not None:
-            group_arg["group"] = self.pipen_opt_group.upper()
+        group_arg = {"group": self.pipen_opt_group}
+
+        for opt, desc in PARAM_DESCRS.items():
+            self.add_param(
+                opt,
+                default=(
+                    pipen.outdir
+                    if opt == "outdir"
+                    else {}
+                    if opt.endswith("_opts")
+                    else pipen.config[opt]
+                    if opt != "profile"
+                    else "default"
+                ),
+                show=opt not in self.hidden_args,
+                desc=desc,
+                callback=(
+                    None
+                    if opt != "loglevel"
+                    else lambda val: val and val.upper()
+                ),
+                **group_arg,
+            )
+
+        pipen.build_proc_relationships()
+        if len(pipen.procs) > 1 and self.flatten_proc_args is True:
+            raise ValueError(
+                "Cannot flatten process arguments for multiprocess pipeline."
+            )
+
+        if len(pipen.procs) == 1 and self.flatten_proc_args == "auto":
+            self.flatten_proc_args = True
+
+        if self.flatten_proc_args is True:
+            self._add_proc_args(pipen.procs[0], True, flatten=True)
+        else:
+            for proc in pipen.procs:
+                self._add_proc_args(proc, proc in pipen.starts, flatten=False)
+
+    def _add_proc_args(self, proc, is_start, flatten):
+        """Add process arguments"""
+        try:
+            anno = _annotate_process(proc)
+        except Exception:
+            anno = {"Input": {}, "Output": {}, "Envs": {}}
+
+        if not flatten:
+            # add a namespace argumemnt for this proc
+            self.add_param(
+                proc.name,
+                desc=_doc_to_summary(proc.__doc__ or ""),
+                type="ns",
+                group="PROCESSES",
+            )
+
+        else:
+            # add proc's summary to params' description
+            self.desc.append(_doc_to_summary(proc.__doc__ or ""))
+
+        if is_start:
+            self.add_param(
+                "in" if flatten else f"{proc.name}.in",
+                desc="Input data for the process.",
+                show=False,
+                argname_shorten=False,
+                type="ns",
+                group=f"OPTIONS FOR <{proc.name}>",
+            )
+
+            input_keys = proc.input or []
+            if isinstance(input_keys, str):
+                input_keys = [ikey.strip() for ikey in input_keys.split(",")]
+
+            for input_key_type in input_keys:
+                if ":" not in input_key_type:
+                    input_key = input_key_type.strip()
+                    # out.type[input_key_type] = ProcInputType.VAR
+                else:
+                    # input_key, input_type = input_key_type.split(":", 1)
+                    input_key, _ = input_key_type.split(":", 1)
+                    input_key = input_key.strip()
+                    # input_type = input_type.strip()
+
+                self.add_param(
+                    f"in.{input_key}"
+                    if flatten
+                    else f"{proc.name}.in.{input_key}",
+                    desc=(
+                        "[Required] "
+                        + anno["Input"].get(input_key, "Undescribed.")
+                    ),
+                    argname_shorten=False,
+                    required=True,
+                    type="list",
+                    group=f"OPTIONS FOR <{proc.name}>",
+                )
+
+        if not proc.nexts:
+            self.add_param(
+                "out" if flatten else f"{proc.name}.out",
+                desc="Output for the process (cannot be overwritten, just FYI).",
+                show=False,
+                type="ns",
+                argname_shorten=False,
+                group=f"OPTIONS FOR <{proc.name}>",
+            )
+
+            for key, val in anno["Output"].items():
+                self.add_param(
+                    f"out.{key}" if flatten else f"{proc.name}.out.{key}",
+                    desc=anno["Output"].get(key, "Undescribed."),
+                    default="<awaiting compiling>",
+                    type="auto",
+                    argname_shorten=False,
+                    group=f"OPTIONS FOR <{proc.name}>",
+                )
 
         self.add_param(
-            "profile",
-            default="default",
-            desc=(
-                "The default profile from the configuration to run the "
-                "pipeline. This profile will be used unless a profile is "
-                "specified in the process or in the .run method of pipen.",
-            ),
-            show="profile" not in self.hide_args,
-            **group_arg,
+            "envs" if flatten else f"{proc.name}.envs",
+            desc="Envs for the process.",
+            argname_shorten=False,
+            show=False,
+            type="ns",
+            group=f"OPTIONS FOR <{proc.name}>",
         )
-        self.add_param(
-            "loglevel",
-            default=None,
-            desc=(
-                "The logging level for the main logger, only takes effect "
-                "after pipeline is initialized.",
-                "Default: <from config>",
-            ),
-            show="loglevel" not in self.hide_args,
-            callback=lambda val: val and val.upper(),
-            **group_arg,
-        )
-        self.add_param(
-            "cache",
-            default=None,
-            type=bool,
-            desc=(
-                "Whether enable caching for processes.",
-                "Default: <from config>",
-            ),
-            show="cache" not in self.hide_args,
-            **group_arg,
-        )
-        self.add_param(
-            "dirsig",
-            default=None,
-            type=int,
-            desc=(
-                "The depth to check the Last Modification Time of a directory.",
-                "Since modifying the content won't change its LMT.",
-                "Default: <from config>",
-            ),
-            show="dirsig" not in self.hide_args,
-            **group_arg,
-        )
-        self.add_param(
-            "error-strategy",
-            default=None,
-            type="choice",
-            choices=["ignore", "halt", "retry"],
-            desc=(
-                "How we should deal with job errors.",
-                " - `ignore`: Let other jobs keep running. "
-                "But the process is still failing when done.",
-                " - `halt`: Halt the pipeline, other running jobs will be "
-                "killed.",
-                " - `retry`: Retry this job on the scheduler system.",
-                "Default: <from config>",
-            ),
-            show="error_strategy" not in self.hide_args
-            and "error-strategy" not in self.hide_args,
-            **group_arg,
-        )
-        self.add_param(
-            "num-retries",
-            default=None,
-            type=int,
-            desc=(
-                "How many times to retry the job when failed.",
-                "Default: <from config>",
-            ),
-            show="num_retries" not in self.hide_args
-            and "num-retries" not in self.hide_args,
-            **group_arg,
-        )
-        self.add_param(
-            "forks",
-            default=None,
-            type=int,
-            desc=(
-                "How many jobs to run simultaneously by the scheduler.",
-                "Default: <from config>",
-            ),
-            show="forks" not in self.hide_args,
-            **group_arg,
-        )
-        self.add_param(
-            "submission-batch",
-            default=None,
-            type=int,
-            desc=(
-                "How many jobs to submit simultaneously to "
-                "the scheduler system.",
-                "Default: <from config>",
-            ),
-            show="submission-batch" not in self.hide_args
-            and "submission_batch" not in self.hide_args,
-            **group_arg,
-        )
-        self.add_param(
-            "workdir",
-            default=None,
-            type="path",
-            desc=("The workdir for the pipeline.", "Default: <from config>"),
-            show="workdir" not in self.hide_args,
-            **group_arg,
-        )
-        self.add_param(
-            "scheduler",
-            default=None,
-            type=str,
-            desc="The default scheduler. Default: <from config>",
-            show="scheduler" not in self.hide_args,
-            **group_arg,
-        )
-        self.add_param(
-            "scheduler-opts",
-            default=None,
-            type="json",
-            desc=(
-                "The default scheduler options. "
-                "Will update to the default one.",
-                "Default: <from config>",
-            ),
-            show="scheduler_opts" not in self.hide_args
-            and "scheduler-opts" not in self.hide_args,
-            **group_arg,
-        )
-        self.add_param(
-            "plugins",
-            type=list,
-            desc=(
-                "A list of plugins to only enabled or disabled for "
-                "this pipeline.",
-                "To disable plugins, use `no:<plugin_name>`",
-                "Default: <from config>",
-            ),
-            show="plugins" not in self.hide_args,
-            **group_arg,
-        )
-        self.add_param(
-            "plugin-opts",
-            default=None,
-            type="json",
-            desc=(
-                "Plugin options. Will update to the default.",
-                "Default: <from config>",
-            ),
-            show="plugin_opts" not in self.hide_args
-            and "plugin-opts" not in self.hide_args,
-            **group_arg,
-        )
-        self.add_param(
-            "template-opts",
-            default=None,
-            type="json",
-            desc=(
-                "Template options. Will update to the default.",
-                "Default: <from config>",
-            ),
-            show="template_opts" not in self.hide_args
-            and "template-opts" not in self.hide_args,
-            **group_arg,
-        )
-        self.add_param(
-            "outdir",
-            default=None,
-            type="path",
-            desc=(
-                "The output directory for the pipeline.",
-                "Default: <from config>",
-            ),
-            **group_arg,
-        )
+        for key, val in (proc.envs or {}).items():
+            self.add_param(
+                f"envs.{key}" if flatten else f"{proc.name}.envs.{key}",
+                default=val,
+                desc=anno["Envs"].get(key, "Undescribed."),
+                argname_shorten=False,
+                group=f"OPTIONS FOR <{proc.name}>",
+            )
+
+        if not flatten:
+            for key in (
+                "cache",
+                "dirsig",
+                "error_strategy",
+                "num_retries",
+                "forks",
+                "submission_batch",
+            ):
+                self.add_param(
+                    f"{proc.name}.{key}",
+                    desc=PARAM_DESCRS[key],
+                    default=getattr(proc, key),
+                    show=key not in self.hidden_args,
+                    argname_shorten=False,
+                    group=f"OPTIONS FOR <{proc.name}>",
+                )
+
+            self.add_param(
+                f"{proc.name}.export",
+                desc="Whether to export output for this process.",
+                show="export" not in self.hidden_args,
+                default=not proc.nexts,
+                argname_shorten=False,
+                group=f"OPTIONS FOR <{proc.name}>",
+            )
+
+            for key in ("plugin_opts", "scheduler_opts"):
+                self.add_param(
+                    f"{proc.name}.{key}",
+                    desc=PARAM_DESCRS[key],
+                    show=key not in self.hidden_args,
+                    default={},
+                    argname_shorten=False,
+                    type="json",
+                    group=f"OPTIONS FOR <{proc.name}>",
+                )
+
+            self.add_param(
+                f"{proc.name}.<config>",
+                desc=(
+                    "Other process-level configurations.",
+                    f"See [{self.pipen_opt_group}], and use --full "
+                    "to see all of them"
+                ),
+                argname_shorten=False,
+                group=f"OPTIONS FOR <{proc.name}>",
+            )
 
 
 def __getattr__(name: str) -> Args:
@@ -272,12 +390,20 @@ async def on_init(pipen):
             "   >>> args = Args(...)\n"
         )
 
+    args = Args.INST
     config = pipen.config
 
-    if Args.INST.desc == ["Not described."]:
-        Args.INST.desc = [pipen.desc or "Undescripbed."]
+    if args.desc == ["Not described."]:
+        args.desc = [pipen.desc or "Undescripbed."]
 
-    parsed = Args.INST.parse()
+    args.init(pipen)
+    args.from_arg(
+        "config",
+        desc="Read options from a configuration file in TOML.",
+        force=True,
+    )
+
+    parsed = args.parse()
     if parsed.profile is not None:
         pipen.profile = parsed.profile
         fileconfs = Config()
@@ -292,10 +418,10 @@ async def on_init(pipen):
         "loglevel",
         "cache",
         "dirsig",
-        "error-strategy",
-        "num-retries",
+        "error_strategy",
+        "num_retries",
         "forks",
-        "submission-batch",
+        "submission_batch",
         "workdir",
         "scheduler",
         "plugins",
@@ -304,14 +430,50 @@ async def on_init(pipen):
             config[key.replace("-", "_")] = parsed[key]
 
     for key in (
-        "plugin-opts",
-        "template-opts",
-        "scheduler-opts",
+        "plugin_opts",
+        "template_opts",
+        "scheduler_opts",
     ):
-        us_key = key.replace("-", "_")
-        old = copy_dict(config[us_key] or {}, 3)
+        old = copy_dict(config[key] or {}, 3)
         old.update(parsed[key] or {})
-        config[us_key] = old
+        config[key] = old
 
+    if args.flatten_proc_args is True:
+        parsed = {pipen.procs[0].name: parsed}
+
+    for proc in pipen.procs:
+        proc_args = parsed[proc.name]
+        if "in" in proc_args:
+            from pandas import DataFrame
+            proc.input_data = DataFrame(proc_args["in"]._to_dict())
+
+        if (
+            "envs" in proc_args
+            and proc.envs is not None
+            and proc_args["envs"] is not None
+        ):
+            proc.envs.update(proc_args.envs._to_dict())
+
+        for key in (
+            "cache",
+            "dirsig",
+            "error_strategy",
+            "num_retries",
+            "forks",
+            "submission_batch",
+        ):
+            if key in proc_args:
+                setattr(proc, key, proc_args[key])
+
+        if "export" in proc_args:
+            proc.export = proc_args["export"]
+
+        for key in ("plugin_opts", "scheduler_opts"):
+            if key in proc_args:
+                if proc_args[key]:
+                    proc_opts = getattr(proc, key, None)
+                    if proc_opts is None:
+                        setattr(proc, key, {})
+                    getattr(proc, key).update(proc_args[key])
 
 plugin.register(__name__)

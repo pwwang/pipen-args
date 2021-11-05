@@ -114,3 +114,4 @@ t-*.ipynb
 
 .history/
 *_results/
+myoutput/
