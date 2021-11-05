@@ -273,12 +273,8 @@ class Args(Params):
                     f"in.{input_key}"
                     if flatten
                     else f"{proc.name}.in.{input_key}",
-                    desc=(
-                        "[Required] "
-                        + anno["Input"].get(input_key, "Undescribed.")
-                    ),
+                    desc=anno["Input"].get(input_key, "Undescribed."),
                     argname_shorten=False,
-                    required=True,
                     type="list",
                     group=f"OPTIONS FOR <{proc.name}>",
                 )
@@ -376,7 +372,7 @@ def __getattr__(name: str) -> Args:
     if name == "__path__":
         raise AttributeError
     if name == "args":
-        Args.INST = Args(help_on_void=False)
+        Args.INST = Args()
         return Args.INST
 
 

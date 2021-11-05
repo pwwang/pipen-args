@@ -3,14 +3,14 @@ from pipen_args import Args
 
 Args(
     desc="Pipeline description",
-    hide_args=[
-        "scheduler-opts",
-        "plugin-opts",
-        "template-opts",
+    hidden_args=[
+        "scheduler_opts",
+        "plugin_opts",
+        "template_opts",
         "dirsig",
         "loglevel",
         "plugins",
-        "submission-batch",
+        "submission_batch",
     ],
     help_on_void=False,
 )
