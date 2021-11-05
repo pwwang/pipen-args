@@ -164,6 +164,7 @@ class Args(Params):
 
         self.hidden_args = hidden_args or ()
         self.flatten_proc_args = flatten_proc_args
+        self.cli_args = None
         # self.init()
         self.parsed = None
         _logger_handler.console.file = self.file = StringIO()
@@ -240,6 +241,8 @@ class Args(Params):
 
         else:
             # add proc's summary to params' description
+            if self.desc == ["Undescribed."]:
+                self.desc = []
             self.desc.append(_doc_to_summary(proc.__doc__ or ""))
 
         if is_start:
@@ -394,7 +397,7 @@ async def on_init(pipen):
     config = pipen.config
 
     if args.desc == ["Not described."]:
-        args.desc = [pipen.desc or "Undescripbed."]
+        args.desc = [pipen.desc or "Undescribed."]
 
     args.init(pipen)
     args.from_arg(
@@ -403,7 +406,8 @@ async def on_init(pipen):
         force=True,
     )
 
-    parsed = args.parse()
+    parsed = args.parse(args.cli_args)
+    args.cli_args = None
     if parsed.profile is not None:
         pipen.profile = parsed.profile
         fileconfs = Config()
