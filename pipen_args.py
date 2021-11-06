@@ -12,7 +12,7 @@ from pipen.utils import _logger_handler, copy_dict
 from pyparam import Params, defaults
 from simpleconf import Config
 
-__version__ = "0.1.2"
+__version__ = "0.1.3"
 
 # Allow type to be overriden from command line
 defaults.PARAM.type_frozen = False
@@ -448,7 +448,7 @@ async def on_init(pipen):
             indata = proc_args["in"]._to_dict()
             proc.input_data = DataFrame({
                 key: val
-                for key, val in indata
+                for key, val in indata.items()
                 if val is not None and len(val) > 0
             })
 
