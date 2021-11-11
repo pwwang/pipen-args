@@ -5,7 +5,7 @@ from io import StringIO
 from pathlib import Path
 
 from pardoc import google_parser
-from pardoc.parsed import ParsedItem
+from pardoc.parsed import ParsedItem, ParsedPara
 from pipen import plugin
 from pipen.defaults import CONFIG_FILES
 from pipen.utils import _logger_handler, copy_dict
@@ -88,7 +88,12 @@ def _annotate_process(proc):
             if not isinstance(item, ParsedItem):  # pragma: no cover
                 continue
 
-            out[key][item.name] = item.desc
+            out[key][item.name] = [item.desc]
+            if item.more:
+                for moreitem in item.more:
+                    if not isinstance(moreitem, ParsedPara):
+                        continue
+                    out[key][item.name].extend(moreitem.lines)
 
     return out
 

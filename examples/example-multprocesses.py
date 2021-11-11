@@ -6,6 +6,11 @@ class Process1(Proc):
 
     Output:
         b: output b
+
+    Envs:
+        x: line1
+            line2
+            >>> code
     """
     input = 'a'
     input_data = range(10)
