@@ -12,7 +12,7 @@ from pipen.utils import _logger_handler, copy_dict
 from pyparam import Params, defaults
 from simpleconf import Config
 
-__version__ = "0.1.3"
+__version__ = "0.1.4"
 
 # Allow type to be overriden from command line
 defaults.PARAM.type_frozen = False
