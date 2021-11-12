@@ -451,11 +451,14 @@ async def on_init(pipen):
         if "in" in proc_args:
             from pandas import DataFrame
             indata = proc_args["in"]._to_dict()
-            proc.input_data = DataFrame({
+            input_data = DataFrame({
                 key: val
                 for key, val in indata.items()
                 if val is not None and len(val) > 0
             })
+            # only when input data is given
+            if input_data.shape[0] > 0:
+                proc.input_data = input_data
 
         if (
             "envs" in proc_args
