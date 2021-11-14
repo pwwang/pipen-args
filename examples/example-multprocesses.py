@@ -24,5 +24,6 @@ class Process2(Proc):
     requires = Process1
     input = 'a'
     script = 'echo {{in.a}}'
+    plugin_opts = {"args_hide": True}
 
 Pipen(desc='Pipeline description.').set_start(Process1).run()

@@ -32,7 +32,7 @@ PARAM_DESCRS = {
     "cache": "Whether enable caching for processes.",
     "dirsig": (
         "The depth to check the Last Modification Time of a directory.",
-        "Since modifying the content won't change its LMT."
+        "Since modifying the content won't change its LMT.",
     ),
     "error_strategy": (
         "How we should deal with job errors.",
@@ -53,7 +53,7 @@ PARAM_DESCRS = {
     ),
     "plugins": (
         "A list of plugins to only enabled or disabled for this pipeline.",
-        "To disable plugins, use `no:<plugin_name>`"
+        "To disable plugins, use `no:<plugin_name>`",
     ),
     "plugin_opts": "Plugin options. Will update to the default.",
     "template_opts": "Template options. Will update to the default.",
@@ -223,13 +223,30 @@ class Args(Params):
             self.flatten_proc_args = True
 
         if self.flatten_proc_args is True:
-            self._add_proc_args(pipen.procs[0], True, flatten=True)
+            self._add_proc_args(
+                pipen.procs[0],
+                is_start=True,
+                hide=False,
+                flatten=True,
+            )
         else:
             for proc in pipen.procs:
-                self._add_proc_args(proc, proc in pipen.starts, flatten=False)
+                self._add_proc_args(
+                    proc,
+                    is_start=proc in pipen.starts,
+                    hide=(
+                        False
+                        if not proc.plugin_opts
+                        else proc.plugin_opts.get("args_hide", False)
+                    ),
+                    flatten=False,
+                )
 
-    def _add_proc_args(self, proc, is_start, flatten):
+    def _add_proc_args(self, proc, is_start, hide, flatten):
         """Add process arguments"""
+        if is_start:
+            hide = False
+
         try:
             anno = _annotate_process(proc)
         except Exception:
@@ -241,6 +258,7 @@ class Args(Params):
                 proc.name,
                 desc=_doc_to_summary(proc.__doc__ or ""),
                 type="ns",
+                show=not hide,
                 group="PROCESSES",
             )
 
@@ -316,6 +334,7 @@ class Args(Params):
             self.add_param(
                 f"envs.{key}" if flatten else f"{proc.name}.envs.{key}",
                 default=val,
+                show=not hide,
                 desc=anno["Envs"].get(key, "Undescribed."),
                 argname_shorten=False,
                 group=f"OPTIONS FOR <{proc.name}>",
@@ -334,7 +353,7 @@ class Args(Params):
                     f"{proc.name}.{key}",
                     desc=PARAM_DESCRS[key],
                     default=getattr(proc, key),
-                    show=key not in self.hidden_args,
+                    show=not hide and (key not in self.hidden_args),
                     argname_shorten=False,
                     group=f"OPTIONS FOR <{proc.name}>",
                 )
@@ -342,7 +361,7 @@ class Args(Params):
             self.add_param(
                 f"{proc.name}.export",
                 desc="Whether to export output for this process.",
-                show="export" not in self.hidden_args,
+                show=not hide and ("export" not in self.hidden_args),
                 default=not proc.nexts,
                 argname_shorten=False,
                 group=f"OPTIONS FOR <{proc.name}>",
@@ -352,7 +371,7 @@ class Args(Params):
                 self.add_param(
                     f"{proc.name}.{key}",
                     desc=PARAM_DESCRS[key],
-                    show=key not in self.hidden_args,
+                    show=not hide and (key not in self.hidden_args),
                     default={},
                     argname_shorten=False,
                     type="json",
@@ -364,8 +383,9 @@ class Args(Params):
                 desc=(
                     "Other process-level configurations.",
                     f"See [{self.pipen_opt_group}], and use --full "
-                    "to see all of them"
+                    "to see all of them",
                 ),
+                show=not hide,
                 argname_shorten=False,
                 group=f"OPTIONS FOR <{proc.name}>",
             )
@@ -379,6 +399,14 @@ def __getattr__(name: str) -> Args:
     if name == "args":
         Args.INST = Args()
         return Args.INST
+
+
+@plugin.impl
+def on_setup(config) -> None:
+    """Default configrations"""
+    # process-level: Whether to hide all arguments of the process on
+    # help page
+    config.plugin_opts.args_hide = False
 
 
 @plugin.impl
@@ -450,12 +478,15 @@ async def on_init(pipen):
         proc_args = parsed[proc.name]
         if "in" in proc_args:
             from pandas import DataFrame
+
             indata = proc_args["in"]._to_dict()
-            input_data = DataFrame({
-                key: val
-                for key, val in indata.items()
-                if val is not None and len(val) > 0
-            })
+            input_data = DataFrame(
+                {
+                    key: val
+                    for key, val in indata.items()
+                    if val is not None and len(val) > 0
+                }
+            )
             # only when input data is given
             if input_data.shape[0] > 0:
                 proc.input_data = input_data
@@ -488,5 +519,6 @@ async def on_init(pipen):
                     if proc_opts is None:
                         setattr(proc, key, {})
                     getattr(proc, key).update(proc_args[key])
+
 
 plugin.register(__name__)
