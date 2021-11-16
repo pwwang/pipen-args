@@ -65,6 +65,7 @@ HIDDEN_ARGS = (
     "template_opts",
     "dirsig",
     "cache",
+    "export",
     "forks",
     "error_strategy",
     "num_retries",
@@ -258,7 +259,6 @@ class Args(Params):
                 proc.name,
                 desc=_doc_to_summary(proc.__doc__ or ""),
                 type="ns",
-                show=not hide,
                 group="PROCESSES",
             )
 
@@ -318,6 +318,7 @@ class Args(Params):
                     desc=anno["Output"].get(key, "Undescribed."),
                     default="<awaiting compiling>",
                     type="auto",
+                    show=not hide,
                     argname_shorten=False,
                     group=f"OPTIONS FOR <{proc.name}>",
                 )
