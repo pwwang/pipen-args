@@ -12,6 +12,8 @@ from pipen.utils import _logger_handler, copy_dict
 from pyparam import Params, defaults
 from simpleconf import Config
 
+from slugify import slugify
+
 __version__ = "0.1.8"
 
 # Allow type to be overriden from command line
@@ -46,10 +48,9 @@ PARAM_DESCRS = {
     "submission_batch": (
         "How many jobs to submit simultaneously to the scheduler system."
     ),
-    "workdir": (
-        "The workdir for the pipeline. ",
-        "Note it will still shows the default `workdir` "
-        "in the argument box when pipeline starts.",
+    "name": (
+        "The name for the pipeline, "
+        "will affect the default workdir and outdir.",
     ),
     "scheduler": "The scheduler to run the jobs.",
     "scheduler_opts": (
@@ -202,6 +203,8 @@ class Args(Params):
                 default=(
                     pipen.outdir
                     if opt == "outdir"
+                    else pipen.name
+                    if opt == "name"
                     else {}
                     if opt.endswith("_opts")
                     else pipen.config[opt]
@@ -466,10 +469,12 @@ async def on_init(pipen):
         if parsed[key] is not None:
             config[key.replace("-", "_")] = parsed[key]
 
-    if parsed["workdir"] is not None:
-        pipen.workdir = Path(parsed["workdir"])
+    if parsed["name"] not in (None, pipen.name):
+        pipen.name = parsed["name"]
+        pipen.workdir = Path(config["workdir"]) / slugify(pipen.name)
         pipen.workdir.mkdir(parents=True, exist_ok=True)
-
+        if parsed["outdir"] in (None, pipen.outdir):
+            pipen.outdir = Path(f"./{slugify(pipen.name)}_results").resolve()
 
     for key in (
         "plugin_opts",
