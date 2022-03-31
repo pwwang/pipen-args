@@ -17,7 +17,7 @@ class Process(Proc):
     """
     input = 'a'
     input_data = range(10)
-    output = 'b'
+    output = 'b:var:b'
     script = 'echo {{in.a}}'
 
 Pipen().set_starts(Process).run()

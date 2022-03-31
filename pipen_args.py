@@ -46,7 +46,11 @@ PARAM_DESCRS = {
     "submission_batch": (
         "How many jobs to submit simultaneously to the scheduler system."
     ),
-    "workdir": "The workdir for the pipeline.",
+    "workdir": (
+        "The workdir for the pipeline. ",
+        "Note it will still shows the default `workdir` "
+        "in the argument box when pipeline starts.",
+    ),
     "scheduler": "The scheduler to run the jobs.",
     "scheduler_opts": (
         "The default scheduler options. Will update to the default one."
@@ -456,12 +460,16 @@ async def on_init(pipen):
         "num_retries",
         "forks",
         "submission_batch",
-        "workdir",
         "scheduler",
         "plugins",
     ):
         if parsed[key] is not None:
             config[key.replace("-", "_")] = parsed[key]
+
+    if parsed["workdir"] is not None:
+        pipen.workdir = Path(parsed["workdir"])
+        pipen.workdir.mkdir(parents=True, exist_ok=True)
+
 
     for key in (
         "plugin_opts",
