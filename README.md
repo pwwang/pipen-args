@@ -38,9 +38,8 @@ PIPELINE OPTIONS:
                                     This profile will be used unless a profile is specified in the
                                     process or in the .run method of pipen. Default: default
   --outdir <path>                 - The output directory of the pipeline
-                                    Default:
-                                    /home/pwwang/github/pipen-args/examples/pipen-0_results
-  --workdir <str>                 - The workdir for the pipeline. Default: ./.pipen
+                                    Default: ./<name>_results
+  --name <str>                    - The workdir for the pipeline. Default: <pipeline-defined>
   --scheduler <str>               - The scheduler to run the jobs. Default: local
 ```
 
