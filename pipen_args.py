@@ -10,11 +10,11 @@ from pipen import plugin
 from pipen.defaults import CONFIG_FILES
 from pipen.utils import _logger_handler, copy_dict
 from pyparam import Params, defaults
-from simpleconf import Config
+from simpleconf import ProfileConfig
 
 from slugify import slugify
 
-__version__ = "0.1.9"
+__version__ = "0.2.0"
 
 # Allow type to be overriden from command line
 defaults.PARAM.type_frozen = False
@@ -447,10 +447,16 @@ async def on_init(pipen):
     args.cli_args = None
     if parsed.profile is not None:
         pipen.profile = parsed.profile
-        fileconfs = Config()
-        fileconfs._load(*CONFIG_FILES)
-        fileconfs._use(pipen.profile)
-        config.update(fileconfs)
+        try:
+            fileconfs = ProfileConfig.load(*CONFIG_FILES, ignore_nonexist=True)
+        except KeyError:  # no default profile
+            pass
+        else:
+            ProfileConfig.use_profile(
+                fileconfs,
+                pipen.profile,
+            )
+            config.update(fileconfs)
 
     if parsed.outdir is not None:
         pipen.outdir = Path(parsed.outdir).resolve()
