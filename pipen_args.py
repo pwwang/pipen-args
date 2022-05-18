@@ -410,16 +410,11 @@ def __getattr__(name: str) -> Args:
 
 
 @plugin.impl
-def on_setup(config) -> None:
-    """Default configrations"""
-    # process-level: Whether to hide all arguments of the process on
-    # help page
-    config.plugin_opts.args_hide = False
-
-
-@plugin.impl
 async def on_init(pipen):
     """Parse and update the config"""
+    config = pipen.config
+    config.plugin_opts.args_hide = False
+
     if Args.INST is None:
         raise ImportError(
             "[pipen-args] Args class is not instantiated. \n"
@@ -431,7 +426,6 @@ async def on_init(pipen):
         )
 
     args = Args.INST
-    config = pipen.config
 
     if args.desc == ["Not described."]:
         args.desc = [pipen.desc or "Undescribed."]
