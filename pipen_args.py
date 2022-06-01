@@ -26,6 +26,7 @@ PARAM_DESCRS = {
         "pipeline. This profile will be used unless a profile is "
         "specified in the process or in the .run method of pipen."
     ),
+    "lang": "The language interpreter to use for the pipeline/process.",
     "outdir": "The output directory of the pipeline",
     "loglevel": (
         "The logging level for the main logger, only takes effect "
@@ -352,6 +353,7 @@ class Args(Params):
             for key in (
                 "cache",
                 "dirsig",
+                "lang",
                 "error_strategy",
                 "num_retries",
                 "forks",
@@ -459,6 +461,7 @@ async def on_init(pipen):
         "loglevel",
         "cache",
         "dirsig",
+        "lang",
         "error_strategy",
         "num_retries",
         "forks",
@@ -515,6 +518,7 @@ async def on_init(pipen):
         for key in (
             "cache",
             "dirsig",
+            "lang",
             "error_strategy",
             "num_retries",
             "forks",
