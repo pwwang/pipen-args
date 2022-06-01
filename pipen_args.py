@@ -14,7 +14,7 @@ from simpleconf import ProfileConfig
 
 from slugify import slugify
 
-__version__ = "0.2.1"
+__version__ = "0.2.2"
 
 # Allow type to be overriden from command line
 defaults.PARAM.type_frozen = False
