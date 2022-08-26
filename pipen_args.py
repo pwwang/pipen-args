@@ -497,9 +497,10 @@ async def on_init(pipen):
             from pandas import DataFrame
 
             indata = proc_args["in"]._to_dict()
+            maxlen = max(map(len, indata.values()))
             input_data = DataFrame(
                 {
-                    key: val
+                    key: val * maxlen if len(val) == 1 and maxlen > 1 else val
                     for key, val in indata.items()
                     if val is not None and len(val) > 0
                 }
