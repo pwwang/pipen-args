@@ -5,7 +5,7 @@ Command line argument parser for [pipen][1]
 ## Usage
 ```python
 from pipen import Proc, Pipen
-from pipen_args import args
+from pipen_args import args as _
 
 class Process(Proc):
     input = 'a'
