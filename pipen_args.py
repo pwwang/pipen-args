@@ -10,7 +10,7 @@ from pipen import plugin
 from pipen.defaults import CONFIG_FILES
 from pipen.utils import _logger_handler, copy_dict
 from pyparam import Params, defaults
-from simpleconf import ProfileConfig
+from simpleconf import ProfileConfig, Config
 
 from slugify import slugify
 
@@ -409,6 +409,10 @@ def __getattr__(name: str) -> Args:
     if name == "args":
         Args.INST = Args()
         return Args.INST
+    if name == "config":
+        for i, arg in enumerate(sys.argv):
+            if arg == "--config":
+                return Config.load(sys.argv[i + 1])
 
 
 @plugin.impl

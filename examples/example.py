@@ -1,6 +1,7 @@
 from pipen import Proc, Pipen
 from pipen_args import args
 
+
 class Process(Proc):
     """My process"""
     input = 'a'
