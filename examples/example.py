@@ -10,4 +10,8 @@ class Process(Proc):
     script = 'echo {{in.a}} > {{out.b}}'
     plugin_opts = {"report": "a"}
 
-Pipen(desc='Pipeline description.').set_start(Process).run()
+(
+    Pipen(desc='Pipeline description.', plugins=["no:report"])
+    .set_start(Process)
+    .run()
+)

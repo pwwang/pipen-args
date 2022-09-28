@@ -15,6 +15,7 @@ class Process1(Proc):
     input = 'a'
     input_data = range(10)
     output = 'b:var'
+    lang = "bash"
     envs = {"x": 1}
     script = 'echo {{in.a}}'
 
@@ -26,4 +27,7 @@ class Process2(Proc):
     script = 'echo {{in.a}}'
     plugin_opts = {"args_hide": True}
 
-Pipen(desc='Pipeline description.').set_start(Process1).run()
+Pipen(
+    desc='Pipeline description.',
+    plugins=["no:report"],
+).set_start(Process1).run()

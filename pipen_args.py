@@ -199,6 +199,34 @@ class Args(Params):
         """Define arguments"""
         group_arg = {"group": self.pipen_opt_group}
 
+        pipen.build_proc_relationships()
+        if len(pipen.procs) > 1 and self.flatten_proc_args is True:
+            raise ValueError(
+                "Cannot flatten process arguments for multiprocess pipeline."
+            )
+
+        if len(pipen.procs) == 1 and self.flatten_proc_args == "auto":
+            self.flatten_proc_args = True
+
+        config = pipen.config
+        if self.flatten_proc_args:
+            config = config.copy()
+            for opt in (
+                "lang",
+                "cache",
+                "dirsig",
+                "error_strategy",
+                "num_retries",
+                "forks",
+                "submission_batch",
+                "scheduler",
+                "scheduler_opts",
+                "plugin_opts",
+            ):
+                value = getattr(pipen.procs[0], opt, None)
+                if value is not None:
+                    config[opt] = value
+
         for opt, desc in PARAM_DESCRS.items():
             self.add_param(
                 opt,
@@ -209,7 +237,7 @@ class Args(Params):
                     if opt == "name"
                     else {}
                     if opt.endswith("_opts")
-                    else pipen.config[opt]
+                    else config[opt]
                     if opt != "profile"
                     else "default"
                 ),
@@ -229,15 +257,6 @@ class Args(Params):
                 ),
                 **group_arg,
             )
-
-        pipen.build_proc_relationships()
-        if len(pipen.procs) > 1 and self.flatten_proc_args is True:
-            raise ValueError(
-                "Cannot flatten process arguments for multiprocess pipeline."
-            )
-
-        if len(pipen.procs) == 1 and self.flatten_proc_args == "auto":
-            self.flatten_proc_args = True
 
         if self.flatten_proc_args is True:
             self._add_proc_args(
