@@ -530,8 +530,13 @@ async def on_init(pipen):
         proc_args = parsed[proc.name]
         if "in" in proc_args:
             from pandas import DataFrame
+            from pandas.core.dtypes.api import is_scalar
 
             indata = proc_args["in"]._to_dict()
+            for key, val in indata.items():
+                if is_scalar(val):
+                    indata[key] = [val]
+
             maxlen = max(map(len, indata.values()))
             input_data = DataFrame(
                 {

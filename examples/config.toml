@@ -4,4 +4,4 @@ outdir = "./myoutput"
 report_forks = 4
 
 [in]
-a = [1,2,3,4,5]
+a = 1
