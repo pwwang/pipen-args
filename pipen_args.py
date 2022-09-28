@@ -10,6 +10,7 @@ from pipen import plugin
 from pipen.defaults import CONFIG_FILES
 from pipen.utils import _logger_handler, copy_dict
 from pyparam import Params, defaults
+from pyparam.utils import cast_to
 from simpleconf import ProfileConfig, Config
 
 from slugify import slugify
@@ -212,12 +213,19 @@ class Args(Params):
                     if opt != "profile"
                     else "default"
                 ),
+                type=str if opt == "cache" else None,
                 show=opt not in self.hidden_args,
                 desc=desc,
                 callback=(
-                    None
-                    if opt != "loglevel"
-                    else lambda val: val and val.upper()
+                    (lambda val: val and val.upper())
+                    if opt == "loglevel"
+                    else (
+                        lambda val: (
+                            val if val == "force" else cast_to(val, "bool")
+                        )
+                    )
+                    if opt == "cache"
+                    else None
                 ),
                 **group_arg,
             )
@@ -437,6 +445,10 @@ async def on_init(pipen):
         args.desc = [pipen.desc or "Undescribed."]
 
     args.init(pipen)
+    # NOTE: When we have [cache] defined in config file, only the same type of
+    # value is accepted from command line argument `--cache`. But cache supports
+    # True, False and "force". So when you need "--cache force" from command
+    # line, you have to remove it from the config file if it defaults to a bool.
     args.from_arg(
         "config",
         desc="Read options from a configuration file in TOML.",
