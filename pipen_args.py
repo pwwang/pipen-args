@@ -340,7 +340,7 @@ class Args(Params):
         if not proc.nexts:
             self.add_param(
                 "out" if flatten else f"{proc.name}.out",
-                desc="Output for the process (cannot be overwritten, just FYI).",
+                desc="Output for the process (can't be overwritten, just FYI).",
                 show=False,
                 type="ns",
                 argname_shorten=False,
