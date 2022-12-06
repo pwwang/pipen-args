@@ -6,6 +6,7 @@ from pathlib import Path
 
 from pardoc import google_parser
 from pardoc.parsed import ParsedItem, ParsedPara
+from diot import Diot
 from pipen import plugin
 from pipen.defaults import CONFIG_FILES
 from pipen.utils import _logger_handler, copy_dict
@@ -440,6 +441,8 @@ def __getattr__(name: str) -> Args:
         for i, arg in enumerate(sys.argv):
             if arg == "--config":
                 return Config.load(sys.argv[i + 1])
+        return Diot()
+    raise AttributeError
 
 
 @plugin.impl
