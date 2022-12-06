@@ -1,5 +1,5 @@
 from pipen import Proc, Pipen
-from pipen_args import args
+from pipen_args import args  # noqa: F401
 
 
 class Process(Proc):
@@ -9,6 +9,7 @@ class Process(Proc):
     input_data = range(10)
     script = 'echo {{in.a}} > {{out.b}}'
     plugin_opts = {"report": "a"}
+
 
 (
     Pipen(desc='Pipeline description.', plugins=["no:report"])
