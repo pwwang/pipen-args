@@ -212,15 +212,15 @@ test = ["hypothesis (>=3.58)", "pytest (>=6.0)", "pytest-xdist"]
 
 [[package]]
 name = "pardoc"
-version = "0.0.3"
+version = "0.1.0"
 description = "Yet another docstring parser for python"
 category = "main"
 optional = false
-python-versions = ">=3.6,<4.0"
+python-versions = ">=3.7,<4.0"
 
 [package.dependencies]
-diot = "*"
-lark-parser = "<1.0.0"
+diot = ">=0.1.6,<0.2.0"
+lark-parser = ">=0.12,<0.13"
 
 [[package]]
 name = "pipda"
@@ -476,7 +476,7 @@ testing = ["flake8 (<5)", "func-timeout", "jaraco.functools", "jaraco.itertools"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7.1"
-content-hash = "94e8adc7ab72e457ac0c1cac058684f3722784a8c1c9f25d1f9d7420bd25b46e"
+content-hash = "e3ebffe8e429076c2aac8836447135eb69b632d36559f9ee767ed0af50de353c"
 
 [metadata.files]
 aiofiles = [
@@ -670,8 +670,8 @@ pandas = [
     {file = "pandas-1.3.5.tar.gz", hash = "sha256:1e4285f5de1012de20ca46b188ccf33521bff61ba5c5ebd78b4fb28e5416a9f1"},
 ]
 pardoc = [
-    {file = "pardoc-0.0.3-py3-none-any.whl", hash = "sha256:f42bb6d05f80247e9205e562a2e5bbb707fc96938e839b30978c58b174b2e2d3"},
-    {file = "pardoc-0.0.3.tar.gz", hash = "sha256:f1561a38e3eb7c6712c615a6e6351f364c4008ac076c5d763d2fba1950ef3bf5"},
+    {file = "pardoc-0.1.0-py3-none-any.whl", hash = "sha256:64348487740f7870fed88668e277c4212ae3c253b6351b6eba566ad0ae190bd5"},
+    {file = "pardoc-0.1.0.tar.gz", hash = "sha256:38a5947740e9a353a728e60c2db2be547f44c0227308f9d09ac79227fcccc620"},
 ]
 pipda = [
     {file = "pipda-0.10.0-py3-none-any.whl", hash = "sha256:ccdf29dfea636886607907dbf25b414739cef749a4c2899356b9767bfd0c848b"},
