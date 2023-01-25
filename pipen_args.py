@@ -492,6 +492,7 @@ async def on_init(pipen):
             )
             config.update(fileconfs)
 
+    pipen_outdir = pipen.outdir
     if parsed.outdir is not None:
         pipen.outdir = Path(parsed.outdir).resolve()
 
@@ -514,7 +515,7 @@ async def on_init(pipen):
         pipen.name = parsed["name"]
         pipen.workdir = Path(config["workdir"]) / slugify(pipen.name)
         pipen.workdir.mkdir(parents=True, exist_ok=True)
-        if parsed["outdir"] in (None, pipen.outdir):
+        if parsed["outdir"] in (None, pipen_outdir):
             pipen.outdir = Path(f"./{slugify(pipen.name)}_results").resolve()
 
     for key in (
