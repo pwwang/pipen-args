@@ -206,8 +206,8 @@ class Args(Params):
                 "Cannot flatten process arguments for multiprocess pipeline."
             )
 
-        if len(pipen.procs) == 1 and self.flatten_proc_args == "auto":
-            self.flatten_proc_args = True
+        if self.flatten_proc_args == "auto":
+            self.flatten_proc_args = len(pipen.procs) == 1
 
         config = pipen.config
         if self.flatten_proc_args:
