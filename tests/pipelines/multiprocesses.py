@@ -1,9 +1,13 @@
 from pipen import Proc, Pipen
-from pipen_args import parser  # noqa: F401
+
+import pipen_args  # noqa: F401
 
 
 class Process1(Proc):
     """Process 1
+
+    Input:
+        a: input a
 
     Output:
         b: output b
@@ -23,7 +27,11 @@ class Process1(Proc):
 
 
 class Process2(Proc):
-    """Process 2"""
+    """Process 2
+
+    Input:
+        a: input a
+    """
 
     requires = Process1
     input = "a"

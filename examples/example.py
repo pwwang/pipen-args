@@ -1,5 +1,5 @@
 from pipen import Proc, Pipen
-from pipen_args import args  # noqa: F401
+from pipen_args import parser  # noqa: F401
 
 
 class Process(Proc):

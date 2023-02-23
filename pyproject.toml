@@ -10,18 +10,27 @@ repository = "https://github.com/pwwang/pipen-args"
 
 [tool.poetry.dependencies]
 python = "^3.7.1"
-pipen = "^0.3"
-pardoc = "^0.1"
-# # required by pipen
-# pyparam = "^0.5"
+pipen = "^0.4"
+pipen-annotate = "^0.2"
+# # required by xqute > pipen
 # diot = "^0.1"
 
 [tool.poetry.dev-dependencies]
+pytest = "^7"
+pytest-cov = "^4"
+pytest-forked = "^1"
 
 [build-system]
 requires = ["poetry>=0.12"]
 build-backend = "poetry.masonry.api"
 
+[tool.pytest.ini_options]
+addopts = "-v --cov=pipen_args --cov-report xml:.coverage.xml --cov-report term-missing"
+filterwarnings = [
+    #"error"
+]
+console_output_style = "progress"
+junit_family = "xunit1"
 
 [tool.black]
 line-length = 80
