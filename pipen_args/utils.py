@@ -1,7 +1,7 @@
 """Command line argument parser for pipen"""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Iterable, Literal, Mapping
+from typing import TYPE_CHECKING, Any, Iterable, Mapping
 
 from diot import Diot
 
@@ -185,7 +185,7 @@ def _get_argument_attrs(
 
 def _add_envs_arguments(
     ns: _NamespaceArgumentGroup,
-    anno: Mapping[Literal["attrs", "terms", "help"], Any],
+    anno: Mapping[str, Any],
     values: Mapping[str, Any],
     flatten: bool,
     proc_name: str,
