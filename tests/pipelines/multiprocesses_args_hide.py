@@ -1,17 +1,19 @@
 from pipen import Proc, Pipen
-from pipen_args import parser  # noqa: F401
+
+import pipen_args  # noqa: F401
 
 
 class Process1(Proc):
     """Process 1
+
+    Input:
+        a: input a
 
     Output:
         b: output b
 
     Envs:
         x: line1
-            line2
-            >>> code
     """
 
     input = "a"
@@ -23,7 +25,11 @@ class Process1(Proc):
 
 
 class Process2(Proc):
-    """Process 2"""
+    """Process 2
+
+    Input:
+        a: input a
+    """
 
     requires = Process1
     input = "a"
@@ -31,7 +37,10 @@ class Process2(Proc):
     plugin_opts = {"args_hide": True}
 
 
-Pipen(
+pipeline = Pipen(
     desc="Pipeline description.",
     plugins=["no:report"],
-).set_start(Process1).run()
+).set_start(Process1)
+
+if __name__ == "__main__":
+    pipeline.run()

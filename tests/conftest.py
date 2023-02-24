@@ -3,14 +3,23 @@ from subprocess import check_output
 from pathlib import Path
 from typing import List
 
-PIPELINE_DIR = Path(__file__).parent.resolve() / "pipelines"
+TEST_DIR = Path(__file__).parent.resolve()
+CONFIGS_DIR = TEST_DIR / "configs"
 
 
-def run_pipeline(pipeline: str, args: List[str] = []) -> str:
+def run_pipeline(pipeline: str, gets: List[str], args: List[str] = []) -> str:
     """Run a pipeline with `args`"""
     try:
         return check_output(
-            [sys.executable, PIPELINE_DIR / f"{pipeline}.py", *args],
+            [
+                sys.executable,
+                str(TEST_DIR / "run_pipeline.py"),
+                f"{pipeline}:pipeline",
+                "++args",
+                *args,
+                "++gets",
+                *gets,
+            ],
             encoding="utf-8",
         )
     except Exception as e:

@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any, Iterable, Literal, Mapping
 
 from diot import Diot
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from argx.parser import _NamespaceArgumentGroup
 
 PIPEN_ARGS = Diot(
@@ -128,14 +128,9 @@ PIPEN_ARGS = Diot(
         show=False,
         default=0,
     ),
-    export=Diot(
-        help="Export the pipeline to a file",
-        type="path",
-        show=False,
-    ),
 )
 
-PIPELINE_ARGS_GROUP = "Pipeline options"
+PIPELINE_ARGS_GROUP = "pipeline options"
 FLATTEN_PROC_ARGS = "auto"
 
 
@@ -168,12 +163,22 @@ def _get_argument_attrs(
     }
     if "atype" in attrs:
         out["type"] = attrs["atype"]
+    elif "type" in attrs:
+        out["type"] = attrs["type"]
+
+    typefun = None
+    if out.get("type"):
+        from .parser import Parser
+        typefun = Parser.INST._registry_get("type", out["type"], out["type"])
 
     choices = out.get("choices", None)
     if choices is True:
         out["choices"] = list(terms)
     elif isinstance(choices, str):
         out["choices"] = choices.split(",")
+
+    if out.get("choices") and typefun:
+        out["choices"] = [typefun(c) for c in out["choices"]]
 
     return out
 
@@ -187,31 +192,24 @@ def _add_envs_arguments(
     key: str = "envs",
 ) -> None:
     """Add the envs argument to the namespace"""
-    for k, v in anno.items():
-        default = values[k]
-
-        if "action" not in v.attrs:
-            if isinstance(default, dict):
-                v.attrs["action"] = "namespace"
-            elif isinstance(default, list):
-                v.attrs["action"] = "list"
-                v.attrs.setdefault("nargs", "+")
+    for kk, vv in anno.items():
+        default = values[kk]
 
         if default is not None:
-            v.attrs["default"] = default
+            vv.attrs["default"] = default
 
         ns.add_argument(
-            f"--{key}.{k}" if flatten else f"--{proc_name}.{key}.{k}",
-            **_get_argument_attrs(v.attrs, v.terms),
+            f"--{key}.{kk}" if flatten else f"--{proc_name}.{key}.{kk}",
+            **_get_argument_attrs(vv.attrs, vv.terms),
         )
 
         # add sub-namespace
-        for term in v.terms:
+        if vv.attrs.get("action", None) in ("namespace", "ns"):
             _add_envs_arguments(
                 ns=ns,
-                anno=term,
+                anno=vv.terms,
                 values=default,
                 flatten=flatten,
                 proc_name=proc_name,
-                key=f"{key}.{k}",
+                key=f"{key}.{kk}",
             )

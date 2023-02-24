@@ -117,3 +117,4 @@ t-*.ipynb
 myoutput/
 
 *_workdir/
+/test.py

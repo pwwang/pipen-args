@@ -15,7 +15,7 @@ from slugify import slugify
 
 from .parser import Parser
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from pipen import Pipen
 
 __version__ = "0.4.0"
@@ -24,7 +24,7 @@ __version__ = "0.4.0"
 def __getattr__(name: str) -> Any:
     """Instantiate the instance only on import"""
     # to avoid this function to be called twice
-    if name == "__path__":
+    if name == "__path__":  # pragma: no cover
         raise AttributeError
 
     if name == "config":
@@ -33,7 +33,7 @@ def __getattr__(name: str) -> Any:
                 return Config.load(arg[1:])
         return Diot()
 
-    raise AttributeError
+    raise AttributeError  # pragma: no cover
 
 
 class ArgsPlugin:
@@ -57,17 +57,20 @@ class ArgsPlugin:
         #         "   >>> parser = Parser(...)\n"
         #     )
 
-        parser = Parser()
+        parser = Parser.INST or Parser()
         # Init the parser
         parser.init(pipen)
 
         # Parse the args
         parsed = parser.parse_args()
         # Load configs by profile
-        if parsed.profile is not None:
+        if parsed.profile is not None:  # pragma: no cover
             pipen.profile = parsed.profile
             try:
-                fileconfs = ProfileConfig.load(*CONFIG_FILES, ignore_nonexist=True)
+                fileconfs = ProfileConfig.load(
+                    *CONFIG_FILES,
+                    ignore_nonexist=True,
+                )
             except KeyError:  # no default profile
                 pass
             else:
@@ -94,19 +97,21 @@ class ArgsPlugin:
             "scheduler",
             "plugins",
         ):
-            if vars(parsed)[key] is not None:
-                config[key] = parsed[key]
+            if getattr(parsed, key, None) is not None:
+                config[key] = getattr(parsed, key)
 
         if parsed.name not in (None, pipen.name):
             pipen.name = parsed.name
             pipen.workdir = Path(config["workdir"]) / slugify(pipen.name)
             pipen.workdir.mkdir(parents=True, exist_ok=True)
             if parsed.outdir in (None, pipen_outdir):
-                pipen.outdir = Path(f"./{slugify(pipen.name)}_results").resolve()
+                pipen.outdir = Path(
+                    f"./{slugify(pipen.name)}_results"
+                ).resolve()
 
         for key in ("plugin_opts", "template_opts", "scheduler_opts"):
             old = copy_dict(config[key] or {}, 3)
-            old.update(vars(parsed)[key] or {})
+            old.update(getattr(parsed, key, None) or {})
             config[key] = old
 
         if parser.flatten_proc_args is True:
@@ -126,7 +131,11 @@ class ArgsPlugin:
                 maxlen = max(map(len, indata.values()))
                 input_data = DataFrame(
                     {
-                        key: val * maxlen if len(val) == 1 and maxlen > 1 else val
+                        key: (
+                            val * maxlen
+                            if len(val) == 1 and maxlen > 1
+                            else val
+                        )
                         for key, val in indata.items()
                         if val is not None and len(val) > 0
                     }
@@ -140,7 +149,12 @@ class ArgsPlugin:
                 and proc.envs is not None
                 and proc_args["envs"] is not None
             ):
-                proc.envs.update(vars(proc_args["envs"]))
+                proc_envs = (
+                    vars(proc_args["envs"])
+                    if isinstance(proc_args["envs"], Namespace)
+                    else proc_args["envs"]
+                )
+                proc.envs.update(proc_envs)
 
             for key in (
                 "cache",
@@ -153,9 +167,6 @@ class ArgsPlugin:
             ):
                 if key in proc_args:
                     setattr(proc, key, proc_args[key])
-
-            if "export" in proc_args:
-                proc.export = proc_args["export"]
 
             for key in ("plugin_opts", "scheduler_opts"):
                 if key in proc_args:

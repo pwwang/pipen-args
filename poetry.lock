@@ -86,14 +86,14 @@ trio = ["trio (>=0.16,<0.22)"]
 
 [[package]]
 name = "argx"
-version = "0.2.0"
+version = "0.2.2"
 description = "Super-charged argparse for python"
 category = "main"
 optional = false
 python-versions = ">=3.7,<4.0"
 files = [
-    {file = "argx-0.2.0-py3-none-any.whl", hash = "sha256:a5fa455dbe2a489653bbda4856f9100a4c8845b67db6cc45307d3f88f7290de3"},
-    {file = "argx-0.2.0.tar.gz", hash = "sha256:dfedb1ca83518e714e07b4adb1e43040dab18c23557bea989da2dc98f51ca612"},
+    {file = "argx-0.2.2-py3-none-any.whl", hash = "sha256:d3bfd34b8a7d16ce5c300c63fc93c7a37e8bfdb62de3d8adf266467d5834971c"},
+    {file = "argx-0.2.2.tar.gz", hash = "sha256:e0943bf9744bcdd59b3f39218e606fb3835dc393caad2f768ea20003eae921a8"},
 ]
 
 [package.dependencies]
@@ -743,14 +743,29 @@ xqute = ">=0.1,<0.2"
 
 [[package]]
 name = "pipen-annotate"
-version = "0.2.1"
+version = "0.2.3"
 description = "Use docstring to annotate pipen processes"
 category = "main"
 optional = false
 python-versions = ">=3.7.1,<4.0.0"
 files = [
-    {file = "pipen_annotate-0.2.1-py3-none-any.whl", hash = "sha256:b92a3c6d07c19dc3719894035319c9c679b4eb32a309a88e9a7427f9020fc276"},
-    {file = "pipen_annotate-0.2.1.tar.gz", hash = "sha256:d39df35f46229bf96363f165fa866dcb640e347fadb08e891046de3c90da703f"},
+    {file = "pipen_annotate-0.2.3-py3-none-any.whl", hash = "sha256:10fe0583a90f3bde0dee5289f702f6831d854de660d459239f1c1efebabf34b4"},
+    {file = "pipen_annotate-0.2.3.tar.gz", hash = "sha256:e355ef4ff112d146e79bcc9d7059306be33cb1ec26e31332ad16ff8f4add9fbd"},
+]
+
+[package.dependencies]
+pipen = ">=0.4,<0.5"
+
+[[package]]
+name = "pipen-verbose"
+version = "0.2.0"
+description = "Add verbosal information in logs for pipen."
+category = "dev"
+optional = false
+python-versions = ">=3.7.1,<4.0.0"
+files = [
+    {file = "pipen_verbose-0.2.0-py3-none-any.whl", hash = "sha256:e03917d00efa6acc1f61671ee2b7fcbeab2a7e0c6ba711dbb1effc5efc2140f1"},
+    {file = "pipen_verbose-0.2.0.tar.gz", hash = "sha256:21b78e927d93a6e6088408af47bec39ff04403aea273d80013f7243a6e5037f6"},
 ]
 
 [package.dependencies]
@@ -1267,4 +1282,4 @@ testing = ["flake8 (<5)", "func-timeout", "jaraco.functools", "jaraco.itertools"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7.1"
-content-hash = "7344b510c5202bba6521b85773ab5f2794641bb2f6f410dcc820b27896d0fc8a"
+content-hash = "cde4e64c8698b3858b4d00f836abec7313e1bad4fa02fcdf3c367267aada3543"

@@ -3,11 +3,17 @@
 Command line argument parser for [pipen][1]
 
 ## Usage
+
 ```python
 from pipen import Proc, Pipen
-from pipen_args import args as _
+import pipen_args  # noqa: F401
 
 class Process(Proc):
+    """My process
+
+    Input:
+        a: Input data
+    """
     input = 'a'
     input_data = range(10)
     script = 'echo {{in.a}}'
@@ -15,34 +21,33 @@ class Process(Proc):
 Pipen().set_start(Process).run()
 ```
 
+```shell
+$ python example.py --help
+Usage: test.py [-h | -h+] [options]
+
+Undescribed process.
+Use `@configfile` to load default values for the options.
+
+Pipeline Options:
+  --name NAME           The name for the pipeline, will affect the default workdir and
+                        outdir. [default: pipen-0]
+  --profile PROFILE     The default profile from the configuration to run the pipeline.
+                        This profile will be used unless a profile is specified in the
+                        process or in the .run method of pipen. You can check the
+                        available profiles by running `pipen profile`
+  --outdir OUTDIR       The output directory of the pipeline [default: ./<name>_results]
+  --forks FORKS         How many jobs to run simultaneously by the scheduler
+  --scheduler SCHEDULER
+                        The scheduler to run the jobs
+
+Namespace <in>:
+  --in.a A [A ...]      Input data
+
+Optional Arguments:
+  -h, --help, -h+, --help+
+                        show help message (with + to show more options) and exit
 ```
-❯ python example.py --help
 
-DESCRIPTION:
-  Pipeline description.
-  My process
-
-USAGE:
-  example.py --in.a list [OPTIONS]
-
-OPTIONS FOR <Process>:
-  --in.a <list>                   - [Required] Undescribed.
-
-OPTIONAL OPTIONS:
-  --config <path>                 - Read options from a configuration file in TOML. Default: None
-  -h, --help                      - Print help information for this command
-  --full                          - Show full options for this command
-
-PIPELINE OPTIONS:
-  --profile <str>                 - The default profile from the configuration to run the pipeline.
-                                    This profile will be used unless a profile is specified in the
-                                    process or in the .run method of pipen. Default: default
-  --outdir <path>                 - The output directory of the pipeline
-                                    Default: ./<name>_results
-  --name <str>                    - The workdir for the pipeline. Default: <pipeline-defined>
-  --scheduler <str>               - The scheduler to run the jobs. Default: local
-```
-
-See more examples in `examples/` folder.
+See more examples in `tests/pipelines/` folder.
 
 [1]: https://github.com/pwwang/pipen

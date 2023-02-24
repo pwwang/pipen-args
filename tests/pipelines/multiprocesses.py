@@ -36,10 +36,12 @@ class Process2(Proc):
     requires = Process1
     input = "a"
     script = "echo {{in.a}}"
-    plugin_opts = {"args_hide": True}
 
 
-Pipen(
+pipeline = Pipen(
     desc="Pipeline description.",
     plugins=["no:report"],
-).set_start(Process1).run()
+).set_start(Process1)
+
+if __name__ == "__main__":
+    pipeline.run()
