@@ -130,7 +130,7 @@ class Parser(ArgumentParser):
                     order=i,
                 )
             self.description = (
-                f"{self.description or ''}\n"
+                f"{self.description or ''}\n"  # type: ignore[has-type]
                 "Use `@configfile` to load default values for the options."
             )
 
