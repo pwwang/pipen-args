@@ -38,6 +38,7 @@ def __getattr__(name: str) -> Any:
 
 class ArgsPlugin:
     """Automatically parse arguments and load configs for pipen pipelines"""
+    name = "args"
     version = __version__
 
     @plugin.impl
