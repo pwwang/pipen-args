@@ -37,11 +37,11 @@ PIPEN_ARGS = Diot(
     loglevel=Diot(
         help=(
             "The logging level for the main logger, only takes effect "
-            "after pipeline is initialized [default: info]"
+            "after pipeline is initialized [default: INFO]"
         ),
-        choices=["debug", "info", "warning", "error", "critical"],
-        type=str.upper,
+        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
         show=False,
+        type=str.upper,
     ),
     cache=Diot(
         help="\n".join(
@@ -53,7 +53,7 @@ PIPEN_ARGS = Diot(
                 "   Such as envs or script file change",
             ]
         ),
-        choices=["True", "False", "force"],
+        choices=[True, False, "force"],
         show=False,
         type="auto",
     ),
