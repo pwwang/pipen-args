@@ -18,7 +18,7 @@ from .parser import Parser
 if TYPE_CHECKING:  # pragma: no cover
     from pipen import Pipen
 
-__version__ = "0.4.0"
+__version__ = "0.4.1"
 
 
 def __getattr__(name: str) -> Any:
