@@ -146,8 +146,7 @@ class Parser(ArgumentParser):
         if is_start:
             hide = False
 
-        proc = annotate(proc)
-        anno = proc.annotated
+        anno = annotate(proc)
 
         if not flatten:
             # add a namespace argumemnt for this proc
