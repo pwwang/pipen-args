@@ -1,57 +1,48 @@
 """Command line argument parser for pipen"""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Type
+from typing import TYPE_CHECKING, Any, Type, Mapping
 
 from argx import ArgumentParser
 from diot import Diot
 from pipen_annotate import annotate
 
-from .utils import (
-    PIPELINE_ARGS_GROUP,
-    FLATTEN_PROC_ARGS,
-    PIPEN_ARGS,
-    _get_argument_attrs,
-    _add_envs_arguments,
-)
+from .defaults import PIPELINE_ARGS_GROUP, FLATTEN_PROC_ARGS, PIPEN_ARGS
 
 if TYPE_CHECKING:  # pragma: no cover
     from pipen import Pipen, Proc
     from argx import Namespace
 
 
-class Parser(ArgumentParser):
+class ParserMeta(type):
+    """Meta class for Proc"""
+
+    _INST = None
+
+    def __call__(cls, *args, **kwds) -> Parser:
+        """Make sure Parser class is singleton
+
+        Args:
+            *args: and
+            **kwds: Arguments for the constructor
+
+        Returns:
+            The Parser instance
+        """
+        if cls._INST is None:
+            cls._INST = super().__call__(*args, **kwds)
+
+        return cls._INST
+
+
+class Parser(ArgumentParser, metaclass=ParserMeta):
     """Subclass of Params to fit for pipen
 
     Args:
         pipeline_args_group: The group name to gather all the parameters on
             help page
-        hidden_args: Hide some arguments in help page
+        flatten_proc_args: Flatten process arguments to the top level
     """
-
-    INST = None
-
-    def __new__(
-        cls,
-        *args,
-        pipeline_args_group: str = PIPELINE_ARGS_GROUP,
-        flatten_proc_args: bool | str = FLATTEN_PROC_ARGS,
-        **kwargs,
-    ) -> Parser:
-        """Make class as singleton
-
-        As we want external instantiation returns the same instance.
-        """
-        if cls.INST is None:
-            cls.INST = super().__new__(cls)
-            return cls.INST
-
-        raise ValueError(
-            "Class Parser should only instantiate once. \n"
-            "If you want to access the instance, use `Parser.INST` or "
-            "`from pipen_args import parser`"
-        )
-
     def __init__(
         self,
         *args,
@@ -66,16 +57,27 @@ class Parser(ArgumentParser):
         super().__init__(*args, **kwargs)
 
         self.flatten_proc_args = flatten_proc_args
+        self._cli_args = None
         self._pipeline_args_group = self.add_argument_group(
             pipeline_args_group,
             order=-99,
         )
         self._parsed = None
 
-    def parse_args(self, *args, **kwargs) -> Namespace:
+    def set_cli_args(self, args: Any) -> None:
+        """Set cli arguments, allows externals to set arguments to parse"""
+        self._cli_args = args
+
+    def parse_args(self, args: Any = None, namespace: Any = None) -> Namespace:
         """Parse arguments"""
         if not self._parsed:
-            self._parsed = super().parse_args(*args, **kwargs)
+            # This should be called only once at `on_init` hook
+            # If you have additional arguments, before `on_init`
+            # You should call `parse_known_args` instead
+            if self._cli_args is not None:
+                args = self._cli_args
+
+            self._parsed = super().parse_args(args, namespace)
         return self._parsed
 
     def init(self, pipen: Pipen) -> None:
@@ -87,7 +89,10 @@ class Parser(ArgumentParser):
             )
 
         if self.flatten_proc_args == "auto":
-            self.flatten_proc_args = len(pipen.procs) == 1
+            self.flatten_proc_args = (
+                len(pipen.procs) == 1
+                and not getattr(pipen.procs[0], "__procgroup__", False)
+            )
 
         for arg, argopt in PIPEN_ARGS.items():
             if arg == "order":
@@ -118,13 +123,14 @@ class Parser(ArgumentParser):
             )
         else:
             for i, proc in enumerate(pipen.procs):
+                in_procgroup = bool(getattr(proc, "__procgroup__", None))
                 self._add_proc_args(
                     proc,
-                    is_start=proc in pipen.starts,
+                    is_start=proc in pipen.starts and not in_procgroup,
                     hide=(
-                        False
+                        in_procgroup
                         if not proc.plugin_opts
-                        else proc.plugin_opts.get("args_hide", False)
+                        else proc.plugin_opts.get("args_hide", in_procgroup)
                     ),
                     flatten=False,
                     order=i,
@@ -133,6 +139,47 @@ class Parser(ArgumentParser):
                 f"{self.description or ''}\n"  # type: ignore[has-type]
                 "Use `@configfile` to load default values for the options."
             )
+
+    def _get_arg_attrs_from_anno(
+        self,
+        anno_attrs: Mapping[str, Any],
+        terms: Mapping[str, Any] | None = None,
+    ) -> Mapping[str, Any]:
+        """Get argument attributes from annotation"""
+        out = {
+            k: v
+            for k, v in anno_attrs.items()
+            if k in (
+                "help",
+                "show",
+                "action",
+                "nargs",
+                "default",
+                "dest",
+                "required",
+                "metavar",
+                "choices",
+            )
+        }
+        if "atype" in anno_attrs:
+            out["type"] = anno_attrs["atype"]
+        elif "type" in anno_attrs:
+            out["type"] = anno_attrs["type"]
+
+        typefun = None
+        if out.get("type"):
+            typefun = self._registry_get("type", out["type"], out["type"])
+
+        choices = out.get("choices", None)
+        if choices is True:
+            out["choices"] = list(terms)
+        elif isinstance(choices, str):
+            out["choices"] = choices.split(",")
+
+        if out.get("choices") and typefun:
+            out["choices"] = [typefun(c) for c in out["choices"]]
+
+        return out
 
     def _add_proc_args(
         self,
@@ -168,14 +215,16 @@ class Parser(ArgumentParser):
                     f"--in.{inkey}"
                     if flatten
                     else f"--{proc.name}.in.{inkey}",
-                    **_get_argument_attrs(inval.attrs),
+                    help=inval.help or "",
+                    **self._get_arg_attrs_from_anno(inval.attrs),
                 )
 
         if not proc.nexts:
             for key, val in anno.Output.items():
                 self.add_argument(
                     f"--out.{key}" if flatten else f"--{proc.name}.out.{key}",
-                    **_get_argument_attrs(val.attrs),
+                    help=val.help or "",
+                    **self._get_arg_attrs_from_anno(val.attrs),
                 )
 
         if proc.envs:
@@ -186,7 +235,7 @@ class Parser(ArgumentParser):
                 default=Diot(proc.envs)
             )
 
-        _add_envs_arguments(
+        self._add_envs_arguments(
             self,
             anno.Envs,
             proc.envs or {},
@@ -213,3 +262,36 @@ class Parser(ArgumentParser):
 
             for key in ("plugin_opts", "scheduler_opts"):
                 self.add_argument(f"--{proc.name}.{key}", **PIPEN_ARGS[key])
+
+    def _add_envs_arguments(
+        self,
+        ns: Namespace,
+        anno: Mapping[str, Any],
+        values: Mapping[str, Any],
+        flatten: bool,
+        proc_name: str,
+        key: str = "envs",
+    ) -> None:
+        """Add the envs argument to the namespace"""
+        for kk, vv in anno.items():
+            default = values[kk]
+
+            if default is not None:
+                vv.attrs["default"] = default
+
+            ns.add_argument(
+                f"--{key}.{kk}" if flatten else f"--{proc_name}.{key}.{kk}",
+                help=vv.help or "",
+                **self._get_arg_attrs_from_anno(vv.attrs, vv.terms),
+            )
+
+            # add sub-namespace
+            if vv.attrs.get("action", None) in ("namespace", "ns"):
+                self._add_envs_arguments(
+                    ns=ns,
+                    anno=vv.terms,
+                    values=default,
+                    flatten=flatten,
+                    proc_name=proc_name,
+                    key=f"{key}.{kk}",
+                )

@@ -1,12 +1,5 @@
 """Command line argument parser for pipen"""
-from __future__ import annotations
-
-from typing import TYPE_CHECKING, Any, Iterable, Mapping
-
 from diot import Diot
-
-if TYPE_CHECKING:  # pragma: no cover
-    from argx.parser import _NamespaceArgumentGroup
 
 PIPEN_ARGS = Diot(
     name=Diot(
@@ -132,84 +125,3 @@ PIPEN_ARGS = Diot(
 
 PIPELINE_ARGS_GROUP = "pipeline options"
 FLATTEN_PROC_ARGS = "auto"
-
-
-def _get_argument_attrs(
-    attrs: Mapping[str, Any],
-    terms: Mapping[str, Any] | Iterable[str] | None = None,
-) -> Mapping[str, Any]:
-    """Get the attributes for an argument from the attrs, parsed from docstring
-
-    Args:
-        attrs: The attributes to be filtered
-
-    Returns:
-        The attributes for an argument
-    """
-    out = {
-        k: v
-        for k, v in attrs.items()
-        if k in (
-            "help",
-            "show",
-            "action",
-            "nargs",
-            "default",
-            "dest",
-            "required",
-            "metavar",
-            "choices",
-        )
-    }
-    if "atype" in attrs:
-        out["type"] = attrs["atype"]
-    elif "type" in attrs:
-        out["type"] = attrs["type"]
-
-    typefun = None
-    if out.get("type"):
-        from .parser import Parser
-        typefun = Parser.INST._registry_get("type", out["type"], out["type"])
-
-    choices = out.get("choices", None)
-    if choices is True:
-        out["choices"] = list(terms)
-    elif isinstance(choices, str):
-        out["choices"] = choices.split(",")
-
-    if out.get("choices") and typefun:
-        out["choices"] = [typefun(c) for c in out["choices"]]
-
-    return out
-
-
-def _add_envs_arguments(
-    ns: _NamespaceArgumentGroup,
-    anno: Mapping[str, Any],
-    values: Mapping[str, Any],
-    flatten: bool,
-    proc_name: str,
-    key: str = "envs",
-) -> None:
-    """Add the envs argument to the namespace"""
-    for kk, vv in anno.items():
-        default = values[kk]
-
-        if default is not None:
-            vv.attrs["default"] = default
-
-        ns.add_argument(
-            f"--{key}.{kk}" if flatten else f"--{proc_name}.{key}.{kk}",
-            **_get_argument_attrs(vv.attrs, vv.terms),
-        )
-
-        # add sub-namespace
-        if vv.attrs.get("action", None) in ("namespace", "ns"):
-            _add_envs_arguments(
-                ns=ns,
-                anno=vv.terms,
-                values=default,
-                flatten=flatten,
-                proc_name=proc_name,
-                key=f"{key}.{kk}",
-            )

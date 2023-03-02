@@ -47,18 +47,7 @@ class ArgsPlugin:
         config = pipen.config
         config.plugin_opts.args_hide = False
 
-        # Make sure the parser is instantiated
-        # if Parser.INST is None:
-        #     raise ImportError(
-        #         "[pipen-args] Parser class is not instantiated. \n"
-        #         "Either do:\n"
-        #         "   >>> from pipen_args import parser\n"
-        #         "or\n"
-        #         "   >>> from pipen_args import Parser\n"
-        #         "   >>> parser = Parser(...)\n"
-        #     )
-
-        parser = Parser.INST or Parser()
+        parser = Parser()
         # Init the parser
         parser.init(pipen)
 

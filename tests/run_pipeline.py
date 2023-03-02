@@ -55,15 +55,15 @@ async def _run(pipeline: Pipen, args: List[str], gets: List[str]) -> None:
     """Run the pipeline"""
     import pipen_args
     # Inject the cli arguments to the pipeline
-    sys.argv = [pipeline.name] + args
+    pipen_args.Parser().set_cli_args(args)
     # Initialize the pipeline so that the arguments definied by
     # other plugins (i.e. pipen-args) to take in place.
     await pipeline._init()
     for get in gets:
         if get == "help":
-            pipen_args.Parser.INST.print_help()
+            pipen_args.Parser().print_help()
         elif get == "help+":
-            pipen_args.Parser.INST.print_help(plus=True)
+            pipen_args.Parser().print_help(plus=True)
         elif get in ("name", "outdir"):
             print(f"{get} = {getattr(pipeline, get)}")
         elif get in pipeline.config:
