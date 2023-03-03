@@ -14,6 +14,7 @@ from simpleconf import ProfileConfig, Config
 from slugify import slugify
 
 from .parser import Parser
+from .procgroup import ProcGroup  # noqa: F401
 
 if TYPE_CHECKING:  # pragma: no cover
     from pipen import Pipen

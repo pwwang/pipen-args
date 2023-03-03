@@ -196,10 +196,15 @@ class Parser(ArgumentParser, metaclass=ParserMeta):
         anno = annotate(proc)
 
         if not flatten:
+            name = (
+                f"{proc.__procgroup__.name}/{proc.name}"
+                if getattr(proc, "__procgroup__", None)
+                else proc.name
+            )
             # add a namespace argumemnt for this proc
             self.add_namespace(
                 proc.name,
-                title=f"Process <{proc.name}>",
+                title=f"Process <{name}>",
                 show=not hide,
                 order=order + 1,  # avoid 0 conflicting default
             )
@@ -274,7 +279,7 @@ class Parser(ArgumentParser, metaclass=ParserMeta):
     ) -> None:
         """Add the envs argument to the namespace"""
         for kk, vv in anno.items():
-            default = values[kk]
+            default = values.get(kk, None)
 
             if default is not None:
                 vv.attrs["default"] = default
