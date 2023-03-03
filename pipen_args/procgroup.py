@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import sys
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List, Type
 from abc import ABC
 
 from diot import Diot
@@ -11,6 +11,7 @@ from pipen_annotate import annotate
 
 if TYPE_CHECKING:  # pragma: no cover
     from argx import ArgumentParser
+    from pipen import Proc
 
 
 class ProcGroup(PipenProcGroup, ABC):
@@ -23,33 +24,35 @@ class ProcGroup(PipenProcGroup, ABC):
     """
     PRESERVED = PipenProcGroup.PRESERVED | {"parser"}
 
-    def __init__(self, **options) -> None:
-        self.name = self.__class__.name or self.__class__.__name__
-
+    def __init__(self, **opts) -> None:
+        self.name: str = self.__class__.name or self.__class__.__name__
         # add arguments to parser
         parser = self.parser
         self._add_proggroup_args(parser)
-
         if (
             "-h" not in sys.argv
             and "--help" not in sys.argv
             and "-h+" not in sys.argv
             and "--help+" not in sys.argv
         ):
+            # Leave the parser to add the arguments at `on_init` hook
+            # So that we get a full help page with arguments from
+            # all the processes
             parsed, rest = parser.parse_known_args()
             parser.set_cli_args(rest)
         else:
             parsed = Namespace()
 
-        self.options = Diot(self.__class__.DEFAULTS or {})
-        self.options.update(
+        self.opts = Diot(self.__class__.DEFAULTS or {})
+        self.opts.update(
             vars(getattr(parsed, self.name, None) or Namespace())
         )
-        self.options |= (options or {})
+        self.opts |= (opts or {})
 
-        for method in self.__class__.__dict__.values():
-            if callable(method) and getattr(method, "_defining_proc", False):
-                method(self)
+        self.starts: List[Type[Proc]] = []
+        self.procs = Diot()
+
+        self._load_runtime_procs()
 
     @property
     def parser(self):
@@ -76,7 +79,7 @@ class ProcGroup(PipenProcGroup, ABC):
 
         parser.add_argument(
             f"--{self.name}",
-            help="Process group options, as a JSON string",
+            help="Process group opts, as a JSON string",
             action="ns",
         )
 
