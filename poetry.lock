@@ -86,14 +86,14 @@ trio = ["trio (>=0.16,<0.22)"]
 
 [[package]]
 name = "argx"
-version = "0.2.3"
+version = "0.2.4"
 description = "Super-charged argparse for python"
 category = "main"
 optional = false
 python-versions = ">=3.7,<4.0"
 files = [
-    {file = "argx-0.2.3-py3-none-any.whl", hash = "sha256:516199922dc4ebb78a1821d7db3b3bd981361f3daf27735a35f550b7b22cca98"},
-    {file = "argx-0.2.3.tar.gz", hash = "sha256:452983b1e9f22fd00fa02cf2a34532b3cc37e324f4f5c6e03beff2d8189c9084"},
+    {file = "argx-0.2.4-py3-none-any.whl", hash = "sha256:91b7fa8aad3b770c4fe159bf37d84ba85535b73f16a25067855477fbf9d3ef1d"},
+    {file = "argx-0.2.4.tar.gz", hash = "sha256:8e56650b67ff6f00c4564906e628a6efb865534351f85512b6dd5b0f9ebff8fb"},
 ]
 
 [package.dependencies]
@@ -548,18 +548,6 @@ files = [
 ]
 
 [[package]]
-name = "more-itertools"
-version = "8.14.0"
-description = "More routines for operating on iterables, beyond itertools"
-category = "main"
-optional = false
-python-versions = ">=3.5"
-files = [
-    {file = "more-itertools-8.14.0.tar.gz", hash = "sha256:c09443cd3d5438b8dafccd867a6bc1cb0894389e90cb53d227456b0b0bccb750"},
-    {file = "more_itertools-8.14.0-py3-none-any.whl", hash = "sha256:1bc4f91ee5b1b31ac7ceacc17c09befe6a40a503907baf9c839c229b5095cfd2"},
-]
-
-[[package]]
 name = "numpy"
 version = "1.21.6"
 description = "NumPy is the fundamental package for array computing with Python."
@@ -715,14 +703,14 @@ executing = ">1.1.0,<2.0"
 
 [[package]]
 name = "pipen"
-version = "0.4.6"
+version = "0.5.0"
 description = "A pipeline framework for python"
 category = "main"
 optional = false
 python-versions = ">=3.7.1,<4.0.0"
 files = [
-    {file = "pipen-0.4.6-py3-none-any.whl", hash = "sha256:bdc390b5e8ac32158e7c157d5b1040232a844f908eb5398b0118ccebb5429d81"},
-    {file = "pipen-0.4.6.tar.gz", hash = "sha256:096cf0ae853071cac29bd159b0c618b307a3fc416c05a2082b11c78977d7ba4f"},
+    {file = "pipen-0.5.0-py3-none-any.whl", hash = "sha256:8cfe25f6887f597a484286b21380dede46355fda9dd1755bca2d744d189ea9d6"},
+    {file = "pipen-0.5.0.tar.gz", hash = "sha256:f463a6f9928ebda69654a0b5783461f7f725d42ab755f5cc4da6b76f10101725"},
 ]
 
 [package.dependencies]
@@ -730,7 +718,6 @@ argx = ">=0.2,<0.3"
 cached-property = ">=1,<2"
 enlighten = ">=1,<2"
 liquidpy = ">=0.7,<0.8"
-more-itertools = ">=8,<9"
 pandas = ">=1.3,<2.0"
 pipda = ">=0.11,<0.12"
 python-simpleconf = {version = ">=0.5,<0.6", extras = ["toml"]}
@@ -743,33 +730,33 @@ xqute = ">=0.1,<0.2"
 
 [[package]]
 name = "pipen-annotate"
-version = "0.3.0"
+version = "0.4.0"
 description = "Use docstring to annotate pipen processes"
 category = "main"
 optional = false
 python-versions = ">=3.7.1,<4.0.0"
 files = [
-    {file = "pipen_annotate-0.3.0-py3-none-any.whl", hash = "sha256:302da4f27b315ef1ea243254568c8f4319eb778eba4858b3c0ed917f1efbff75"},
-    {file = "pipen_annotate-0.3.0.tar.gz", hash = "sha256:9d256974b1d7f504a6f605f1fe35fed0f8be4420da0944877c4eac7dc25d5b7c"},
+    {file = "pipen_annotate-0.4.0-py3-none-any.whl", hash = "sha256:0143ce2e5e55f9d6e80791fd02e80f0a8638416dd4e6febff05ad58ffbde9545"},
+    {file = "pipen_annotate-0.4.0.tar.gz", hash = "sha256:25062e5cf44722908da4fc5865e46bd9e0a4ee78cf1cbd87c554cde4b067f925"},
 ]
 
 [package.dependencies]
-pipen = ">=0.4,<0.5"
+pipen = ">=0.5,<0.6"
 
 [[package]]
 name = "pipen-verbose"
-version = "0.2.0"
+version = "0.3.0"
 description = "Add verbosal information in logs for pipen."
 category = "dev"
 optional = false
 python-versions = ">=3.7.1,<4.0.0"
 files = [
-    {file = "pipen_verbose-0.2.0-py3-none-any.whl", hash = "sha256:e03917d00efa6acc1f61671ee2b7fcbeab2a7e0c6ba711dbb1effc5efc2140f1"},
-    {file = "pipen_verbose-0.2.0.tar.gz", hash = "sha256:21b78e927d93a6e6088408af47bec39ff04403aea273d80013f7243a6e5037f6"},
+    {file = "pipen_verbose-0.3.0-py3-none-any.whl", hash = "sha256:b60cea3d83dea980c24975890df612b45bfa4edcb5959258dca1073e5fa1f89b"},
+    {file = "pipen_verbose-0.3.0.tar.gz", hash = "sha256:77667751417fc208af25a853a2732d616d7751d7cdf1caf4fee9a6c4166a07d9"},
 ]
 
 [package.dependencies]
-pipen = ">=0.4,<0.5"
+pipen = ">=0.5,<0.6"
 
 [[package]]
 name = "pluggy"
@@ -858,14 +845,14 @@ plugins = ["importlib-metadata"]
 
 [[package]]
 name = "pytest"
-version = "7.2.1"
+version = "7.2.2"
 description = "pytest: simple powerful testing with Python"
 category = "dev"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "pytest-7.2.1-py3-none-any.whl", hash = "sha256:c7c6ca206e93355074ae32f7403e8ea12163b1163c976fee7d4d84027c162be5"},
-    {file = "pytest-7.2.1.tar.gz", hash = "sha256:d45e0952f3727241918b8fd0f376f5ff6b301cc0777c6f9a556935c92d8a7d42"},
+    {file = "pytest-7.2.2-py3-none-any.whl", hash = "sha256:130328f552dcfac0b1cec75c12e3f005619dc5f874f0a06e8ff7263f0ee6225e"},
+    {file = "pytest-7.2.2.tar.gz", hash = "sha256:c99ab0c73aceb050f68929bc93af19ab6db0558791c6a0715723abe9d0ade9d4"},
 ]
 
 [package.dependencies]
@@ -1282,4 +1269,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7.1"
-content-hash = "ca1548ccb8b56387a41bb69aa061af47c099b4741b0ca11041edcba9bbfec23b"
+content-hash = "f7611ec2e5dac5d50fb770e2806bdedad5185b387917fcb1838187e112391229"
