@@ -1,5 +1,5 @@
 from pipen import Proc, Pipen
-from pipen_args import Parser
+from pipen_args import Parser, install  # noqa: F401
 
 parser = Parser()
 parser.add_argument('-x', choices=['a', 'b'], default='a')

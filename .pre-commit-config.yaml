@@ -19,7 +19,7 @@ repos:
         args:
             - get_ver() { echo $(egrep "^__version|^version" $1 | cut -d= -f2 | sed 's/\"\| //g'); };
               v1=`get_ver pyproject.toml`;
-              v2=`get_ver pipen_args/__init__.py`;
+              v2=`get_ver pipen_args/version.py`;
               if [[ $v1 == $v2 ]]; then exit 0; else exit 1; fi
         pass_filenames: false
         files: ^pyproject\.toml|pipen_args/__init__\.py$
