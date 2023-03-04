@@ -62,7 +62,7 @@ class ProcGroup(PipenProcGroup, ABC):
         `plugin.on_init()` hook, which happens usually after the initialization
         of a process group.
         """
-        from .parser import Parser
+        from .parser_ import Parser
         return Parser()
 
     def _add_proggroup_args(self, parser: ArgumentParser) -> None:

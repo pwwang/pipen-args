@@ -8,7 +8,7 @@ from diot import Diot
 from simpleconf import Config
 
 from .version import __version__
-from .parser import Parser  # noqa: F401
+from .parser_ import Parser  # noqa: F401
 from .procgroup import ProcGroup  # noqa: F401
 
 
@@ -26,5 +26,11 @@ def __getattr__(name: str) -> Any:
             if arg.startswith("@"):
                 return Config.load(arg[1:])
         return Diot()
+
+    if name == "parser":
+        # Allow
+        # from pipen_args import parser
+        # to get the parser instance
+        return Parser()
 
     raise AttributeError  # pragma: no cover

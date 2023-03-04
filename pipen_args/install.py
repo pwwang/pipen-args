@@ -11,7 +11,7 @@ from pipen.defaults import CONFIG_FILES
 from pipen.utils import copy_dict
 
 from .version import __version__
-from .parser import Parser
+from .parser_ import Parser
 
 if TYPE_CHECKING:  # pragma: no cover
     from pipen import Pipen
