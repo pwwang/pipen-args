@@ -52,7 +52,16 @@ class ProcGroup(PipenProcGroup, ABC):
         self.starts: List[Type[Proc]] = []
         self.procs = Diot()
 
+        self.post_init()
         self._load_runtime_procs()
+
+    def post_init(self) -> None:
+        """Post initialization
+
+        This method is called after arguments are parsed and set to self.opts
+        This method is called before runtime processes are loaded
+        """
+        pass
 
     @property
     def parser(self):
