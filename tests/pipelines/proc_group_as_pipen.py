@@ -8,6 +8,9 @@ class PG(ProcGroup):
 
     DEFAULTS = {'x': 1}
 
+    def post_init(self) -> None:
+        print("POST_INIT")
+
     @ProcGroup.add_proc
     def p(self):
         class Process(Proc):

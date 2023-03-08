@@ -31,5 +31,6 @@ def test_as_pipen():
     )
     # No annotation, so no help
     # assert "Process Group <PG>" in out
+    assert "POST_INIT" in out
     assert "Process <PG/Process>" in out
     assert "Process <PG/Process2>" in out
