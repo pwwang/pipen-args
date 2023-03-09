@@ -86,14 +86,14 @@ trio = ["trio (>=0.16,<0.22)"]
 
 [[package]]
 name = "argx"
-version = "0.2.4"
+version = "0.2.5"
 description = "Super-charged argparse for python"
 category = "main"
 optional = false
 python-versions = ">=3.7,<4.0"
 files = [
-    {file = "argx-0.2.4-py3-none-any.whl", hash = "sha256:91b7fa8aad3b770c4fe159bf37d84ba85535b73f16a25067855477fbf9d3ef1d"},
-    {file = "argx-0.2.4.tar.gz", hash = "sha256:8e56650b67ff6f00c4564906e628a6efb865534351f85512b6dd5b0f9ebff8fb"},
+    {file = "argx-0.2.5-py3-none-any.whl", hash = "sha256:a2e97ddf3d95ed79f27d38958ec7db4cc0585242fae9036aed0545594b566c3a"},
+    {file = "argx-0.2.5.tar.gz", hash = "sha256:b594d6eef0a77917113e32849e174c33dbb914edddb3589c539a1a693d226ed2"},
 ]
 
 [package.dependencies]
@@ -698,14 +698,14 @@ executing = ">1.1.0,<2.0"
 
 [[package]]
 name = "pipen"
-version = "0.5.1"
+version = "0.5.2"
 description = "A pipeline framework for python"
 category = "main"
 optional = false
 python-versions = ">=3.7.1,<4.0.0"
 files = [
-    {file = "pipen-0.5.1-py3-none-any.whl", hash = "sha256:0babf9e2e75fe95873278ee780e756535ae464f30b4e3dce0b84762a0279547a"},
-    {file = "pipen-0.5.1.tar.gz", hash = "sha256:0501d68d3207a507e22f0659a682be245c7b21598fa58c72d2d2b7f76fa05eac"},
+    {file = "pipen-0.5.2-py3-none-any.whl", hash = "sha256:467f574f1bd4a354fb4d43e80f0f49c5d9f9f2615091fb54f53a507183c6c10c"},
+    {file = "pipen-0.5.2.tar.gz", hash = "sha256:9a10a52c3c0bc568d57a197334450a9ce40990e334e4f0e1c8e0188bc1f21e31"},
 ]
 
 [package.dependencies]
@@ -725,14 +725,14 @@ xqute = ">=0.1,<0.2"
 
 [[package]]
 name = "pipen-annotate"
-version = "0.4.0"
+version = "0.4.4"
 description = "Use docstring to annotate pipen processes"
 category = "main"
 optional = false
 python-versions = ">=3.7.1,<4.0.0"
 files = [
-    {file = "pipen_annotate-0.4.0-py3-none-any.whl", hash = "sha256:0143ce2e5e55f9d6e80791fd02e80f0a8638416dd4e6febff05ad58ffbde9545"},
-    {file = "pipen_annotate-0.4.0.tar.gz", hash = "sha256:25062e5cf44722908da4fc5865e46bd9e0a4ee78cf1cbd87c554cde4b067f925"},
+    {file = "pipen_annotate-0.4.4-py3-none-any.whl", hash = "sha256:7db6aad20e7f3cf17e46bcf5de28254d9ab71a10751c24559b6e28dbd040b87c"},
+    {file = "pipen_annotate-0.4.4.tar.gz", hash = "sha256:dbc849ad2a89694d4d6cdc0a516a175160fa17d6847e2a5db2eae2489bac8581"},
 ]
 
 [package.dependencies]
