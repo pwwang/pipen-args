@@ -38,16 +38,16 @@ class ProcGroup(PipenProcGroup, ABC):
             # Leave the parser to add the arguments at `on_init` hook
             # So that we get a full help page with arguments from
             # all the processes
-            parsed, rest = parser.parse_known_args()
+            parsed, rest = parser.parse_known_args(parse_file=False)
             parser.set_cli_args(rest)
         else:
             parsed = Namespace()
 
         self.opts = Diot(self.__class__.DEFAULTS or {})
-        self.opts.update(
-            vars(getattr(parsed, self.name, None) or Namespace())
-        )
-        self.opts |= (opts or {})
+        opts = getattr(parsed, self.name, {})
+        if opts and isinstance(opts, Namespace):
+            opts = vars(opts)
+        self.opts.update({k: v for k, v in opts.items() if v is not None})
 
         self.starts: List[Type[Proc]] = []
         self.procs = Diot()
