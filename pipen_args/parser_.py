@@ -151,7 +151,6 @@ class Parser(ArgumentParser, metaclass=ParserMeta):
             for k, v in anno_attrs.items()
             if k in (
                 "help",
-                "show",
                 "action",
                 "nargs",
                 "default",
@@ -161,6 +160,9 @@ class Parser(ArgumentParser, metaclass=ParserMeta):
                 "choices",
             )
         }
+        if "hide" in anno_attrs:
+            out["show"] = False
+
         if "atype" in anno_attrs:
             out["type"] = anno_attrs["atype"]
         elif "type" in anno_attrs:
