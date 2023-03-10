@@ -698,14 +698,14 @@ executing = ">1.1.0,<2.0"
 
 [[package]]
 name = "pipen"
-version = "0.5.2"
+version = "0.6.1"
 description = "A pipeline framework for python"
 category = "main"
 optional = false
 python-versions = ">=3.7.1,<4.0.0"
 files = [
-    {file = "pipen-0.5.2-py3-none-any.whl", hash = "sha256:467f574f1bd4a354fb4d43e80f0f49c5d9f9f2615091fb54f53a507183c6c10c"},
-    {file = "pipen-0.5.2.tar.gz", hash = "sha256:9a10a52c3c0bc568d57a197334450a9ce40990e334e4f0e1c8e0188bc1f21e31"},
+    {file = "pipen-0.6.1-py3-none-any.whl", hash = "sha256:c837570cd0ad8c8fee7f6e311bb26a4657990c515bdcdc3d7878e5c7527a2574"},
+    {file = "pipen-0.6.1.tar.gz", hash = "sha256:baf609eb7dde6a4512eb85591b66ca7cd5f73b5c533e39bbd6463783dfa87f30"},
 ]
 
 [package.dependencies]
@@ -725,33 +725,33 @@ xqute = ">=0.1,<0.2"
 
 [[package]]
 name = "pipen-annotate"
-version = "0.4.5"
+version = "0.5.1"
 description = "Use docstring to annotate pipen processes"
 category = "main"
 optional = false
 python-versions = ">=3.7.1,<4.0.0"
 files = [
-    {file = "pipen_annotate-0.4.5-py3-none-any.whl", hash = "sha256:037b1dd63d6285525cc0c5dcbd2343662de4f9b087757189e2b077da3d0179a5"},
-    {file = "pipen_annotate-0.4.5.tar.gz", hash = "sha256:5cec498c135d5756a70bb6bb9c426f956f77b61e014f048d9c5007b62826dc42"},
+    {file = "pipen_annotate-0.5.1-py3-none-any.whl", hash = "sha256:18b0c152354b15ac485a19c9c9c62e9afb3353facbc3bebb9ff7eab4d71fd7ef"},
+    {file = "pipen_annotate-0.5.1.tar.gz", hash = "sha256:73455141a4419600e0ebaf59c94395d988b3b24c1a58eb5321108ddfcbfc3c86"},
 ]
 
 [package.dependencies]
-pipen = ">=0.5,<0.6"
+pipen = ">=0.6,<0.7"
 
 [[package]]
 name = "pipen-verbose"
-version = "0.3.0"
+version = "0.4.0"
 description = "Add verbosal information in logs for pipen."
 category = "dev"
 optional = false
 python-versions = ">=3.7.1,<4.0.0"
 files = [
-    {file = "pipen_verbose-0.3.0-py3-none-any.whl", hash = "sha256:b60cea3d83dea980c24975890df612b45bfa4edcb5959258dca1073e5fa1f89b"},
-    {file = "pipen_verbose-0.3.0.tar.gz", hash = "sha256:77667751417fc208af25a853a2732d616d7751d7cdf1caf4fee9a6c4166a07d9"},
+    {file = "pipen_verbose-0.4.0-py3-none-any.whl", hash = "sha256:b2f52c6cbbaf8e430b064d91a86ca04a64e25818cee3faf70faa7356665f26e8"},
+    {file = "pipen_verbose-0.4.0.tar.gz", hash = "sha256:7a0e2082510ed9daa270e9f74a7a22385baa288426bb5a56994cf5a849e657d9"},
 ]
 
 [package.dependencies]
-pipen = ">=0.5,<0.6"
+pipen = ">=0.6,<0.7"
 
 [[package]]
 name = "pluggy"
@@ -1264,4 +1264,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7.1"
-content-hash = "f7611ec2e5dac5d50fb770e2806bdedad5185b387917fcb1838187e112391229"
+content-hash = "c512afa05d90490b87325d46e1c89ab9427fa2fc3feac81882b13b254bcf3803"

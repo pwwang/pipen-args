@@ -13,7 +13,7 @@ generate-setup-file = true
 
 [tool.poetry.dependencies]
 python = "^3.7.1"
-pipen-annotate = "^0.4"
+pipen-annotate = "^0.5"
 # # required by xqute > pipen
 # diot = "^0.1"
 
@@ -22,7 +22,7 @@ pytest = "^7"
 pytest-cov = "^4"
 pytest-xdist = "^3"
 pytest-forked = "^1"
-pipen-verbose = "^0.3"
+pipen-verbose = "^0.4"
 
 [build-system]
 requires = ["poetry>=0.12"]
