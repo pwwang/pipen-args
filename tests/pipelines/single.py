@@ -20,6 +20,7 @@ class Process(Proc):
         w: line4
             - a: item a
             - b: item b
+        <more>: line5
     """
     input = 'a'
     output = 'b:file:b.txt'

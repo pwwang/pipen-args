@@ -279,8 +279,10 @@ class Parser(ArgumentParser, metaclass=ParserMeta):
     ) -> None:
         """Add the envs argument to the namespace"""
         for kk, vv in anno.items():
-            default = values.get(kk, None)
+            if kk not in values:
+                continue
 
+            default = values[kk]
             if default is not None:
                 vv.attrs["default"] = default
 
