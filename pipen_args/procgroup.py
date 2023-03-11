@@ -54,7 +54,6 @@ class ProcGroup(PipenProcGroup, ABC):
 
         self.starts: List[Type[Proc]] = []
         self.procs = Diot()
-        print(parsed_opts, self.opts, opts)
         self.post_init()
         self._load_runtime_procs()
 
