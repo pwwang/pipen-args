@@ -44,14 +44,17 @@ class ProcGroup(PipenProcGroup, ABC):
             parsed = Namespace()
 
         self.opts = Diot(self.__class__.DEFAULTS or {})
-        opts = getattr(parsed, self.name, {})
-        if opts and isinstance(opts, Namespace):
-            opts = vars(opts)
-        self.opts.update({k: v for k, v in opts.items() if v is not None})
+        parsed_opts = getattr(parsed, self.name, {})
+        if parsed_opts and isinstance(parsed_opts, Namespace):
+            parsed_opts = vars(parsed_opts)
+        parsed_opts.update(opts)
+        self.opts.update(
+            {k: v for k, v in parsed_opts.items() if v is not None}
+        )
 
         self.starts: List[Type[Proc]] = []
         self.procs = Diot()
-
+        print(parsed_opts, self.opts, opts)
         self.post_init()
         self._load_runtime_procs()
 
