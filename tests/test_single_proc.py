@@ -45,6 +45,7 @@ def test_single_proc_choices_auto_ns():
     )
     assert "--envs.x {a,b}" in out
     assert "--envs.z {1,2,3}" in out
+    assert "--envs.y" not in out
     assert "--envs.w W" in out
     assert "--envs.w.a A" in out
     assert "--envs.w.b B" in out
