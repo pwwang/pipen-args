@@ -38,7 +38,7 @@ class ProcGroup(PipenProcGroup, ABC):
             # Leave the parser to add the arguments at `on_init` hook
             # So that we get a full help page with arguments from
             # all the processes
-            parsed, rest = parser.parse_known_args(parse_file=False)
+            parsed, rest = parser.parse_known_args(fromfile_keep=True)
             parser.set_cli_args(rest)
         else:
             parsed = Namespace()
