@@ -15,8 +15,8 @@ class Process(Proc):
         x (choices): line1
             - a: item a
             - b: item b
-        y (type:str;hide): line2
-        z (atype:int; choices:1,2,3): line3
+        y (type:str;hidden): line2
+        z (type:int; choices:1,2,3): line3
         w: line4
             - a: item a
             - b: item b

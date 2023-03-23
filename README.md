@@ -52,4 +52,22 @@ Optional Arguments:
 
 See more examples in `tests/pipelines/` folder.
 
+## Metadata for env items
+
+The metadata in the docstring of env items determines how the arguments are defined.
+
+```python
+class Process(Proc):
+    """My process
+
+    # other docstring sections
+
+    Envs:
+        a (<metadata>): ...
+```
+
+The metadata could be key-value pairs separated by `;`. The separator `:` or `=` is used to
+separate the key and value. The value is optional. If the value is not specified, it
+will be set to `True`. The keys are valid arguments of `argx.ArgumentParser.add_argument`, except that `hidden` will be interpreted as `show=False` in `argx.ArgumentParser.add_argument`. If the value of `choices` is not specified, the subkeys of the env item will be used as the choices.
+
 [1]: https://github.com/pwwang/pipen

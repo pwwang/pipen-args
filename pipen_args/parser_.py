@@ -158,15 +158,11 @@ class Parser(ArgumentParser, metaclass=ParserMeta):
                 "required",
                 "metavar",
                 "choices",
+                "type",
             )
         }
-        if "hide" in anno_attrs:
+        if "hidden" in anno_attrs:
             out["show"] = False
-
-        if "atype" in anno_attrs:
-            out["type"] = anno_attrs["atype"]
-        elif "type" in anno_attrs:
-            out["type"] = anno_attrs["type"]
 
         typefun = None
         if out.get("type"):
