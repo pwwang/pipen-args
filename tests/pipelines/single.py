@@ -17,7 +17,7 @@ class Process(Proc):
             - b: item b
         y (type:str;hidden): line2
         z (type:int; choices:1,2,3): line3
-        w: line4
+        w (action:ns): line4
             - a: item a
             - b: item b
         <more>: line5

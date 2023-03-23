@@ -37,7 +37,7 @@ def test_single_proc_files():
 
 
 @pytest.mark.forked
-def test_single_proc_choices_auto_ns():
+def test_single_proc_choices():
     """Test single proc"""
     out = run_pipeline(
         "single",
