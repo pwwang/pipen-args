@@ -91,7 +91,7 @@ class Parser(ArgumentParser, metaclass=ParserMeta):
         if self.flatten_proc_args == "auto":
             self.flatten_proc_args = (
                 len(pipen.procs) == 1
-                and not getattr(pipen.procs[0], "__procgroup__", False)
+                and not pipen.procs[0].__meta__["procgroup"]
             )
 
         for arg, argopt in PIPEN_ARGS.items():
@@ -123,7 +123,7 @@ class Parser(ArgumentParser, metaclass=ParserMeta):
             )
         else:
             for i, proc in enumerate(pipen.procs):
-                in_procgroup = bool(getattr(proc, "__procgroup__", None))
+                in_procgroup = bool(proc.__meta__["procgroup"])
                 self._add_proc_args(
                     proc,
                     is_start=proc in pipen.starts and not in_procgroup,
@@ -195,8 +195,8 @@ class Parser(ArgumentParser, metaclass=ParserMeta):
 
         if not flatten:
             name = (
-                f"{proc.__procgroup__.name}/{proc.name}"
-                if getattr(proc, "__procgroup__", None)
+                f"{proc.__meta__['procgroup'].name}/{proc.name}"
+                if proc.__meta__["procgroup"]
                 else proc.name
             )
             # add a namespace argumemnt for this proc

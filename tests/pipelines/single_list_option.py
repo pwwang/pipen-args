@@ -12,7 +12,7 @@ class Process(Proc):
         b: output b
 
     Envs:
-        x (choices): line1
+        x (action=clear_extend;nargs=+;choices): line1
             - a: item a
             - b: item b
             - c: item c

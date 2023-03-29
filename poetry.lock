@@ -429,21 +429,21 @@ ansicon = {version = "*", markers = "platform_system == \"Windows\""}
 
 [[package]]
 name = "liquidpy"
-version = "0.7.6"
+version = "0.8.0"
 description = "A port of liquid template engine for python"
 category = "main"
 optional = false
-python-versions = ">=3.6,<4.0"
+python-versions = ">=3.7,<4.0"
 files = [
-    {file = "liquidpy-0.7.6-py3-none-any.whl", hash = "sha256:9d3bff7c11efe0347104f4957b5e475af404a994e85d0bd2aa4c568869fe3c89"},
-    {file = "liquidpy-0.7.6.tar.gz", hash = "sha256:d6cb83df89a3f0919b9dc659767e09e193ca369bdeef3ccd8c7e40e64da061e3"},
+    {file = "liquidpy-0.8.0-py3-none-any.whl", hash = "sha256:cd04559d400e8b9a0b6dc6096d5b9496252a875676d24685c4c74d1be607d5d3"},
+    {file = "liquidpy-0.8.0.tar.gz", hash = "sha256:7e93bcf216ce76ceca0d699302d684e209e5ca757ac98d4a0003daec4325c4bc"},
 ]
 
 [package.dependencies]
 jinja2 = ">=3,<4"
 
 [package.extras]
-extra = ["markdown (>=3.3,<4.0)", "python-dateutil (>=2.8,<3.0)", "python-frontmatter (>=1.0,<2.0)", "python-slugify (>=6.1,<7.0)", "regex (>=2022.4,<2023.0)", "toml (>=0.10.2,<0.11.0)"]
+extra = ["markdown (>=3.4,<4.0)", "python-dateutil (>=2.8,<3.0)", "python-frontmatter (>=1.0,<2.0)", "python-slugify (>=8,<9)", "regex (>=2022.10,<2023.0)", "toml (>=0.10,<0.11)"]
 
 [[package]]
 name = "markdown-it-py"
@@ -699,21 +699,21 @@ executing = ">1.1.0,<2.0"
 
 [[package]]
 name = "pipen"
-version = "0.6.4"
+version = "0.7.0"
 description = "A pipeline framework for python"
 category = "main"
 optional = false
 python-versions = ">=3.7.1,<4.0.0"
 files = [
-    {file = "pipen-0.6.4-py3-none-any.whl", hash = "sha256:bceb717ca357ecb7b7a2ade0b362980c5c0afb993b606f0143b89da6fc7a5852"},
-    {file = "pipen-0.6.4.tar.gz", hash = "sha256:d208c451d33412035c5d64239f9e95d8fdfe666e1199cbf5c47858c5741f471f"},
+    {file = "pipen-0.7.0-py3-none-any.whl", hash = "sha256:10ae686757d052ae8563d500f47c39da7f9eedd57a82a8cb5cb69eacf258fc70"},
+    {file = "pipen-0.7.0.tar.gz", hash = "sha256:3fcd95baefc5890215af85f86532703b7b972f3a2ec102ac3eb5a2d76fb16d00"},
 ]
 
 [package.dependencies]
 argx = ">=0.2,<0.3"
 cached-property = ">=1,<2"
 enlighten = ">=1,<2"
-liquidpy = ">=0.7,<0.8"
+liquidpy = ">=0.8,<0.9"
 pandas = ">=1.3,<2.0"
 pipda = ">=0.11,<0.12"
 python-simpleconf = {version = ">=0.5,<0.6", extras = ["toml"]}
@@ -726,33 +726,33 @@ xqute = ">=0.1,<0.2"
 
 [[package]]
 name = "pipen-annotate"
-version = "0.5.2"
+version = "0.6.0"
 description = "Use docstring to annotate pipen processes"
 category = "main"
 optional = false
 python-versions = ">=3.7.1,<4.0.0"
 files = [
-    {file = "pipen_annotate-0.5.2-py3-none-any.whl", hash = "sha256:c4522d49b6404d3d2fffca9b34bf82a631f4090ce4c6d5b8ebb9b5fc90c3e369"},
-    {file = "pipen_annotate-0.5.2.tar.gz", hash = "sha256:9effecea55da2b0475a81653c83a2780ffbae8bad5e9f4796ecc4e732a30b3e0"},
+    {file = "pipen_annotate-0.6.0-py3-none-any.whl", hash = "sha256:6a8eaab74d99dea493560bf02fb4bf82b99e1c5f108496d1e41fc39561a73af3"},
+    {file = "pipen_annotate-0.6.0.tar.gz", hash = "sha256:b22e19aa9852d1f4be7530a1ef993b12158399149fa40637e1cf9404f8a5a202"},
 ]
 
 [package.dependencies]
-pipen = ">=0.6,<0.7"
+pipen = ">=0.7,<0.8"
 
 [[package]]
 name = "pipen-verbose"
-version = "0.4.0"
+version = "0.5.0"
 description = "Add verbosal information in logs for pipen."
 category = "dev"
 optional = false
 python-versions = ">=3.7.1,<4.0.0"
 files = [
-    {file = "pipen_verbose-0.4.0-py3-none-any.whl", hash = "sha256:b2f52c6cbbaf8e430b064d91a86ca04a64e25818cee3faf70faa7356665f26e8"},
-    {file = "pipen_verbose-0.4.0.tar.gz", hash = "sha256:7a0e2082510ed9daa270e9f74a7a22385baa288426bb5a56994cf5a849e657d9"},
+    {file = "pipen_verbose-0.5.0-py3-none-any.whl", hash = "sha256:1d3ec92c9beebfe1694392ca2d527fc797222b16c487155e66557c10a03e6318"},
+    {file = "pipen_verbose-0.5.0.tar.gz", hash = "sha256:4b372c6e341b5ca20d2fd0c203c9cc4a6da05317bc151073f2213f11feb5a5ca"},
 ]
 
 [package.dependencies]
-pipen = ">=0.6,<0.7"
+pipen = ">=0.7,<0.8"
 
 [[package]]
 name = "pluggy"
@@ -978,26 +978,26 @@ unidecode = ["Unidecode (>=1.1.1)"]
 
 [[package]]
 name = "pytz"
-version = "2022.7.1"
+version = "2023.3"
 description = "World timezone definitions, modern and historical"
 category = "main"
 optional = false
 python-versions = "*"
 files = [
-    {file = "pytz-2022.7.1-py2.py3-none-any.whl", hash = "sha256:78f4f37d8198e0627c5f1143240bb0206b8691d8d7ac6d78fee88b78733f8c4a"},
-    {file = "pytz-2022.7.1.tar.gz", hash = "sha256:01a0681c4b9684a28304615eba55d1ab31ae00bf68ec157ec3708a8182dbbcd0"},
+    {file = "pytz-2023.3-py2.py3-none-any.whl", hash = "sha256:a151b3abb88eda1d4e34a9814df37de2a80e301e68ba0fd856fb9b46bfbbbffb"},
+    {file = "pytz-2023.3.tar.gz", hash = "sha256:1d8ce29db189191fb55338ee6d0387d82ab59f3d00eac103412d64e0ebd0c588"},
 ]
 
 [[package]]
 name = "rich"
-version = "13.3.2"
+version = "13.3.3"
 description = "Render rich text, tables, progress bars, syntax highlighting, markdown and more to the terminal"
 category = "main"
 optional = false
 python-versions = ">=3.7.0"
 files = [
-    {file = "rich-13.3.2-py3-none-any.whl", hash = "sha256:a104f37270bf677148d8acb07d33be1569eeee87e2d1beb286a4e9113caf6f2f"},
-    {file = "rich-13.3.2.tar.gz", hash = "sha256:91954fe80cfb7985727a467ca98a7618e5dd15178cc2da10f553b36a93859001"},
+    {file = "rich-13.3.3-py3-none-any.whl", hash = "sha256:540c7d6d26a1178e8e8b37e9ba44573a3cd1464ff6348b99ee7061b95d1c6333"},
+    {file = "rich-13.3.3.tar.gz", hash = "sha256:dc84400a9d842b3a9c5ff74addd8eb798d155f36c1c91303888e0a66850d2a15"},
 ]
 
 [package.dependencies]
@@ -1265,4 +1265,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7.1"
-content-hash = "c512afa05d90490b87325d46e1c89ab9427fa2fc3feac81882b13b254bcf3803"
+content-hash = "4528eaef397401a137c9f3d30ae0357f4dc5c2d0811a26317040bf0fdaa8408b"
