@@ -6,9 +6,7 @@ Command line argument parser for [pipen][1]
 
 ```python
 from pipen import Proc, Pipen
-# Note that unlike other plugins, you need to import install
-# to activate the plugin
-from pipen_args import install  # noqa: F401
+
 
 class Process(Proc):
     """My process

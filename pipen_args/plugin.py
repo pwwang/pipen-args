@@ -5,7 +5,6 @@ from pathlib import Path
 
 from argx import Namespace
 from simpleconf import ProfileConfig
-from slugify import slugify
 from pipen import plugin
 from pipen.defaults import CONFIG_FILES
 from pipen.utils import copy_dict
@@ -73,11 +72,11 @@ class ArgsPlugin:
 
         if parsed.name not in (None, pipen.name):
             pipen.name = parsed.name
-            pipen.workdir = Path(config["workdir"]) / slugify(pipen.name)
+            pipen.workdir = Path(config["workdir"]) / pipen.name
             pipen.workdir.mkdir(parents=True, exist_ok=True)
             if parsed.outdir in (None, pipen_outdir):
                 pipen.outdir = Path(
-                    f"./{slugify(pipen.name)}_results"
+                    f"./{pipen.name}_results"
                 ).resolve()
 
         for key in ("plugin_opts", "template_opts", "scheduler_opts"):
@@ -146,6 +145,3 @@ class ArgsPlugin:
                         if proc_opts is None:
                             setattr(proc, key, {})
                         getattr(proc, key).update(proc_args[key])
-
-
-plugin.register(ArgsPlugin)

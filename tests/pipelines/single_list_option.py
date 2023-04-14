@@ -1,5 +1,4 @@
 from pipen import Proc, Pipen
-from pipen_args import install  # noqa: F401
 
 
 class Process(Proc):

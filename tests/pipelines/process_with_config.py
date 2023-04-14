@@ -1,5 +1,5 @@
 from pipen import Proc, Pipen
-from pipen_args import config, install  # noqa: F401
+from pipen_args import config
 
 
 class Process(Proc):

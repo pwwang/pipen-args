@@ -1,5 +1,5 @@
 from pipen import Proc
-from pipen_args import ProcGroup, install  # noqa: F401
+from pipen_args import ProcGroup
 
 
 class PG(ProcGroup):
