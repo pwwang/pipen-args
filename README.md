@@ -50,7 +50,7 @@ Optional Arguments:
 
 See more examples in `tests/pipelines/` folder.
 
-## Metadata for env items
+## Metadata for Proc envs items
 
 The metadata in the docstring of env items determines how the arguments are defined.
 
@@ -62,6 +62,7 @@ class Process(Proc):
 
     Envs:
         a (<metadata>): ...
+    """
 ```
 
 The metadata could be key-value pairs separated by `;`. The separator `:` or `=` is used to
