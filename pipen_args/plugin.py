@@ -7,13 +7,15 @@ from argx import Namespace
 from simpleconf import ProfileConfig
 from pipen import plugin
 from pipen.defaults import CONFIG_FILES
-from pipen.utils import copy_dict
+from pipen.utils import copy_dict, get_logger
 
 from .version import __version__
 from .parser_ import Parser
 
 if TYPE_CHECKING:  # pragma: no cover
     from pipen import Pipen
+
+logger = get_logger("args", "info")
 
 
 class ArgsPlugin:
@@ -89,30 +91,40 @@ class ArgsPlugin:
 
         for proc in pipen.procs:
             proc_args = vars(getattr(parsed, proc.name))
-            if "in" in proc_args:
-                from pandas import DataFrame
-                from pandas.core.dtypes.api import is_scalar
+            if (
+                "in" in proc_args
+                and not all(v is None for v in vars(proc_args["in"]).values())
+            ):
+                if proc.input_data is not None:
+                    logger.warning(
+                        "[red]![%s] input_data is given, ignore input from "
+                        "parsed arguments[/red]",
+                        proc.name,
+                    )
+                else:
+                    from pandas import DataFrame
+                    from pandas.core.dtypes.api import is_scalar
 
-                indata = vars(proc_args["in"])
-                for key, val in indata.items():
-                    if is_scalar(val):
-                        indata[key] = [val]
+                    indata = vars(proc_args["in"])
+                    for key, val in indata.items():
+                        if is_scalar(val):
+                            indata[key] = [val]
 
-                maxlen = max(map(len, indata.values()))
-                input_data = DataFrame(
-                    {
-                        key: (
-                            val * maxlen
-                            if len(val) == 1 and maxlen > 1
-                            else val
-                        )
-                        for key, val in indata.items()
-                        if val is not None and len(val) > 0
-                    }
-                )
-                # only when input data is given
-                if input_data.shape[0] > 0:
-                    proc.input_data = input_data
+                    maxlen = max(map(len, indata.values()))
+                    input_data = DataFrame(
+                        {
+                            key: (
+                                val * maxlen
+                                if len(val) == 1 and maxlen > 1
+                                else val
+                            )
+                            for key, val in indata.items()
+                            if val is not None and len(val) > 0
+                        }
+                    )
+                    # only when input data is given and not all None
+                    if input_data.shape[0] > 0:
+                        proc.input_data = input_data
 
             if (
                 "envs" in proc_args

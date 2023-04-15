@@ -90,3 +90,26 @@ def test_single_extra_args():
     )
     assert "Process.envs.x = a" in out
     assert "Process.envs.y = b" in out
+
+
+@pytest.mark.forked
+def test_warns_when_data_is_set():
+    """Test single proc"""
+    out = run_pipeline(
+        "single",
+        gets=["Process.in"],
+        args=["--in", "a"],
+    )
+    assert "![Process] input_data is given, ignore input from " in out
+
+
+@pytest.mark.forked
+def test_scalar_input(tmp_path):
+    """Test single proc"""
+    configfile = tmp_path / "config.toml"
+    configfile.write_text("[in]\na = 'b'\n")
+    out = run_pipeline(
+        "single_files",
+        gets=["Process.in"],
+        args=[f"@{configfile}"],
+    )
