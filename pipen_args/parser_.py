@@ -256,15 +256,26 @@ class Parser(ArgumentParser, metaclass=ParserMeta):
                 "forks",
                 "order",
             ):
-                attrs = PIPEN_ARGS[key]
-                default = getattr(proc, key)
-                if default is not None:
-                    attrs["default"] = default
+                attrs = PIPEN_ARGS[key].copy()
+                proc_default = getattr(proc, key, None)
+                pipen_default = PIPEN_ARGS[key].get("default", None)
+                if proc_default is not None:
+                    attrs["default"] = proc_default
+                elif pipen_default is not None:
+                    attrs["default"] = pipen_default
 
                 self.add_argument(f"--{proc.name}.{key}", **attrs)
 
             for key in ("plugin_opts", "scheduler_opts"):
-                self.add_argument(f"--{proc.name}.{key}", **PIPEN_ARGS[key])
+                self.add_argument(
+                    f"--{proc.name}.{key}",
+                    **{
+                        k: v
+                        for k, v in PIPEN_ARGS[key].items()
+                        if k != "default"
+                    },
+                    default=getattr(proc, key),
+                )
 
     def _add_envs_arguments(
         self,
