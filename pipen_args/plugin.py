@@ -58,7 +58,8 @@ class ArgsPlugin:
             pipen.outdir = parsed.outdir.resolve()
         pipen_workdir = pipen.workdir
         if parsed.workdir is not None:
-            pipen.workdir = parsed.workdir.resolve()
+            pipen.workdir = parsed.workdir.joinpath(pipen.name).resolve()
+            pipen.workdir.mkdir(parents=True, exist_ok=True)
 
         for key in (
             "loglevel",
