@@ -56,6 +56,9 @@ class ArgsPlugin:
         pipen_outdir = pipen.outdir
         if parsed.outdir is not None:
             pipen.outdir = parsed.outdir.resolve()
+        pipen_workdir = pipen.workdir
+        if parsed.workdir is not None:
+            pipen.workdir = parsed.workdir.resolve()
 
         for key in (
             "loglevel",
@@ -74,12 +77,10 @@ class ArgsPlugin:
 
         if parsed.name not in (None, pipen.name):
             pipen.name = parsed.name
-            pipen.workdir = Path(config["workdir"]) / pipen.name
-            pipen.workdir.mkdir(parents=True, exist_ok=True)
-            if parsed.outdir in (None, pipen_outdir):
-                pipen.outdir = Path(
-                    f"./{pipen.name}_results"
-                ).resolve()
+        if parsed.outdir in (None, pipen_outdir):
+            pipen.outdir = Path(f"./{pipen.name}_results").resolve()
+        if parsed.workdir not in (None, pipen_workdir):
+            pipen.workdir = parsed.workdir.joinpath(pipen.name).resolve()
 
         for key in ("plugin_opts", "template_opts", "scheduler_opts"):
             old = copy_dict(config[key] or {}, 3)

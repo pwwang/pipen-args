@@ -108,8 +108,8 @@ def test_scalar_input(tmp_path):
     """Test single proc"""
     configfile = tmp_path / "config.toml"
     configfile.write_text("[in]\na = 'b'\n")
-    out = run_pipeline(
+    run_pipeline(
         "single_files",
         gets=["Process.in"],
-        args=[f"@{configfile}"],
+        args=[f"@{configfile}", "--workdir", str(tmp_path / "workdir")],
     )

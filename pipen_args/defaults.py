@@ -115,6 +115,7 @@ PIPEN_ARGS = Diot(
     workdir=Diot(
         help="The working directory of the pipeline",
         show=False,
+        type="path",
     ),
     order=Diot(
         help="The order of the process, larger number means later [default: 0]",
