@@ -198,7 +198,7 @@ class ArgsPlugin:
                 "forks",
                 "submission_batch",
             ):
-                if key in proc_args:
+                if proc_args.get(key) is not None:
                     setattr(proc, key, proc_args[key])
 
             for key in ("plugin_opts", "scheduler_opts"):
