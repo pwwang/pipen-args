@@ -1,6 +1,8 @@
 import pytest
 import re
-
+import sys
+from pathlib import Path
+from subprocess import run, PIPE, STDOUT
 from .conftest import run_pipeline
 
 
@@ -148,3 +150,12 @@ def test_outdir_workdir(tmp_path):
     )
     assert "outdir = /tmp/single_outdir_workdir_outdir" in out
     assert "workdir = /tmp/single_outdir_workdir_workdir/Pipen" in out
+
+
+@pytest.mark.forked
+def test_used_in_two_pipelines():
+    """Test single proc"""
+    plfile = Path(__file__).parent / "pipelines" / "two_pipelines.py"
+    p = run([sys.executable, plfile], stderr=STDOUT, stdout=PIPE)
+    assert p.returncode == 1
+    assert "can only be used in one pipeline at a time" in p.stdout.decode()

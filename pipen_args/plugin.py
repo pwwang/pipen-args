@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from argparse import ArgumentError
 from typing import TYPE_CHECKING
 from pathlib import Path
 
@@ -34,7 +35,13 @@ class ArgsPlugin:
 
         parser = Parser()
         # Init the parser
-        parser.init(pipen)
+        try:
+            parser.init(pipen)
+        except ArgumentError:
+            # The parser is initialized in another pipeline
+            raise ValueError(
+                "`pipen-args` can only be used in one pipeline at a time."
+            ) from None
 
         # Parse the args
         parsed = parser.parse_args()
