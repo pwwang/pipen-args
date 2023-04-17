@@ -16,6 +16,9 @@ if TYPE_CHECKING:  # pragma: no cover
     from pipen import Pipen
 
 logger = get_logger("args", "info")
+# Save the warnings to print them after the pipeline is initialized
+# So that they are printed after the logo and the pipeline info
+warns = []
 
 
 class ArgsPlugin:
@@ -52,15 +55,6 @@ class ArgsPlugin:
                 )
                 config.update(fileconfs)
 
-        # Save original outdir to see if it's changed
-        pipen_outdir = pipen.outdir
-        if parsed.outdir is not None:
-            pipen.outdir = parsed.outdir.resolve()
-        pipen_workdir = pipen.workdir
-        if parsed.workdir is not None:
-            pipen.workdir = parsed.workdir.joinpath(pipen.name).resolve()
-            pipen.workdir.mkdir(parents=True, exist_ok=True)
-
         for key in (
             "loglevel",
             "cache",
@@ -76,12 +70,61 @@ class ArgsPlugin:
             if getattr(parsed, key, None) is not None:
                 config[key] = getattr(parsed, key)
 
-        if parsed.name not in (None, pipen.name):
+        # The original name
+        pipen_name = pipen.name
+        # The default outdir
+        pipen_outdir = Path(f"./{pipen_name}_results").resolve()
+        # The default workdir
+        pipen_workdir = Path(f"./{config['workdir']}/{pipen_name}").resolve()
+
+        # Update the name
+        if parsed.name not in (None, pipen_name):
             pipen.name = parsed.name
-        if parsed.outdir in (None, pipen_outdir):
-            pipen.outdir = Path(f"./{pipen.name}_results").resolve()
-        if parsed.workdir not in (None, pipen_workdir):
-            pipen.workdir = parsed.workdir.joinpath(pipen.name).resolve()
+
+        # Update the outdir
+        if pipen.outdir in (None, pipen_outdir):
+            # The outdir is still some default values, that means it is not set
+            # by higher priority (Pipen.outdir, or Pipen(outdir=...))
+            # So we can use the value from arguments
+            if parsed.outdir == pipen.outdir:
+                # if outdir is not passed from cli,
+                # use the name to infer the outdir
+                pipen.outdir = Path(f"./{pipen.name}_results").resolve()
+            else:
+                # otherwise, use it
+                pipen.outdir = parsed.outdir.resolve()
+        elif parsed.outdir is not None:
+            # The outdir is set by higher priority, and a value is passed by
+            # arguments, so we need to warn the user that the value from
+            # arguments will be ignored
+            warns.append(
+                "[red](!)[/red] Pipeline `outdir` is given by a higher "
+                "priority (`Pipen.outdir`, or `Pipen(outdir=...)`), "
+                "ignore the value from cli arguments",
+            )
+
+        # Update the workdir
+        if pipen.workdir is None or pipen.workdir.resolve() == pipen_workdir:
+            # The workdir is still some default values, that means it is not set
+            # by higher priority (Pipen.workdir, or Pipen(workdir=...))
+            # So we can use the value from arguments
+            if parsed.workdir is not None:
+                # If it is passed by arguments, use it
+                workdir = parsed.workdir
+            else:
+                # Otherwise, use the name to infer the workdir
+                workdir = Path(config['workdir'])
+            pipen.workdir = workdir.joinpath(pipen.name).resolve()
+            pipen.workdir.mkdir(parents=True, exist_ok=True)
+        elif parsed.workdir is not None:
+            # The workdir is set by higher priority, and a value is passed by
+            # arguments, so we need to warn the user that the value from
+            # arguments will be ignored
+            warns.append(
+                "[red](!)[/red] Pipeline `workdir` is given by a higher "
+                "priority (Pipen.workdir, or Pipen(workdir=...)), "
+                "ignore the value from cli arguments",
+            )
 
         for key in ("plugin_opts", "template_opts", "scheduler_opts"):
             old = copy_dict(config[key] or {}, 3)
@@ -98,10 +141,9 @@ class ArgsPlugin:
                 and not all(v is None for v in vars(proc_args["in"]).values())
             ):
                 if proc.input_data is not None:
-                    logger.warning(
-                        "[red]![%s] input_data is given, ignore input from "
-                        "parsed arguments[/red]",
-                        proc.name,
+                    warns.append(
+                        f"[red](!)[/red] [{proc.name}] `input_data` is given, "
+                        "ignore input from cli arguments"
                     )
                 else:
                     from pandas import DataFrame
@@ -159,3 +201,9 @@ class ArgsPlugin:
                         if proc_opts is None:
                             setattr(proc, key, {})
                         getattr(proc, key).update(proc_args[key])
+
+    @plugin.impl
+    async def on_start(pipen: Pipen) -> None:
+        """Print warnings"""
+        for wn in warns:  # pragma: no cover
+            logger.warning(wn)

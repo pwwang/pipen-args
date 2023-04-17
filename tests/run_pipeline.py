@@ -66,7 +66,7 @@ async def _run(pipeline: Pipen, args: List[str], gets: List[str]) -> None:
             pipen_args.Parser().print_help()
         elif get == "help+":
             pipen_args.Parser().print_help(plus=True)
-        elif get in ("name", "outdir"):
+        elif get in ("name", "outdir", "workdir"):
             print(f"{get} = {getattr(pipeline, get)}")
         elif get in pipeline.config:
             print(f"{get} = {pipeline.config[get]}")

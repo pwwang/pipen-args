@@ -100,7 +100,7 @@ def test_warns_when_data_is_set():
         gets=["Process.in"],
         args=["--in", "a"],
     )
-    assert "![Process] input_data is given, ignore input from " in out
+    assert "Process.in = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]" in out
 
 
 @pytest.mark.forked
@@ -113,3 +113,38 @@ def test_scalar_input(tmp_path):
         gets=["Process.in"],
         args=[f"@{configfile}", "--workdir", str(tmp_path / "workdir")],
     )
+
+
+@pytest.mark.forked
+def test_outdir_workdir_using_name(tmp_path):
+    """Test single proc"""
+    out = run_pipeline(
+        "single",
+        gets=["workdir", "outdir"],
+        args=["--name", "xyz"],
+    )
+    assert ".pipen/xyz" in out
+    assert "xyz_results" in out
+
+
+@pytest.mark.forked
+def test_outdir(tmp_path):
+    """Test single proc"""
+    out = run_pipeline(
+        "single",
+        gets=["outdir"],
+        args=["--outdir", "xyz"],
+    )
+    assert "xyz" in out
+
+
+@pytest.mark.forked
+def test_outdir_workdir(tmp_path):
+    """Test single proc"""
+    out = run_pipeline(
+        "single_outdir_workdir",
+        gets=["outdir", "workdir"],
+        args=["--outdir", "abcd", "--workdir", "defg"],
+    )
+    assert "outdir = /tmp/single_outdir_workdir_outdir" in out
+    assert "workdir = /tmp/single_outdir_workdir_workdir/Pipen" in out
