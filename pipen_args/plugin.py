@@ -100,7 +100,7 @@ class ArgsPlugin:
             else:
                 # otherwise, use it
                 pipen.outdir = parsed.outdir.resolve()
-        elif parsed.outdir is not None:
+        elif parsed.outdir is not None and parsed.outdir != pipen.outdir:
             # The outdir is set by higher priority, and a value is passed by
             # arguments, so we need to warn the user that the value from
             # arguments will be ignored
@@ -123,7 +123,7 @@ class ArgsPlugin:
                 workdir = Path(config['workdir'])
             pipen.workdir = workdir.joinpath(pipen.name).resolve()
             pipen.workdir.mkdir(parents=True, exist_ok=True)
-        elif parsed.workdir is not None:
+        elif parsed.workdir is not None and parsed.workdir != pipen.workdir:
             # The workdir is set by higher priority, and a value is passed by
             # arguments, so we need to warn the user that the value from
             # arguments will be ignored
