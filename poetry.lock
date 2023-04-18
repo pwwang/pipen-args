@@ -605,14 +605,14 @@ executing = ">1.1.0,<2.0"
 
 [[package]]
 name = "pipen"
-version = "0.9.5"
+version = "0.9.6"
 description = "A pipeline framework for python"
 category = "main"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "pipen-0.9.5-py3-none-any.whl", hash = "sha256:4e260d2ea48504c513ffa0ec5a934fe8c02e1a7890d04f37f045daacf351cb26"},
-    {file = "pipen-0.9.5.tar.gz", hash = "sha256:6a361703e572e045608475b8a21693c39586df563c5edec5899535fca2592c6d"},
+    {file = "pipen-0.9.6-py3-none-any.whl", hash = "sha256:1298ca681dfe29092e5f1207d5a05eac53dc1080a2e553ff582948a1127cae58"},
+    {file = "pipen-0.9.6.tar.gz", hash = "sha256:8318608f201c1e15ac6ea8e66f72003cb7ca5b3107974c3d6ff84ef19e45632e"},
 ]
 
 [package.dependencies]
@@ -1068,4 +1068,4 @@ uvloop = ">=0,<1"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "f2761ac4fab9ce35802e6b66ecd478156f222fe01759c5c95ddf0a82c2184837"
+content-hash = "8f0c3112bf716af882d96793cdf92d726950748c05cd116678af0ac1bb0276ad"

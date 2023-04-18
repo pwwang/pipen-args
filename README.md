@@ -35,7 +35,7 @@ Pipeline Options:
                         This profile will be used unless a profile is specified in the
                         process or in the .run method of pipen. You can check the
                         available profiles by running `pipen profile`
-  --outdir OUTDIR       The output directory of the pipeline [default: ./<name>_results]
+  --outdir OUTDIR       The output directory of the pipeline [default: ./<name>-output]
   --forks FORKS         How many jobs to run simultaneously by the scheduler
   --scheduler SCHEDULER
                         The scheduler to run the jobs

@@ -80,7 +80,7 @@ class ArgsPlugin:
         # The original name
         pipen_name = pipen.name
         # The default outdir
-        pipen_outdir = Path(f"./{pipen_name}_results").resolve()
+        pipen_outdir = Path(f"./{pipen_name}-output").resolve()
         # The default workdir
         pipen_workdir = Path(f"./{config['workdir']}/{pipen_name}").resolve()
 
@@ -96,7 +96,7 @@ class ArgsPlugin:
             if parsed.outdir == pipen.outdir:
                 # if outdir is not passed from cli,
                 # use the name to infer the outdir
-                pipen.outdir = Path(f"./{pipen.name}_results").resolve()
+                pipen.outdir = Path(f"./{pipen.name}-output").resolve()
             else:
                 # otherwise, use it
                 pipen.outdir = parsed.outdir.resolve()

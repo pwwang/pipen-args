@@ -21,7 +21,7 @@ def test_name_changes_outdir():
     )
     assert "name = single" in out
     assert "forks = 2" in out
-    assert re.search(r"outdir = .+/single_results", out)
+    assert re.search(r"outdir = .+/single-output", out)
 
 
 @pytest.mark.forked
@@ -126,7 +126,7 @@ def test_outdir_workdir_using_name(tmp_path):
         args=["--name", "xyz"],
     )
     assert ".pipen/xyz" in out
-    assert "xyz_results" in out
+    assert "xyz-output" in out
 
 
 @pytest.mark.forked

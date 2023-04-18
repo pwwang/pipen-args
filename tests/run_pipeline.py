@@ -59,8 +59,8 @@ async def _run(pipeline: Pipen, args: List[str], gets: List[str]) -> None:
     # Initialize the pipeline so that the arguments definied by
     # other plugins (i.e. pipen-args) to take in place.
     pipeline.workdir = Path(pipeline.config.workdir) / pipeline.name
-    pipeline.workdir.mkdir(parents=True, exist_ok=True)
     await pipeline._init()
+    pipeline.workdir.mkdir(parents=True, exist_ok=True)
     for get in gets:
         if get == "help":
             pipen_args.Parser().print_help()

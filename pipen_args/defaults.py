@@ -24,7 +24,7 @@ PIPEN_ARGS = Diot(
         show=False,
     ),
     outdir=Diot(
-        help="The output directory of the pipeline [default: ./<name>_results]",
+        help="The output directory of the pipeline [default: ./<name>-output]",
         type="path",
     ),
     loglevel=Diot(
