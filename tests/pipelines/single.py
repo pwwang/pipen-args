@@ -28,7 +28,9 @@ class Process(Proc):
     envs = {'x': 'a', 'y': None, "z": 1, "w": {"a": 'x', "b": 2}}
 
 
-pipeline = Pipen(desc='Pipeline description.').set_start(Process)
+pipeline = Pipen(
+    desc='Pipeline description.',
+).set_start(Process)
 
 if __name__ == '__main__':
     pipeline.run()

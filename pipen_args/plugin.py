@@ -11,6 +11,7 @@ from pipen.defaults import CONFIG_FILES
 from pipen.utils import copy_dict, get_logger
 
 from .version import __version__
+from .defaults import FLATTEN_PROC_ARGS
 from .parser_ import Parser
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -31,8 +32,7 @@ class ArgsPlugin:
     async def on_init(pipen: Pipen) -> None:
         """Parse and update the config"""
         config = pipen.config
-        config.plugin_opts.args_hide = False
-
+        config["plugin_opts"]["args_hide"] = False
         parser = Parser()
         # Init the parser
         try:

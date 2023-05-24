@@ -7,7 +7,12 @@ TEST_DIR = Path(__file__).parent.resolve()
 CONFIGS_DIR = TEST_DIR / "configs"
 
 
-def run_pipeline(pipeline: str, gets: List[str], args: List[str] = []) -> str:
+def run_pipeline(
+    pipeline: str,
+    gets: List[str],
+    args: List[str] = [],
+    flatten: str | bool = "auto",
+) -> str:
     """Run a pipeline with `args`"""
     try:
         return check_output(
@@ -15,6 +20,8 @@ def run_pipeline(pipeline: str, gets: List[str], args: List[str] = []) -> str:
                 sys.executable,
                 str(TEST_DIR / "run_pipeline.py"),
                 f"{pipeline}:pipeline",
+                "++flatten",
+                str(flatten).lower(),
                 "++args",
                 *args,
                 "++gets",

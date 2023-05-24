@@ -80,6 +80,20 @@ def test_single_proc_list_option():
 
 
 @pytest.mark.forked
+def test_single_proc_with_namespace():
+    """Test single proc"""
+    out = run_pipeline(
+        "single_list_option",
+        flatten=False,
+        gets=["Process.envs.x"],
+        args=[
+            "--Process.envs.x", "b", "c"
+        ],
+    )
+    assert "Process.envs.x = ['b', 'c']" in out
+
+
+@pytest.mark.forked
 def test_single_extra_args():
     """Test single proc"""
     out = run_pipeline(

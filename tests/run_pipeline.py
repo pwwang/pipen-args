@@ -51,7 +51,12 @@ def _parse_pipeline(pipeline: str) -> Pipen:
     return pipeline
 
 
-async def _run(pipeline: Pipen, args: List[str], gets: List[str]) -> None:
+async def _run(
+    pipeline: Pipen,
+    args: List[str],
+    gets: List[str],
+    flatten: str | bool,
+) -> None:
     """Run the pipeline"""
     import pipen_args
     # Inject the cli arguments to the pipeline
@@ -59,6 +64,7 @@ async def _run(pipeline: Pipen, args: List[str], gets: List[str]) -> None:
     # Initialize the pipeline so that the arguments definied by
     # other plugins (i.e. pipen-args) to take in place.
     pipeline.workdir = Path(pipeline.config.workdir) / pipeline.name
+    pipeline.config.plugin_opts.args_flatten = flatten
     await pipeline._init()
     pipeline.workdir.mkdir(parents=True, exist_ok=True)
     for get in gets:
@@ -106,6 +112,14 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    "++flatten",
+    help="Whether to flatten the arguments, only works for single-process pipeline",
+    choices=["auto", True, False],
+    type=lambda x: True if x == "true" else False if x == "false" else x,
+    default="auto",
+)
+
+parser.add_argument(
     "++args",
     help="The arguments to run the pipeline",
     nargs="*",
@@ -125,4 +139,4 @@ parser.add_argument(
 
 if __name__ == "__main__":
     args = parser.parse_args()
-    asyncio.run(_run(args.pipeline, args.args, args.get))
+    asyncio.run(_run(args.pipeline, args.args, args.get, args.flatten))

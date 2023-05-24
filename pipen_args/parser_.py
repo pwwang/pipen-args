@@ -36,32 +36,18 @@ class ParserMeta(type):
 
 
 class Parser(ArgumentParser, metaclass=ParserMeta):
-    """Subclass of Params to fit for pipen
+    """Subclass of Params to fit for pipen"""
 
-    Args:
-        pipeline_args_group: The group name to gather all the parameters on
-            help page
-        flatten_proc_args: Flatten process arguments to the top level
-    """
-    def __init__(
-        self,
-        *args,
-        pipeline_args_group: str = PIPELINE_ARGS_GROUP,
-        flatten_proc_args: bool | str = FLATTEN_PROC_ARGS,
-        **kwargs,
-    ) -> None:
+    def __init__(self, *args, **kwargs) -> None:
         """Constructor"""
         kwargs["add_help"] = "+"
         kwargs["fromfile_prefix_chars"] = "@"
         kwargs["usage"] = "%(prog)s [-h | -h+] [options]"
         super().__init__(*args, **kwargs)
 
-        self.flatten_proc_args = flatten_proc_args
+        self.flatten_proc_args = None
         self._cli_args = None
-        self._pipeline_args_group = self.add_argument_group(
-            pipeline_args_group,
-            order=-99,
-        )
+        self._pipeline_args_group = None
         self._parsed = None
 
     def set_cli_args(self, args: Any) -> None:
@@ -82,6 +68,16 @@ class Parser(ArgumentParser, metaclass=ParserMeta):
 
     def init(self, pipen: Pipen) -> None:
         """Define arguments"""
+
+        self._pipeline_args_group = self.add_argument_group(
+            pipen.config["plugin_opts"].get("args_group", PIPELINE_ARGS_GROUP),
+            order=-99,
+        )
+        self.flatten_proc_args = pipen.config["plugin_opts"].get(
+            "args_flatten",
+            FLATTEN_PROC_ARGS,
+        )
+
         pipen.build_proc_relationships()
         if len(pipen.procs) > 1 and self.flatten_proc_args is True:
             raise ValueError(  # pragma: no cover
