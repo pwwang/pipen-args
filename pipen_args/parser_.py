@@ -70,10 +70,10 @@ class Parser(ArgumentParser, metaclass=ParserMeta):
         """Define arguments"""
 
         self._pipeline_args_group = self.add_argument_group(
-            pipen.config["plugin_opts"].get("args_group", PIPELINE_ARGS_GROUP),
+            pipen._kwargs["plugin_opts"].get("args_group", PIPELINE_ARGS_GROUP),
             order=-99,
         )
-        self.flatten_proc_args = pipen.config["plugin_opts"].get(
+        self.flatten_proc_args = pipen._kwargs["plugin_opts"].get(
             "args_flatten",
             FLATTEN_PROC_ARGS,
         )
@@ -102,11 +102,11 @@ class Parser(ArgumentParser, metaclass=ParserMeta):
             if arg in ("scheduler_opts", "plugin_opts"):
                 if self.flatten_proc_args:
                     argopt["default"] = (
-                        Diot(pipen.config.get(arg, None) or {})
+                        Diot(pipen._kwargs.get(arg, None) or {})
                         | (getattr(pipen.procs[0], arg, None) or {})
                     )
                 else:
-                    argopt["default"] = pipen.config.get(arg, None) or {}
+                    argopt["default"] = pipen._kwargs.get(arg, None) or {}
 
             self._pipeline_args_group.add_argument(f"--{arg}", **argopt)
 

@@ -31,7 +31,7 @@ class ArgsPlugin:
     @plugin.impl
     async def on_init(pipen: Pipen) -> None:
         """Parse and update the config"""
-        config = pipen.config
+        config = pipen._kwargs
         config["plugin_opts"]["args_hide"] = False
         parser = Parser()
         # Init the parser
@@ -82,7 +82,9 @@ class ArgsPlugin:
         # The default outdir
         pipen_outdir = Path(f"./{pipen_name}-output").resolve()
         # The default workdir
-        pipen_workdir = Path(f"./{config['workdir']}/{pipen_name}").resolve()
+        pipen_workdir = Path(
+            f"./{pipen.config['workdir']}/{pipen_name}"
+        ).resolve()
 
         # Update the name
         if parsed.name not in (None, pipen_name):
@@ -120,7 +122,7 @@ class ArgsPlugin:
                 workdir = parsed.workdir
             else:
                 # Otherwise, use the name to infer the workdir
-                workdir = Path(config['workdir'])
+                workdir = Path(pipen.config['workdir'])
             pipen.workdir = workdir.joinpath(pipen.name).resolve()
             pipen.workdir.mkdir(parents=True, exist_ok=True)
         elif parsed.workdir is not None and parsed.workdir != pipen.workdir:

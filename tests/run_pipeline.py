@@ -64,7 +64,7 @@ async def _run(
     # Initialize the pipeline so that the arguments definied by
     # other plugins (i.e. pipen-args) to take in place.
     pipeline.workdir = Path(pipeline.config.workdir) / pipeline.name
-    pipeline.config.plugin_opts.args_flatten = flatten
+    pipeline._kwargs["plugin_opts"]["args_flatten"] = flatten
     await pipeline._init()
     pipeline.workdir.mkdir(parents=True, exist_ok=True)
     for get in gets:
