@@ -1,7 +1,7 @@
 import sys
 from subprocess import check_output
 from pathlib import Path
-from typing import List
+from typing import List, Union
 
 TEST_DIR = Path(__file__).parent.resolve()
 CONFIGS_DIR = TEST_DIR / "configs"
@@ -11,7 +11,7 @@ def run_pipeline(
     pipeline: str,
     gets: List[str],
     args: List[str] = [],
-    flatten: str | bool = "auto",
+    flatten: Union[str, bool] = "auto",
 ) -> str:
     """Run a pipeline with `args`"""
     try:
