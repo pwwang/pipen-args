@@ -32,7 +32,7 @@ class ArgsPlugin:
     @plugin.impl
     async def on_init(pipen: Pipen) -> None:
         """Parse and update the config"""
-        if sys.argv[0].startswith("@pipen-"):
+        if sys.argv[0].startswith("@pipen-"):  # pragma: no cover
             # Allow not to parse args when we just want to load the pipeline
             # by other plugins
             return
