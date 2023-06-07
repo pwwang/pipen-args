@@ -80,8 +80,6 @@ class ProcGroup(PipenProcGroup, ABC):
         """Add process group arguments"""
 
         anno = annotate(self.__class__)
-        if not anno.get("Args"):
-            return
 
         parser.add_namespace(
             self.name,
