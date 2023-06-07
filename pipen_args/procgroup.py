@@ -44,7 +44,7 @@ class ProcGroup(PipenProcGroup, ABC):
             parsed = Namespace()
 
         self.opts = Diot(self.__class__.DEFAULTS or {})
-        parsed_opts = getattr(parsed, self.name, {})
+        parsed_opts = getattr(parsed, self.name, None) or {}
         if parsed_opts and isinstance(parsed_opts, Namespace):
             parsed_opts = vars(parsed_opts)
         parsed_opts.update(opts)

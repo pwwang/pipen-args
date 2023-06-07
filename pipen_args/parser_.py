@@ -45,7 +45,7 @@ class Parser(ArgumentParser, metaclass=ParserMeta):
         kwargs["usage"] = "%(prog)s [-h | -h+] [options]"
         super().__init__(*args, **kwargs)
 
-        self.flatten_proc_args = None
+        self.flatten_proc_args: bool | str | None = None
         self._cli_args = None
         self._pipeline_args_group = None
         self._parsed = None
