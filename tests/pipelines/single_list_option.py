@@ -11,7 +11,7 @@ class Process(Proc):
         b: output b
 
     Envs:
-        x (action=clear_extend;nargs=+;choices): line1
+        x (list;choices): line1
             - a: item a
             - b: item b
             - c: item c

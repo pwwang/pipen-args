@@ -160,6 +160,15 @@ class Parser(ArgumentParser, metaclass=ParserMeta):
         if "hidden" in anno_attrs:
             out["show"] = False
 
+        # Add some shotcuts
+        if anno_attrs.get("ns") or anno_attrs.get("namespace"):
+            out.setdefault("action", "ns")
+        if anno_attrs.get("flag"):
+            out.setdefault("action", "store_true")
+        if anno_attrs.get("array") or anno_attrs.get("list"):
+            out.setdefault("action", "clear_extend")
+            out.setdefault("nargs", "+")
+
         typefun = None
         if out.get("type"):
             typefun = self._registry_get("type", out["type"], out["type"])
@@ -291,14 +300,15 @@ class Parser(ArgumentParser, metaclass=ParserMeta):
             if default is not None:
                 vv.attrs["default"] = default
 
+            attrs = self._get_arg_attrs_from_anno(vv.attrs, vv.terms)
             ns.add_argument(
                 f"--{key}.{kk}" if flatten else f"--{proc_name}.{key}.{kk}",
                 help=vv.help or "",
-                **self._get_arg_attrs_from_anno(vv.attrs, vv.terms),
+                **attrs,
             )
 
             # add sub-namespace
-            if vv.attrs.get("action", None) in ("namespace", "ns"):
+            if attrs.get("action", None) in ("namespace", "ns"):
                 self._add_envs_arguments(
                     ns=ns,
                     anno=vv.terms,
