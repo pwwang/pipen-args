@@ -615,14 +615,14 @@ executing = ">1.1.0,<2.0"
 
 [[package]]
 name = "pipen"
-version = "0.9.11"
+version = "0.10.0"
 description = "A pipeline framework for python"
 category = "main"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "pipen-0.9.11-py3-none-any.whl", hash = "sha256:f6090f4eb152f28ff97cfdc24030276ee13ddc7a8c4c6bfd1590bdbc5d2c4dfc"},
-    {file = "pipen-0.9.11.tar.gz", hash = "sha256:f0617831aad710a23fec17038bbfdfaa00ea6e3f31965e31eac236e0eab8a9ea"},
+    {file = "pipen-0.10.0-py3-none-any.whl", hash = "sha256:7e0a8340976b2ad38e8dab3037a549e44046fb29170d61f616cf71ce185df8c9"},
+    {file = "pipen-0.10.0.tar.gz", hash = "sha256:0ee9b8f6709d847537e426061be7b295fbcd222243910fc78f11b86e8d09fe99"},
 ]
 
 [package.dependencies]
@@ -637,33 +637,33 @@ xqute = ">=0.2.1,<0.3.0"
 
 [[package]]
 name = "pipen-annotate"
-version = "0.8.0"
+version = "0.9.0"
 description = "Use docstring to annotate pipen processes"
 category = "main"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "pipen_annotate-0.8.0-py3-none-any.whl", hash = "sha256:e93c482e101378fdd42a1d3ce249144acd4122385df9a8f8b9648a049ddb5a3a"},
-    {file = "pipen_annotate-0.8.0.tar.gz", hash = "sha256:cdd5ded871f86a39172763d77657790d60c76c9f17003ae14d739f5f0da10a01"},
+    {file = "pipen_annotate-0.9.0-py3-none-any.whl", hash = "sha256:c2c0128ea8b07f291562b4757dc0a5493b93e71898ad590d6a366a3e8b66ab11"},
+    {file = "pipen_annotate-0.9.0.tar.gz", hash = "sha256:f49bc017c6238a98366775df6b50dc6acbe1f16f9dd0a320a4b5748e542e8b37"},
 ]
 
 [package.dependencies]
-pipen = ">=0.9,<0.10"
+pipen = ">=0.10,<0.11"
 
 [[package]]
 name = "pipen-verbose"
-version = "0.6.0"
+version = "0.7.0"
 description = "Add verbosal information in logs for pipen."
 category = "dev"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "pipen_verbose-0.6.0-py3-none-any.whl", hash = "sha256:9b6c7a6d4a671b6a59f0d56759abbb829d21ce8ef44667849a772607053cc277"},
-    {file = "pipen_verbose-0.6.0.tar.gz", hash = "sha256:f1547d6daebc399a8668481251c2a8d675ffced4e82004bd815767c29ffc670c"},
+    {file = "pipen_verbose-0.7.0-py3-none-any.whl", hash = "sha256:ab95514a15dbd5139d13af5eee9046d77070b4d38f18c18b8907fb4f0405c462"},
+    {file = "pipen_verbose-0.7.0.tar.gz", hash = "sha256:15a4d3c802c8a16f037849fda6f50719c3567fcfcf056b23fa0fb536ac70273c"},
 ]
 
 [package.dependencies]
-pipen = ">=0.9,<0.10"
+pipen = ">=0.10,<0.11"
 
 [[package]]
 name = "pluggy"
@@ -1078,4 +1078,4 @@ uvloop = ">=0,<1"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "f45d08621ca3e38fa44e35cf0f48d82b1b8b2247702de35cef373a0e67a91d50"
+content-hash = "67ca3f3633364eca6f07cb2bb317805f29688ed922310b890ab91b4065eea08d"
