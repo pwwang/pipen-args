@@ -170,6 +170,17 @@ def test_outdir_workdir(tmp_path):
 def test_used_in_two_pipelines():
     """Test single proc"""
     plfile = Path(__file__).parent / "pipelines" / "two_pipelines.py"
-    p = run([sys.executable, plfile], stderr=STDOUT, stdout=PIPE)
+    p = run([sys.executable, str(plfile)], stderr=STDOUT, stdout=PIPE)
     assert p.returncode == 1
     assert "can only be used in one pipeline at a time" in p.stdout.decode()
+
+
+@pytest.mark.forked
+def test_required_with_default():
+    """Test single proc"""
+    plfile = (
+        Path(__file__).parent / "pipelines" / "single_required_with_default.py"
+    )
+    p = run([sys.executable, str(plfile)], stderr=STDOUT, stdout=PIPE)
+    # Should succeed
+    assert p.returncode == 0

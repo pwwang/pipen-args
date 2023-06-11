@@ -299,6 +299,9 @@ class Parser(ArgumentParser, metaclass=ParserMeta):
             default = values[kk]
             if default is not None:
                 vv.attrs["default"] = default
+                # If we have a default value, we don't need to require it
+                if vv.attrs.get("required"):
+                    vv.attrs["required"] = False
 
             attrs = self._get_arg_attrs_from_anno(vv.attrs, vv.terms)
             ns.add_argument(
