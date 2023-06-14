@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import sys
 from argparse import ArgumentError
 from typing import TYPE_CHECKING
 from pathlib import Path
@@ -12,6 +11,7 @@ from pipen.defaults import CONFIG_FILES
 from pipen.utils import copy_dict, get_logger
 
 from .version import __version__
+from .defaults import pipen_load_only
 from .parser_ import Parser
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -31,9 +31,7 @@ class ArgsPlugin:
     @plugin.impl
     async def on_init(pipen: Pipen) -> None:
         """Parse and update the config"""
-        if sys.argv[0].startswith("@pipen-"):  # pragma: no cover
-            # Allow not to parse args when we just want to load the pipeline
-            # by other plugins
+        if pipen_load_only():  # pragma: no cover
             return
 
         config = pipen._kwargs

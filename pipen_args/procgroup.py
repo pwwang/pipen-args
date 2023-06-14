@@ -9,6 +9,8 @@ from argx import Namespace
 from pipen.procgroup import ProcGroup as PipenProcGroup
 from pipen_annotate import annotate
 
+from .defaults import pipen_load_only
+
 if TYPE_CHECKING:  # pragma: no cover
     from argx import ArgumentParser
     from pipen import Proc
@@ -34,6 +36,7 @@ class ProcGroup(PipenProcGroup, ABC):
             and "--help" not in sys.argv
             and "-h+" not in sys.argv
             and "--help+" not in sys.argv
+            and not pipen_load_only()
         ):
             # Leave the parser to add the arguments at `on_init` hook
             # So that we get a full help page with arguments from
