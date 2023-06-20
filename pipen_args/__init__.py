@@ -22,7 +22,7 @@ def __getattr__(name: str) -> Any:
         # Allow
         # from pipen_args import config
         # to load the config from the file and use it separately
-        for arg in sys.argv:
+        for arg in sys.argv[1:]:
             if arg.startswith("@"):
                 return Config.load(arg[1:])
         return Diot()
