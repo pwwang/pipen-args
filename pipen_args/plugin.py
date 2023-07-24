@@ -26,6 +26,7 @@ warns = []
 class ArgsPlugin:
     """Automatically parse arguments and load configs for pipen pipelines"""
     name = "args"
+    priority = -9
     version = __version__
 
     @plugin.impl
