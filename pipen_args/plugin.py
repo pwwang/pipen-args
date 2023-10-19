@@ -8,10 +8,9 @@ from argx import Namespace
 from simpleconf import ProfileConfig
 from pipen import plugin
 from pipen.defaults import CONFIG_FILES
-from pipen.utils import copy_dict, get_logger
+from pipen.utils import copy_dict, get_logger, is_loading_pipeline
 
 from .version import __version__
-from .defaults import pipen_load_only
 from .parser_ import Parser
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -32,7 +31,7 @@ class ArgsPlugin:
     @plugin.impl
     async def on_init(pipen: Pipen) -> None:
         """Parse and update the config"""
-        if pipen_load_only():  # pragma: no cover
+        if is_loading_pipeline():  # pragma: no cover
             return
 
         config = pipen._kwargs

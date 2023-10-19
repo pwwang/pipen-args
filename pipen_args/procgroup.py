@@ -6,10 +6,9 @@ from abc import ABC
 
 from diot import Diot
 from argx import Namespace
+from pipen.utils import is_loading_pipeline
 from pipen.procgroup import ProcGroup as PipenProcGroup
 from pipen_annotate import annotate
-
-from .defaults import pipen_load_only
 
 if TYPE_CHECKING:  # pragma: no cover
     from argx import ArgumentParser
@@ -36,7 +35,7 @@ class ProcGroup(PipenProcGroup, ABC):
             and "--help" not in sys.argv
             and "-h+" not in sys.argv
             and "--help+" not in sys.argv
-            and not pipen_load_only()
+            and not is_loading_pipeline()
         ):
             # Leave the parser to add the arguments at `on_init` hook
             # So that we get a full help page with arguments from

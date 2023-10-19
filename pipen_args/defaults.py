@@ -126,16 +126,3 @@ PIPEN_ARGS = Diot(
 
 PIPELINE_ARGS_GROUP = "pipeline options"
 FLATTEN_PROC_ARGS = "auto"
-
-
-def pipen_load_only() -> bool:  # pragma: no cover
-    """Check if we are just loading the pipeline, instead of also running it
-
-    If you want to do so, set sys.argv[0] to "@pipen-<name>" before calling
-
-    Returns:
-        bool: True if we are just loading the pipeline
-    """
-    # Import here to get the correct sys.argv
-    import sys
-    return sys.argv[0].startswith("@pipen-")
