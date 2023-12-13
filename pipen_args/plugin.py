@@ -34,7 +34,7 @@ class ArgsPlugin:
         if is_loading_pipeline():  # pragma: no cover
             return
 
-        config = pipen._kwargs
+        config = {"plugin_opts": {}, "template_opts": {}, "scheduler_opts": {}}
         config["plugin_opts"]["args_hide"] = False
         parser = Parser()
         # Init the parser
@@ -51,19 +51,17 @@ class ArgsPlugin:
         # Load configs by profile
         if parsed.profile is not None:  # pragma: no cover
             pipen.profile = parsed.profile
-            try:
-                fileconfs = ProfileConfig.load(
-                    *CONFIG_FILES,
-                    ignore_nonexist=True,
-                )
-            except KeyError:  # no default profile
-                pass
-            else:
-                ProfileConfig.use_profile(
-                    fileconfs,
-                    pipen.profile,
-                )
-                config.update(fileconfs)
+            init_config = ProfileConfig.load(
+                {"default": pipen.config},
+                *CONFIG_FILES,
+                ignore_nonexist=True,
+            )
+            init_config = ProfileConfig.use_profile(
+                init_config,
+                parsed.profile,
+                copy=True,
+            )
+            config.update(init_config)
 
         for key in (
             "loglevel",
@@ -142,6 +140,8 @@ class ArgsPlugin:
             old = copy_dict(config[key] or {}, 3)
             old.update(getattr(parsed, key, None) or {})
             config[key] = old
+
+        pipen.config.update(config)
 
         if parser.flatten_proc_args is True:
             parsed = Namespace(**{pipen.procs[0].name: parsed})
