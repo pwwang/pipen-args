@@ -12,15 +12,15 @@ repository = "https://github.com/pwwang/pipen-args"
 generate-setup-file = true
 
 [tool.poetry.dependencies]
-python = "^3.8"
-pipen-annotate = "^0.12"
+python = "^3.9"
+pipen-annotate = "^0.13"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7"
 pytest-cov = "^4"
 pytest-xdist = "^3"
 pytest-forked = "^1"
-pipen-verbose = "^0.10"
+pipen-verbose = "^0.11"
 
 [tool.poetry.plugins.pipen]
 args = "pipen_args.plugin:ArgsPlugin"
