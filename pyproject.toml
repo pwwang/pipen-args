@@ -26,8 +26,8 @@ pipen-verbose = "^0.11"
 args = "pipen_args.plugin:ArgsPlugin"
 
 [build-system]
-requires = ["poetry>=1.0"]
-build-backend = "poetry.masonry.api"
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
 
 [tool.pytest.ini_options]
 addopts = "-v -n auto --cov pipen_args --cov-report xml:.coverage.xml --cov-report term-missing"
@@ -39,7 +39,7 @@ filterwarnings = [
 
 [tool.black]
 line-length = 88
-target-version = ['py38', 'py39', 'py310', 'py311']
+target-version = ['py39', 'py310', 'py311']
 include = '\.pyi?$'
 
 [tool.mypy]

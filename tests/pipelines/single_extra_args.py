@@ -2,7 +2,7 @@ from pipen import Proc, Pipen
 from pipen_args import parser
 
 parser.add_argument('-x', choices=['a', 'b'], default='a')
-parsed, _ = parser.parse_known_args()
+parsed = parser.parse_extra_args()
 
 
 class Process(Proc):

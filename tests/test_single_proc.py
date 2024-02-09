@@ -2,7 +2,7 @@ import pytest
 import re
 import sys
 from pathlib import Path
-from subprocess import run, PIPE, STDOUT
+from subprocess import check_output, run, PIPE, STDOUT
 from .conftest import run_pipeline
 
 
@@ -106,6 +106,17 @@ def test_single_extra_args():
     )
     assert "Process.envs.x = a" in out
     assert "Process.envs.y = b" in out
+
+
+@pytest.mark.forked
+def test_single_extra_args_help():
+    """Test single proc with --help"""
+    pipeline_file = Path(__file__).parent / "pipelines" / "single_extra_args.py"
+    out = check_output([sys.executable, str(pipeline_file), "--help+"])
+    out = run_pipeline("single_extra_args", gets=["help"])
+    assert "-x" in out
+    assert "--envs.x" in out
+    assert "--out.b" in out
 
 
 @pytest.mark.forked

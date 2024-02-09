@@ -1,17 +1,28 @@
 """Command line argument parser for pipen"""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Type, Mapping
+from typing import TYPE_CHECKING, Any, Sequence, Type, Mapping
 
-from argx import ArgumentParser
+from argx import ArgumentParser, Namespace
 from diot import Diot
+from pipen.utils import is_loading_pipeline
 from pipen_annotate import annotate
 
 from .defaults import PIPELINE_ARGS_GROUP, FLATTEN_PROC_ARGS, PIPEN_ARGS
 
 if TYPE_CHECKING:  # pragma: no cover
     from pipen import Pipen, Proc
-    from argx import Namespace
+
+
+class FallbackNamespace(Namespace):
+    """When an argument is not found, return None"""
+
+    def __getattr__(self, name: str) -> Any:
+        """Get attribute"""
+        try:
+            return super().__getattr__(name)
+        except AttributeError:
+            return None
 
 
 class ParserMeta(type):
@@ -65,6 +76,37 @@ class Parser(ArgumentParser, metaclass=ParserMeta):
 
             self._parsed = super().parse_args(args, namespace)
         return self._parsed
+
+    def parse_extra_args(
+        self,
+        args: Sequence[str] | None = None,
+        **kwargs: Any,
+    ) -> Namespace:
+        """Parse extra arguments.
+
+        When `-h`, `-h+`, `--help` or `--help+` is in the sys.argv,
+        do not parse the arguments, and leave them to the `on_init` hook.
+        If `args` is passed, they are anyway parsed.
+
+        Args:
+            args: The arguments to parse
+            **kwargs: The default values for the arguments when `-h`, `--help`, etc
+                is in `sys.argv`. If not passed, `None` is used.
+                Because when `-h`, `--help`, etc is in `sys.argv`, we will skip parsing
+                the arguments here. When those values are used in constructing the
+                pipeline, errors will be raised. This is to avoid that.
+        """
+        import sys
+        if not args and (
+            "-h" in sys.argv
+            or "--help" in sys.argv
+            or "-h+" in sys.argv
+            or "--help+" in sys.argv
+            or is_loading_pipeline()
+        ):
+            return FallbackNamespace(**kwargs)
+
+        return self.parse_known_args(args, fromfile_parse=False)[0]
 
     def init(self, pipen: Pipen) -> None:
         """Define arguments"""
