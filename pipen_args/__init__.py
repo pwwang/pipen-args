@@ -8,7 +8,7 @@ from diot import Diot
 from simpleconf import Config
 
 from .version import __version__
-from .parser_ import Parser  # noqa: F401
+from .parser_ import Parser, FallbackNamespace  # noqa: F401
 from .procgroup import ProcGroup  # noqa: F401
 
 
