@@ -13,6 +13,7 @@ generate-setup-file = true
 
 [tool.poetry.dependencies]
 python = "^3.9"
+# pipen = "^0.14.3"
 pipen-annotate = "^0.13"
 
 [tool.poetry.dev-dependencies]
