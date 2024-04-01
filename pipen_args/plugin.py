@@ -201,6 +201,7 @@ class ArgsPlugin:
                 "error_strategy",
                 "num_retries",
                 "forks",
+                "scheduler",
                 "submission_batch",
             ):
                 if proc_args.get(key) is not None:

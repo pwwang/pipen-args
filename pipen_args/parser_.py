@@ -313,6 +313,7 @@ class Parser(ArgumentParser, metaclass=ParserMeta):
                 "lang",
                 "error_strategy",
                 "num_retries",
+                "scheduler",
                 "forks",
                 "order",
             ):

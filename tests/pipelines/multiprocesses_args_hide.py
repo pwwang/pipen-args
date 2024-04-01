@@ -37,7 +37,7 @@ class Process2(Proc):
 
 pipeline = Pipen(
     desc="Pipeline description.",
-    plugins=["no:report"],
+    plugins=["-report"],
 ).set_start(Process1)
 
 if __name__ == "__main__":
