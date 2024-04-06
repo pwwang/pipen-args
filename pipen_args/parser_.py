@@ -55,6 +55,7 @@ class Parser(ArgumentParser, metaclass=ParserMeta):
         kwargs["add_help"] = "+"
         kwargs["fromfile_prefix_chars"] = "@"
         kwargs["usage"] = "%(prog)s [-h | -h+] [options]"
+        kwargs["allow_abbrev"] = False
         super().__init__(*args, **kwargs)
 
         self.flatten_proc_args: bool | str | None = None
