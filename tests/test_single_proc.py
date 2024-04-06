@@ -122,10 +122,11 @@ def test_single_extra_args_help():
 @pytest.mark.forked
 def test_warns_when_data_is_set():
     """Test single proc"""
+    # W args    (!) [Process] `input_data` is given, ignore input from cli arguments
     out = run_pipeline(
         "single",
         gets=["Process.in"],
-        args=["--in", "a"],
+        args=["--in.a", "a"],
     )
     assert "Process.in = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]" in out
 
