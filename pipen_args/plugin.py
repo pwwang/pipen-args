@@ -34,7 +34,7 @@ class ArgsPlugin:
         if is_loading_pipeline():  # pragma: no cover
             return
 
-        config = {"plugin_opts": {}, "template_opts": {}, "scheduler_opts": {}}
+        config: dict = {"plugin_opts": {}, "template_opts": {}, "scheduler_opts": {}}
         config["plugin_opts"]["args_hide"] = False
         parser = Parser()
         # Init the parser
@@ -47,7 +47,7 @@ class ArgsPlugin:
             ) from None
 
         # Parse the args
-        parsed = parser.parse_args()
+        parsed = parser.parse_args(_internal=True)
         # Load configs by profile
         if parsed.profile is not None:  # pragma: no cover
             pipen.profile = parsed.profile

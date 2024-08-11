@@ -1,4 +1,5 @@
 """Command line argument parser for pipen"""
+
 from __future__ import annotations
 
 import sys
@@ -12,6 +13,7 @@ from pipen_annotate import annotate
 from .defaults import PIPELINE_ARGS_GROUP, FLATTEN_PROC_ARGS, PIPEN_ARGS
 
 if TYPE_CHECKING:  # pragma: no cover
+    from argparse import Action
     from pipen import Pipen, Proc
 
 
@@ -24,6 +26,10 @@ class FallbackNamespace(Namespace):
             return super().__getattr__(name)
         except AttributeError:
             return None
+
+    def __setitem__(self, key: str, value: Any) -> None:
+        """Set item"""
+        setattr(self, key, value)
 
 
 class ParserMeta(type):
@@ -48,10 +54,25 @@ class ParserMeta(type):
 
 
 class Parser(ArgumentParser, metaclass=ParserMeta):
-    """Subclass of Params to fit for pipen"""
+    """Subclass of ArgumentParser to fit for pipen pipeline"""
 
     def __init__(self, *args, **kwargs) -> None:
-        """Constructor"""
+        """Create a parser for pipen pipeline.
+
+        See <https://docs.python.org/3/library/argparse.html#argparse.ArgumentParser>
+        for the arguments and keyword arguments.
+
+        Args:
+            *args: Arguments for the ArgumentParser
+            **kwargs: Keyword arguments for the ArgumentParser
+                Note that `add_help`, `fromfile_prefix_chars`, `usage` and
+                `allow_abbrev`.
+                are set by default and cannot be changed.
+                The default `usage` is `%(prog)s [-h | -h+] [options]`.
+                The default `allow_abbrev` is `False`.
+                The default `add_help` is `+`.
+                The default `fromfile_prefix_chars` is `@
+        """
         kwargs["add_help"] = "+"
         kwargs["fromfile_prefix_chars"] = "@"
         kwargs["usage"] = "%(prog)s [-h | -h+] [options]"
@@ -62,13 +83,61 @@ class Parser(ArgumentParser, metaclass=ParserMeta):
         self._cli_args = None
         self._pipeline_args_group = None
         self._parsed = None
+        self._extra_arg_fallbacks = FallbackNamespace()
+
+    def add_extra_argument(self, *args, fallback: Any = Any, **kwargs) -> Action:
+        """Add an extra argument (other than the pipeline arguments).
+
+        Args:
+            *args: The argument flags
+            fallback: The fallback value for the argument.
+                This is required when required is True to avoid the program to
+                terminate when called before the pipeline arguments are parsed.
+            **kwargs: The keyword arguments for `add_argument`
+
+        Returns:
+            The added action
+        """
+        if fallback is Any:
+            if kwargs.get("required", False):
+                raise ValueError(
+                    f"Fallback value is required for required arguments ({args})"
+                )
+            fallback = kwargs.get("default", None)
+
+        action = super().add_argument(*args, **kwargs)
+        self._extra_arg_fallbacks[action.dest] = fallback
+        return action
 
     def set_cli_args(self, args: Any) -> None:
-        """Set cli arguments, allows externals to set arguments to parse"""
+        """Set cli arguments, allows externals to set arguments to parse
+
+        Args:
+            args: The CLI arguments to parse
+        """
         self._cli_args = args
 
-    def parse_args(self, args: Any = None, namespace: Any = None) -> Namespace:
-        """Parse arguments"""
+    def parse_args(
+        self, args: Any = None, _internal: bool = False, namespace: Any = None
+    ) -> Namespace:
+        """Parse the pipeline arguments.
+
+        This is used internally.
+
+        Args:
+            args: The arguments to parse.
+            _internal: Whether this is called internally.
+                This is used to make sure the arguments are parsed at the right time.
+                When users actually want to parse the extra arguments, they should
+                call `parse_extra_args` instead.
+            namespace: The namespace to parse into.
+
+        Returns:
+            The parsed namespace.
+        """
+        if not _internal:
+            raise ValueError("Please use `parse_extra_args` to parse extra arguments.")
+
         if not self._parsed:
             # This should be called only once at `on_init` hook
             # If you have additional arguments, before `on_init`
@@ -82,7 +151,6 @@ class Parser(ArgumentParser, metaclass=ParserMeta):
     def parse_extra_args(
         self,
         args: Sequence[str] | None = None,
-        kwargs: Mapping[str, Any] | None = None,
         fromfile_parse: bool = True,
     ) -> Namespace:
         """Parse extra arguments.
@@ -96,11 +164,6 @@ class Parser(ArgumentParser, metaclass=ParserMeta):
 
         Args:
             args: The arguments to parse
-            kwargs: The default values for the arguments when `-h`, `--help`, etc
-                is in `sys.argv`. If not passed, `None` is used.
-                Because when `-h`, `--help`, etc is in `sys.argv`, we will skip parsing
-                the arguments here. When those values are used in constructing the
-                pipeline, errors will be raised. This is to avoid that.
             fromfile_parse: Whether to parse the extra arguments from file (`@file`)
                 when we are not just loading the pipeline.
 
@@ -110,21 +173,18 @@ class Parser(ArgumentParser, metaclass=ParserMeta):
             `kwargs`.
         """
         help_args = ("-h", "--help", "-h+", "--help+")
-        kwargs = kwargs or {}
-        if (
-            args is not None
-            and is_loading_pipeline(*help_args, argv=[sys.argv[0], *args])
+        if args is not None and is_loading_pipeline(
+            *help_args, argv=[sys.argv[0], *(args or [])]
         ):
-            return FallbackNamespace(**kwargs)
+            return self._extra_arg_fallbacks
 
         if not args and is_loading_pipeline(*help_args):
-            return FallbackNamespace(**kwargs)
+            return self._extra_arg_fallbacks
 
         return self.parse_known_args(args, fromfile_parse=fromfile_parse)[0]
 
     def init(self, pipen: Pipen) -> None:
         """Define arguments"""
-
         self._pipeline_args_group = self.add_argument_group(
             pipen._kwargs["plugin_opts"].get("args_group", PIPELINE_ARGS_GROUP),
             order=-99,
@@ -142,8 +202,7 @@ class Parser(ArgumentParser, metaclass=ParserMeta):
 
         if self.flatten_proc_args == "auto":
             self.flatten_proc_args = (
-                len(pipen.procs) == 1
-                and not pipen.procs[0].__meta__["procgroup"]
+                len(pipen.procs) == 1 and not pipen.procs[0].__meta__["procgroup"]
             )
 
         for arg, argopt in PIPEN_ARGS.items():
@@ -157,9 +216,8 @@ class Parser(ArgumentParser, metaclass=ParserMeta):
 
             if arg in ("scheduler_opts", "plugin_opts"):
                 if self.flatten_proc_args:
-                    argopt["default"] = (
-                        Diot(pipen._kwargs.get(arg, None) or {})
-                        | (getattr(pipen.procs[0], arg, None) or {})
+                    argopt["default"] = Diot(pipen._kwargs.get(arg, None) or {}) | (
+                        getattr(pipen.procs[0], arg, None) or {}
                     )
                 else:
                     argopt["default"] = pipen._kwargs.get(arg, None) or {}
@@ -201,7 +259,8 @@ class Parser(ArgumentParser, metaclass=ParserMeta):
         out = {
             k: v
             for k, v in anno_attrs.items()
-            if k in (
+            if k
+            in (
                 "help",
                 "action",
                 "nargs",
@@ -276,9 +335,7 @@ class Parser(ArgumentParser, metaclass=ParserMeta):
         if is_start:
             for inkey, inval in anno.Input.items():
                 self.add_argument(
-                    f"--in.{inkey}"
-                    if flatten
-                    else f"--{proc.name}.in.{inkey}",
+                    f"--in.{inkey}" if flatten else f"--{proc.name}.in.{inkey}",
                     help=inval.help or "",
                     **self._get_arg_attrs_from_anno(inval.attrs),
                 )
@@ -296,7 +353,7 @@ class Parser(ArgumentParser, metaclass=ParserMeta):
                 "--envs" if flatten else f"--{proc.name}.envs",
                 action="ns",
                 help="Environment variables for the process",
-                default=Diot(proc.envs)
+                default=Diot(proc.envs),
             )
 
         self._add_envs_arguments(
@@ -331,12 +388,8 @@ class Parser(ArgumentParser, metaclass=ParserMeta):
             for key in ("plugin_opts", "scheduler_opts"):
                 self.add_argument(
                     f"--{proc.name}.{key}",
-                    **{
-                        k: v
-                        for k, v in PIPEN_ARGS[key].items()
-                        if k != "default"
-                    },
                     default=getattr(proc, key),
+                    **{k: v for k, v in PIPEN_ARGS[key].items() if k != "default"},
                 )
 
     def _add_envs_arguments(

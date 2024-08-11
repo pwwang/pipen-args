@@ -12,7 +12,7 @@ from .parser_ import Parser, FallbackNamespace  # noqa: F401
 from .procgroup import ProcGroup  # noqa: F401
 
 
-def __getattr__(name: str) -> Any:
+def __getattr__(name: str) -> Diot | Parser:
     """Instantiate the instance only on import"""
     # to avoid this function to be called twice
     if name == "__path__":  # pragma: no cover

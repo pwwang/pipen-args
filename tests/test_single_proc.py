@@ -102,6 +102,7 @@ def test_single_extra_args():
         args=[
             "-x", "a",
             "--envs.y", "b",
+            "-yy", "2",
         ],
     )
     assert "Process.envs.x = a" in out
@@ -113,7 +114,7 @@ def test_single_extra_args_help():
     """Test single proc with --help"""
     pipeline_file = Path(__file__).parent / "pipelines" / "single_extra_args.py"
     out = check_output([sys.executable, str(pipeline_file), "--help+"])
-    out = run_pipeline("single_extra_args", gets=["help"])
+    out = run_pipeline("single_extra_args", args=['-yy', '1'], gets=["help"])
     assert "-x" in out
     assert "--envs.x" in out
     assert "--out.b" in out

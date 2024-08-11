@@ -3,52 +3,18 @@ actually running the pipeline. Used for testing
 """
 from __future__ import annotations
 import asyncio
-import importlib
+# import importlib
 import sys
 from pathlib import Path
 from typing import List
 
 from argx import ArgumentParser
 from pipen import Pipen
+from pipen.utils import load_pipeline
 
 # make sure tests/pipelines can be passed as
 # multiprocesses:pipeline
 sys.path.insert(0, str(Path(__file__).parent / "pipelines"))
-
-
-def _parse_pipeline(pipeline: str) -> Pipen:
-    """Parse the pipeline"""
-    modpath, sep, name = pipeline.rpartition(":")
-    if sep != ":":
-        raise ValueError(
-            f"Invalid pipeline: {pipeline}.\n"
-            "It must be in the format '<module[.submodule]>:pipeline' or \n"
-            "'/path/to/pipeline.py:pipeline'"
-        )
-
-    path = Path(modpath)
-    if path.is_file():
-        spec = importlib.util.spec_from_file_location(path.stem, modpath)
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
-    else:
-        module = importlib.import_module(modpath)
-
-    try:
-        pipeline = getattr(module, name)
-    except AttributeError:
-        raise ValueError(f"Invalid pipeline: {pipeline}") from None
-
-    if callable(pipeline):
-        pipeline = pipeline()
-
-    if not isinstance(pipeline, Pipen):
-        raise ValueError(
-            f"Invalid pipeline: {pipeline}\n"
-            "It must be a `pipen.Pipen` instance"
-        )
-
-    return pipeline
 
 
 async def _run(
@@ -63,10 +29,14 @@ async def _run(
     pipen_args.Parser().set_cli_args(args)
     # Initialize the pipeline so that the arguments definied by
     # other plugins (i.e. pipen-args) to take in place.
-    pipeline.workdir = Path(pipeline.config.workdir) / pipeline.name
-    pipeline._kwargs["plugin_opts"]["args_flatten"] = flatten
-    await pipeline._init()
-    pipeline.workdir.mkdir(parents=True, exist_ok=True)
+    pipeline = await load_pipeline(
+        pipeline,
+        # disable is_loading_pipeline check
+        argv0=sys.argv[0],
+        argv1p=args,
+        plugin_opts={"args_flatten": flatten}
+    )
+    # pipeline.workdir.mkdir(parents=True, exist_ok=True)
     for get in gets:
         if get == "help":
             pipen_args.Parser().print_help()
@@ -108,7 +78,6 @@ parser.add_argument(
     "pipeline",
     help="The pipeline to run, either `<pipeline.py>:<pipeline>` or "
     "`<module.submodule>:<pipeline>`",
-    type=_parse_pipeline,
 )
 
 parser.add_argument(
