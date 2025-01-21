@@ -49,7 +49,10 @@ def test_warning_about_profile():
 def test_sheduler_opts_reserved():
     """Test scheduler options are reserved"""
     pipeline_file = Path(__file__).parent / "pipelines" / "single_sched_config.py"
-    out = check_output([sys.executable, str(pipeline_file)], encoding="utf-8")
+    out = check_output(
+        [sys.executable, str(pipeline_file), "--name", "another_name"],
+        encoding="utf-8",
+    )
     assert "server1" in out
     assert "server2" in out
 
