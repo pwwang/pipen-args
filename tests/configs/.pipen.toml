@@ -1,0 +1,2 @@
+[test_sched.scheduler_opts]
+ssh_servers = ["server1", "server2"]

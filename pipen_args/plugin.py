@@ -48,9 +48,20 @@ class ArgsPlugin:
 
         # Parse the args
         parsed = parser.parse_args(_internal=True)
+        profile = None
         # Load configs by profile
-        if parsed.profile is not None:  # pragma: no cover
-            pipen.profile = parsed.profile
+        if pipen.profile and pipen.profile != "default":
+            if parsed.profile is not None:
+                warns.append(
+                    "[red](!)[/red] `profile` is given by a higher priority, "
+                    "ignore the value from cli arguments"
+                )
+            profile = pipen.profile
+        elif parsed.profile is not None:
+            profile = parsed.profile
+
+        if profile and profile != "default":
+            pipen.profile = profile
             init_config = ProfileConfig.load(
                 {"default": pipen.config},
                 *CONFIG_FILES,
@@ -58,7 +69,7 @@ class ArgsPlugin:
             )
             init_config = ProfileConfig.use_profile(
                 init_config,
-                parsed.profile,
+                profile,
                 copy=True,
             )
             config.update(init_config)
