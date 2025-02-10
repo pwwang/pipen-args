@@ -1,12 +1,10 @@
 """Command line argument parser for pipen"""
+
 from diot import Diot
 
 PIPEN_ARGS = Diot(
     name=Diot(
-        help=(
-            "The name for the pipeline, "
-            "will affect the default workdir and outdir."
-        )
+        help="The name for the pipeline, will affect the default workdir and outdir."
     ),
     profile=Diot(
         help=(

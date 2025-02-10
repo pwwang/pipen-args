@@ -1,4 +1,5 @@
 """Command line argument parser for pipen"""
+
 from __future__ import annotations
 
 import sys

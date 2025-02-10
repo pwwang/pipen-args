@@ -24,6 +24,7 @@ warns = []
 
 class ArgsPlugin:
     """Automatically parse arguments and load configs for pipen pipelines"""
+
     name = "args"
     priority = -9
     version = __version__
@@ -94,9 +95,7 @@ class ArgsPlugin:
         # The default outdir
         pipen_outdir = Path(f"./{pipen_name}-output").absolute()
         # The default workdir
-        pipen_workdir = Path(
-            f"./{pipen.config['workdir']}/{pipen_name}"
-        ).absolute()
+        pipen_workdir = Path(f"./{pipen.config['workdir']}/{pipen_name}").absolute()
 
         # Update the name
         if parsed.name not in (None, pipen_name):
@@ -134,7 +133,7 @@ class ArgsPlugin:
                 workdir = parsed.workdir
             else:
                 # Otherwise, use the name to infer the workdir
-                workdir = Path(pipen.config['workdir'])
+                workdir = Path(pipen.config["workdir"])
             pipen.workdir = workdir.joinpath(pipen.name).absolute()
             pipen.workdir.mkdir(parents=True, exist_ok=True)
         elif parsed.workdir is not None and parsed.workdir != pipen.workdir:
@@ -159,9 +158,8 @@ class ArgsPlugin:
 
         for proc in pipen.procs:
             proc_args = vars(getattr(parsed, proc.name))
-            if (
-                "in" in proc_args
-                and not all(v is None for v in vars(proc_args["in"]).values())
+            if "in" in proc_args and not all(
+                v is None for v in vars(proc_args["in"]).values()
             ):
                 if proc.input_data is not None:
                     warns.append(
@@ -180,11 +178,7 @@ class ArgsPlugin:
                     maxlen = max(map(len, indata.values()))
                     input_data = DataFrame(
                         {
-                            key: (
-                                val * maxlen
-                                if len(val) == 1 and maxlen > 1
-                                else val
-                            )
+                            key: (val * maxlen if len(val) == 1 and maxlen > 1 else val)
                             for key, val in indata.items()
                             if val is not None and len(val) > 0
                         }

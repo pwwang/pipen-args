@@ -23,6 +23,7 @@ class ProcGroup(PipenProcGroup, ABC):
     pipeline needs some processes (typically start processes) to be built
     and use them as dependencies or dependent processes.
     """
+
     PRESERVED = PipenProcGroup.PRESERVED | {"parser"}
 
     def __init__(self, **opts) -> None:
@@ -50,9 +51,7 @@ class ProcGroup(PipenProcGroup, ABC):
         if parsed_opts and isinstance(parsed_opts, Namespace):
             parsed_opts = vars(parsed_opts)
         parsed_opts.update(opts)
-        self.opts.update(
-            {k: v for k, v in parsed_opts.items() if v is not None}
-        )
+        self.opts.update({k: v for k, v in parsed_opts.items() if v is not None})
 
         self.starts: List[Type[Proc]] = []
         self.procs = Diot()
@@ -76,6 +75,7 @@ class ProcGroup(PipenProcGroup, ABC):
         of a process group.
         """
         from .parser_ import Parser
+
         return Parser()
 
     def _add_proggroup_args(self, parser: ArgumentParser) -> None:
