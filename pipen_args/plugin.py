@@ -92,11 +92,11 @@ class ArgsPlugin:
         # The original name
         pipen_name = pipen.name
         # The default outdir
-        pipen_outdir = Path(f"./{pipen_name}-output").resolve()
+        pipen_outdir = Path(f"./{pipen_name}-output").absolute()
         # The default workdir
         pipen_workdir = Path(
             f"./{pipen.config['workdir']}/{pipen_name}"
-        ).resolve()
+        ).absolute()
 
         # Update the name
         if parsed.name not in (None, pipen_name):
@@ -110,10 +110,10 @@ class ArgsPlugin:
             if parsed.outdir == pipen.outdir:
                 # if outdir is not passed from cli,
                 # use the name to infer the outdir
-                pipen.outdir = Path(f"./{pipen.name}-output").resolve()
+                pipen.outdir = Path(f"./{pipen.name}-output").absolute()
             else:
                 # otherwise, use it
-                pipen.outdir = parsed.outdir.resolve()
+                pipen.outdir = parsed.outdir.absolute()
         elif parsed.outdir is not None and parsed.outdir != pipen.outdir:
             # The outdir is set by higher priority, and a value is passed by
             # arguments, so we need to warn the user that the value from
@@ -125,7 +125,7 @@ class ArgsPlugin:
             )
 
         # Update the workdir
-        if pipen.workdir is None or pipen.workdir.resolve() == pipen_workdir:
+        if pipen.workdir is None or pipen.workdir.absolute() == pipen_workdir:
             # The workdir is still some default values, that means it is not set
             # by higher priority (Pipen.workdir, or Pipen(workdir=...))
             # So we can use the value from arguments
@@ -135,7 +135,7 @@ class ArgsPlugin:
             else:
                 # Otherwise, use the name to infer the workdir
                 workdir = Path(pipen.config['workdir'])
-            pipen.workdir = workdir.joinpath(pipen.name).resolve()
+            pipen.workdir = workdir.joinpath(pipen.name).absolute()
             pipen.workdir.mkdir(parents=True, exist_ok=True)
         elif parsed.workdir is not None and parsed.workdir != pipen.workdir:
             # The workdir is set by higher priority, and a value is passed by
