@@ -92,7 +92,7 @@ PIPEN_ARGS = Diot(
     plugins=Diot(
         help=(
             "A list of plugins to only enabled or disabled for this pipeline. "
-            "To disable plugins, use `no:<plugin_name>`"
+            "To disable plugins, use `-<plugin_name>`"
         ),
         action="append",
         nargs="+",
@@ -124,3 +124,4 @@ PIPEN_ARGS = Diot(
 
 PIPELINE_ARGS_GROUP = "pipeline options"
 FLATTEN_PROC_ARGS = "auto"
+DUMP_ARGS = False

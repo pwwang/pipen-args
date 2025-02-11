@@ -39,6 +39,7 @@ class Process2(Proc):
 pipeline = Pipen(
     desc="Pipeline description.",
     plugins=["-report"],
+    plugin_opts={"args_dump": True},
 ).set_start(Process1)
 
 if __name__ == "__main__":

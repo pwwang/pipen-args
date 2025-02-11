@@ -46,7 +46,10 @@ class P2(Proc):
     script = 'echo {{in.a}} > {{out.b}}'
 
 
-pipeline = Pipen(desc='Pipeline description.').set_start(PG().starts)
+pipeline = Pipen(
+    desc='Pipeline description.',
+    plugin_opts={"args_dump": True},
+).set_start(PG().starts)
 
 if __name__ == '__main__':
     pipeline.run()

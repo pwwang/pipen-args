@@ -29,7 +29,10 @@ class Process(Proc):
     envs = {'x': parsed.x, 'y': None}
 
 
-pipeline = Pipen(desc='Pipeline description.').set_start(Process)
+pipeline = Pipen(
+    desc='Pipeline description.',
+    plugin_opts={"args_dump": True},
+).set_start(Process)
 
 if __name__ == '__main__':
     pipeline.run()

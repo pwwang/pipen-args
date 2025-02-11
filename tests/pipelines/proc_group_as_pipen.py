@@ -38,7 +38,7 @@ class PG(ProcGroup):
         return Process2
 
 
-pipeline = PG().as_pipen()
+pipeline = PG().as_pipen(plugin_opts={"args_dump": True})
 
 if __name__ == '__main__':
     pipeline.run()

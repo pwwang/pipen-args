@@ -55,6 +55,7 @@ See more examples in `tests/pipelines/` folder.
 - `args_hide`: (process level) Hide the arguments in the help message. Default: `False`
 - `args_group`: (pipeline level) The group name for the arguments. Default: `pipeline options`
 - `args_flatten`: (pipeline level) Flatten the arguments in the help message when there is only one process in the pipeline. Default: `auto` (flatten if single process, otherwise not)
+- `args_dump`: (pipeline level) Whether to dump the arguments to `<outdir>/args.toml` file. Default: `False`.
 
 
 ## Metadata for Proc envs items
