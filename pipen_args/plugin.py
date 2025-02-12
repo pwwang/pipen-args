@@ -19,7 +19,8 @@ from .defaults import FLATTEN_PROC_ARGS, DUMP_ARGS
 from .parser_ import Parser
 
 if TYPE_CHECKING:  # pragma: no cover
-    from pipen import Pipen, Proc
+    from argparse import Action, ArgumentParser
+    from pipen import Pipen
 
 logger = get_logger("args", "info")
 # Save the warnings to print them after the pipeline is initialized
@@ -35,7 +36,7 @@ def _dump_dict(d: dict) -> str:
     """Dump a dictionary into a string"""
     out = []
     for key, value in d.items():
-        if not VALID_TOML_KEY.match(key):
+        if not VALID_TOML_KEY.match(key) and "-" not in key:
             key = f'"{key}"'
         if isinstance(value, dict):
             out.append(f"{key} = {_dump_dict(value)}")
@@ -45,46 +46,93 @@ def _dump_dict(d: dict) -> str:
     return f"{{ {out} }}"
 
 
-def dump_args(
-    parser: Parser,
-    parsed: Namespace,
-    dumped_file: Path,
+def _sort_actions(
+    actions: list[Action],
+    procgroups: dict,
+    procs: dict,
+) -> list[Action]:
+    """Sort the actions"""
+    indexes = {}
+    for action in actions:
+        if isinstance(action, HelpAction) or action.dest in (
+            "workdir",
+            "dirsig",
+            "lang",
+        ):
+            action.index = None
+            continue
+
+        if "." in action.dest:
+            part = action.dest.rpartition(".")[0]
+            if part in indexes:
+                if isinstance(action, NamespaceAction):
+                    indexes[action.dest] = indexes[part] + 900
+                else:
+                    indexes[action.dest] = indexes[part] + 1
+
+                action.index = indexes[action.dest]
+                continue
+
+            maybeproc = action.dest.split(".")[0]
+
+            if maybeproc in procgroups:
+                if isinstance(action, NamespaceAction):
+                    indexes[action.dest] = procgroups[maybeproc]["base"] + 90000
+                else:
+                    indexes[action.dest] = procgroups[maybeproc]["base"] + 1
+            elif maybeproc in procs:
+                if isinstance(action, NamespaceAction):
+                    indexes[action.dest] = procs[maybeproc]["base"] + 9000
+                else:
+                    indexes[action.dest] = procs[maybeproc]["base"] + 1
+            else:
+                indexes[action.dest] = 1000
+
+        elif action.dest in procgroups:
+            indexes[action.dest] = procgroups[action.dest]["base"]
+        elif action.dest in procs:
+            indexes[action.dest] = procs[action.dest]["base"]
+        elif isinstance(action, NamespaceAction):
+            indexes[action.dest] = 9000
+        else:
+            indexes[action.dest] = 1
+
+        action.index = indexes[action.dest]
+
+    return sorted(
+        [action for action in actions if action.index],
+        key=lambda x: x.index,
+    )
+
+
+def _procs_and_groups(
+    parser: ArgumentParser,
     args_flatten: bool,
-    proc0: Proc,
-) -> None:
-    """Dump the parsed arguments into a dictionary
-
-    Args:
-        parser: The parser instance
-        parsed: The parsed arguments
-        dumped_file: The path to the TOML file
-    """
-    out = {}
-    parsed_dict = vars(parsed)
-    NS_VAL = object()
-
+    proc0: str | None,
+    pg0: str | None,
+) -> tuple[dict, dict]:
+    """Get the process groups and processes"""
     procgroups = {}
     procs = {}
-    if args_flatten:
+    if args_flatten and proc0:
         default_group = {
             "procs": [],
             "used": False,
-            "base": (len(procgroups) + 1) * 10000,
+            "base": (len(procgroups) + 1) * 1000000,
         }
         default_proc = {
             "group": None,
             "used": False,
-            "base": (len(procs) + 1) * 1000,
+            "base": (len(procs) + 1) * 10000,
         }
-        group = get_marked(proc0, "procgroup")
-        if group:
-            procgroups.setdefault(group.name, default_group)
-            procgroups[group.name]["procs"] = [proc0.name]
-            procs.setdefault(proc0.name, default_proc)
-            procs[proc0.name]["group"] = group.name
-            procs[proc0.name]["base"] += procgroups[group.name]["base"]
+        if pg0:
+            procgroups.setdefault(pg0, default_group)
+            procgroups[pg0]["procs"] = [proc0]
+            procs.setdefault(proc0, default_proc)
+            procs[proc0]["group"] = pg0
+            procs[proc0]["base"] += procgroups[pg0]["base"]
         else:
-            procs[proc0.name] = default_proc
+            procs[proc0] = default_proc
     else:
         for group in parser._action_groups:
             if not isinstance(group, _NamespaceArgumentGroup):
@@ -93,12 +141,12 @@ def dump_args(
             default_group = {
                 "procs": [],
                 "used": False,
-                "base": (len(procgroups) + 1) * 10000,
+                "base": (len(procgroups) + 1) * 1000000,
             }
             default_proc = {
                 "group": None,
                 "used": False,
-                "base": (len(procs) + 1) * 1000,
+                "base": (len(procs) + 1) * 10000,
             }
 
             if group.title.startswith("Process Group <"):
@@ -113,59 +161,36 @@ def dump_args(
             else:
                 procs[group.name] = default_proc
 
-    # scan the actions and add index
-    actions = []
-    indexes = {}
-    for action in parser._actions:
-        if (
-            isinstance(action, HelpAction)
-            or action.dest in ("workdir", "dirsig", "lang")
-        ):
-            continue
+    return procgroups, procs
 
-        if "." in action.dest:
-            part = action.dest.rpartition(".")[0]
-            if part in indexes:
-                if isinstance(action, NamespaceAction):
-                    indexes[action.dest] = indexes[part] + 90
-                else:
-                    indexes[action.dest] = indexes[part] + 1
 
-                actions.append((indexes[action.dest], action))
-                continue
+def dump_args(
+    parser: Parser,
+    parsed: Namespace,
+    dumped_file: Path,
+    args_flatten: bool,
+    proc0: str | None,
+    pg0: str | None,
+) -> None:
+    """Dump the parsed arguments into a dictionary
 
-            maybeproc, rest = action.dest.split(".", 1)
+    Args:
+        parser: The parser instance
+        parsed: The parsed arguments
+        dumped_file: The path to the TOML file
+    """
+    out = {}
+    parsed_dict = vars(parsed)
+    NS_VAL = object()
 
-            if maybeproc in procgroups:
-                if isinstance(action, NamespaceAction):
-                    indexes[action.dest] = procgroups[maybeproc]["base"] + 9000
-                else:
-                    indexes[action.dest] = procgroups[maybeproc]["base"] + 1
-            elif maybeproc in procs:
-                if isinstance(action, NamespaceAction):
-                    indexes[action.dest] = procs[maybeproc]["base"] + 900
-                else:
-                    indexes[action.dest] = procs[maybeproc]["base"] + 1
-            else:
-                indexes[action.dest] = 100
-
-        elif action.dest in procgroups:
-            indexes[action.dest] = procgroups[action.dest]["base"]
-        elif action.dest in procs:
-            indexes[action.dest] = procs[action.dest]["base"]
-        elif isinstance(action, NamespaceAction):
-            indexes[action.dest] = 900
-        else:
-            indexes[action.dest] = 1
-
-        actions.append((indexes[action.dest], action))
+    procgroups, procs = _procs_and_groups(parser, args_flatten, proc0, pg0)
 
     # Access the argument groups through the underlying argparser
-    for _, action in sorted(actions, key=lambda x: x[0]):
+    for action in _sort_actions(parser._actions, procgroups, procs):
         key = action.dest
         value = parsed_dict.get(key)
-        if args_flatten and key.split(".")[0] in ("envs", "in", "out"):
-            key = f"{proc0.name}.{key}"
+        if args_flatten and proc0 and key.split(".")[0] in ("envs", "in", "out"):
+            key = f"{proc0}.{key}"
 
         if "." in key:
             maybeproc, rest = key.split(".", 1)
@@ -231,9 +256,7 @@ def dump_args(
                 elif isinstance(value, Path):
                     f.write(f"{key} = {str(value)!r}\n\n")
                 elif isinstance(value, dict):
-                    f.write(
-                        f"{key} = {_dump_dict(value)}\n\n"
-                    )
+                    f.write(f"{key} = {_dump_dict(value)}\n\n")
                 else:
                     f.write(f"{key} = {json.dumps(value)}\n\n")
 
@@ -370,12 +393,14 @@ class ArgsPlugin:
 
         if args_dump:
             args_dump_file = pipen.outdir / "args.toml"
+            proc0 = pipen.procs[0] if pipen.procs else None
             dump_args(
                 parser,
                 parsed,
                 args_dump_file,
                 args_flatten and len(pipen.procs) == 1,
-                pipen.procs[0],
+                proc0.name if proc0 else None,
+                get_marked(proc0, "procgroup") if proc0 else None,
             )
             infos.append(f"Arguments are dumped to {args_dump_file}")
 
