@@ -70,10 +70,10 @@ class Parser(ArgumentParser, metaclass=ParserMeta):
                 are set by default and cannot be changed.
                 The default `usage` is `%(prog)s [-h | -h+] [options]`.
                 The default `allow_abbrev` is `False`.
-                The default `add_help` is `+`.
+                The default `add_help` is `["h", "help", "h+", "help+"]`.
                 The default `fromfile_prefix_chars` is `@
         """
-        kwargs["add_help"] = "+"
+        kwargs["add_help"] = ["h", "help", "h+", "help+"]
         kwargs["fromfile_prefix_chars"] = "@"
         kwargs["usage"] = "%(prog)s [-h | -h+] [options]"
         kwargs["allow_abbrev"] = False
