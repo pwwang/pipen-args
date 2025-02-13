@@ -57,6 +57,11 @@ See more examples in `tests/pipelines/` folder.
 - `args_flatten`: (pipeline level) Flatten the arguments in the help message when there is only one process in the pipeline. Default: `auto` (flatten if single process, otherwise not)
 - `args_dump`: (pipeline level) Whether to dump the arguments to `<outdir>/args.toml` file. Default: `False`.
 
+> [!NOTE]
+> Only `args_dump` can be passed from the command line or a configuration file.
+> Other options can only be set in the pipeline class, passed to the `Pipen` construct.
+> Because they are used to construct the argument parser and we don't
+> know the value of these options before the argument parser is constructed.
 
 ## Metadata for Proc envs items
 
