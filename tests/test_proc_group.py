@@ -43,14 +43,21 @@ def test_as_pipen():
 def test_real_run(tmp_path):
     pipeline_file = Path(__file__).parent / "pipelines" / "proc_group_integrate.py"
     run(
-        [sys.executable, pipeline_file],
+        [
+            sys.executable,
+            pipeline_file,
+            "--plugin_opts",
+            '{"args_flatten": false, "args_group": "abc", "args_hide": true}',
+            "--forks",
+            "1",
+        ],
         cwd=tmp_path,
     )
     args_toml_file = tmp_path / "Pipen-output" / "args.toml"
     assert args_toml_file.exists()
 
     content = args_toml_file.read_text()
-    assert "plugin_opts = { args_dump = true }" in content
+    assert "args_dump = true" in content
     assert "# | Argument for process group:  PG" in content
     assert "# | Argument for process:  PG/Process" in content
     assert "# | Argument for process:  PG/Process2" in content

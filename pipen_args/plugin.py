@@ -274,11 +274,11 @@ class ArgsPlugin:
         if is_loading_pipeline():  # pragma: no cover
             return
 
-        args_dump = pipen._kwargs["plugin_opts"].get("args_dump", DUMP_ARGS)
         args_flatten = pipen._kwargs["plugin_opts"].get(
             "args_flatten",
             FLATTEN_PROC_ARGS,
         )
+
         config: dict = {"plugin_opts": {}, "template_opts": {}, "scheduler_opts": {}}
         config["plugin_opts"]["args_hide"] = False
         parser = Parser()
@@ -293,6 +293,26 @@ class ArgsPlugin:
 
         # Parse the args
         parsed = parser.parse_args(_internal=True)
+
+        # Warn if args_hide, args_group, args_flatten are passed
+        if parsed.plugin_opts and "args_hide" in parsed.plugin_opts:
+            warns.append(
+                "[red](!)[/red] `plugin_opts.args_hide` should not be passed "
+                "via command line or config file via `@configfile`"
+            )
+            del parsed.plugin_opts["args_hide"]
+        if parsed.plugin_opts and "args_group" in parsed.plugin_opts:
+            warns.append(
+                "[red](!)[/red] `plugin_opts.args_group` should not be passed "
+                "via command line or config file via `@configfile`"
+            )
+            del parsed.plugin_opts["args_group"]
+        if parsed.plugin_opts and "args_flatten" in parsed.plugin_opts:
+            warns.append(
+                "[red](!)[/red] `plugin_opts.args_flatten` should not be passed "
+                "via command line or config file via `@configfile`"
+            )
+            del parsed.plugin_opts["args_flatten"]
 
         profile = None
         # Load configs by profile
@@ -332,7 +352,14 @@ class ArgsPlugin:
             "scheduler",
             "plugins",
         ):
-            if getattr(parsed, key, None) is not None:
+            if getattr(parsed, key) is not None:
+                if key in pipen._kwargs:
+                    warns.append(
+                        f"[red](!)[/red] `{key}` is given by a higher priority, "
+                        "ignore the value from cli arguments"
+                    )
+                    setattr(parsed, key, pipen._kwargs[key])
+
                 config[key] = getattr(parsed, key)
 
         # The original name
@@ -354,10 +381,11 @@ class ArgsPlugin:
             if parsed.outdir == pipen.outdir:
                 # if outdir is not passed from cli,
                 # use the name to infer the outdir
-                pipen.outdir = Path(f"./{pipen.name}-output").absolute()
+                parsed.outdir = pipen.outdir = Path(f"./{pipen.name}-output").absolute()
             else:
                 # otherwise, use it
                 pipen.outdir = parsed.outdir.absolute()
+
         elif parsed.outdir is not None and parsed.outdir != pipen.outdir:
             # The outdir is set by higher priority, and a value is passed by
             # arguments, so we need to warn the user that the value from
@@ -367,6 +395,7 @@ class ArgsPlugin:
                 "priority (`Pipen.outdir`, or `Pipen(outdir=...)`), "
                 "ignore the value from cli arguments",
             )
+            parsed.outdir = pipen.outdir
 
         # Update the workdir
         if pipen.workdir is None or pipen.workdir.absolute() == pipen_workdir:
@@ -379,8 +408,10 @@ class ArgsPlugin:
             else:
                 # Otherwise, use the name to infer the workdir
                 workdir = Path(pipen.config["workdir"])
-            pipen.workdir = workdir.joinpath(pipen.name).absolute()
+
+            parsed.workdir = pipen.workdir = workdir.joinpath(pipen.name).absolute()
             pipen.workdir.mkdir(parents=True, exist_ok=True)
+
         elif parsed.workdir is not None and parsed.workdir != pipen.workdir:
             # The workdir is set by higher priority, and a value is passed by
             # arguments, so we need to warn the user that the value from
@@ -390,6 +421,28 @@ class ArgsPlugin:
                 "priority (Pipen.workdir, or Pipen(workdir=...)), "
                 "ignore the value from cli arguments",
             )
+            parsed.workdir = pipen.workdir
+
+        for key in ("plugin_opts", "template_opts", "scheduler_opts"):
+            old = copy_dict(config[key] or {}, 99)
+            old.update(getattr(parsed, key) or {})
+            config[key] = old
+
+            for k, v in pipen._kwargs[key].items():
+                if k in old:
+                    warns.append(
+                        f"[red](!)[/red] `{key}.{k}` is given by a higher "
+                        "priority, ignore the value from cli arguments"
+                    )
+
+                config[key][k] = v
+
+            setattr(parsed, key, config[key])
+
+        pipen.config.update(config)
+
+        # args_dump should be able to be passed from command line
+        args_dump = pipen.config.plugin_opts.get("args_dump", DUMP_ARGS)
 
         if args_dump:
             args_dump_file = pipen.outdir / "args.toml"
@@ -402,14 +455,7 @@ class ArgsPlugin:
                 proc0.name if proc0 else None,
                 get_marked(proc0, "procgroup") if proc0 else None,
             )
-            infos.append(f"Arguments are dumped to {args_dump_file}")
-
-        for key in ("plugin_opts", "template_opts", "scheduler_opts"):
-            old = copy_dict(config[key] or {}, 3)
-            old.update(getattr(parsed, key, None) or {})
-            config[key] = old
-
-        pipen.config.update(config)
+            infos.append(f"All arguments are dumped to {args_dump_file}")
 
         if parser.flatten_proc_args is True:
             parsed = Namespace(**{pipen.procs[0].name: parsed})
@@ -481,7 +527,7 @@ class ArgsPlugin:
     @plugin.impl
     async def on_start(pipen: Pipen) -> None:
         """Print warnings"""
-        for info in infos:  # pragma: no cover
-            logger.info(info)
-        for wn in warns:  # pragma: no cover
+        for wn in warns:
             logger.warning(wn)
+        for info in infos:
+            logger.info(info)

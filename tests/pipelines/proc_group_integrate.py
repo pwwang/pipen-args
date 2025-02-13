@@ -49,6 +49,7 @@ class P2(Proc):
 pipeline = Pipen(
     desc='Pipeline description.',
     plugin_opts={"args_dump": True},
+    forks=2,
 ).set_start(PG().starts)
 
 if __name__ == '__main__':
