@@ -50,7 +50,7 @@ PIPEN_ARGS = Diot(
     ),
     dirsig=Diot(
         help=(
-            "The depth to check the Last Modification Time of a directory."
+            "The depth to check the Last Modification Time of a directory. "
             "Since modifying the content won't change its LMT."
         ),
         action="store_true",

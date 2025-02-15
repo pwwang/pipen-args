@@ -44,7 +44,7 @@ class Process(Proc):
 
 pipeline = Pipen(
     desc="Pipeline description.",
-    plugin_opts={"args_dump": True},
+    plugin_opts={"args_dump": True, "args_flatten": False},
 ).set_start(Process)
 pipeline.profile = "test_sched"
 

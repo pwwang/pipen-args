@@ -47,7 +47,10 @@ def test_real_run(tmp_path):
             sys.executable,
             pipeline_file,
             "--plugin_opts",
-            '{"args_flatten": false, "args_group": "abc", "args_hide": true}',
+            '{"args_flatten": false, '
+            '"args_group": "abc", '
+            '"args_hide": true, '
+            '"plugin_x": "y"}',
             "--forks",
             "1",
         ],
@@ -58,6 +61,6 @@ def test_real_run(tmp_path):
 
     content = args_toml_file.read_text()
     assert "args_dump = true" in content
-    assert "# | Argument for process group:  PG" in content
-    assert "# | Argument for process:  PG/Process" in content
-    assert "# | Argument for process:  PG/Process2" in content
+    assert "# | Arguments for process group: PG" in content
+    assert "# | Arguments for process: PG/Process" in content
+    assert "# | Arguments for process: PG/Process2" in content
