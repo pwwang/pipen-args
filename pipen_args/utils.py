@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
-import rtoml
+from diot import Diot
 from argx import Namespace
 from argx.parser import _NamespaceArgumentGroup
 from argx.action import HelpAction, NamespaceAction
@@ -158,15 +158,15 @@ def _dump_dict(
                     val = {key: value}
                     for part in reversed(prefix.split(".")):
                         val = {part: val}
-                    out.append(rtoml.dumps(val))
+                    out.append(Diot(val).to_toml())
                 else:
-                    out.append(rtoml.dumps({key: value}))
+                    out.append(Diot({key: value}).to_toml())
 
             else:
                 try:
-                    out.append(rtoml.dumps({key: value}))
-                except rtoml.TomlSerializationError:
-                    out.append(rtoml.dumps({key: str(value)}))
+                    out.append(Diot({key: value}).to_toml())
+                except Exception:
+                    out.append(Diot({key: str(value)}).to_toml())
 
             out.append("\n")
 

@@ -39,7 +39,7 @@ def test_as_pipen():
     assert "Process <PG/Process2>" in out
 
 
-# @pytest.mark.forked
+@pytest.mark.forked
 def test_real_run(tmp_path):
     pipeline_file = Path(__file__).parent / "pipelines" / "proc_group_integrate.py"
     run(
