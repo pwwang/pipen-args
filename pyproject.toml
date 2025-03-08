@@ -15,12 +15,12 @@ generate-setup-file = true
 python = "^3.9"
 pipen-annotate = "^0.15"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 pytest = "^8"
 pytest-cov = "^6"
 pytest-xdist = "^3"
 pytest-forked = "^1"
-pipen-verbose = "^0.13"
+pipen-verbose = "^0.14"
 
 [tool.poetry.plugins.pipen]
 args = "pipen_args.plugin:ArgsPlugin"
@@ -39,7 +39,7 @@ filterwarnings = [
 
 [tool.black]
 line-length = 88
-target-version = ['py39', 'py310', 'py311']
+target-version = ['py39', 'py310', 'py311', 'py312']
 include = '\.pyi?$'
 
 [tool.mypy]
