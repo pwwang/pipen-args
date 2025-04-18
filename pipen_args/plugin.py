@@ -8,7 +8,7 @@ from argx import Namespace
 from simpleconf import ProfileConfig
 from pipen import plugin
 from pipen.defaults import CONFIG_FILES
-from pipen.utils import copy_dict, get_logger, is_loading_pipeline
+from pipen.utils import copy_dict, get_logger, is_loading_pipeline, update_dict
 
 from .version import __version__
 from .defaults import DUMP_ARGS
@@ -277,7 +277,12 @@ class ArgsPlugin:
                     if isinstance(proc_args["envs"], Namespace)
                     else proc_args["envs"]
                 )
-                proc.envs.update(proc_envs)
+                # proc.envs.update(proc_envs)
+                proc.envs = update_dict(
+                    proc.envs,
+                    proc_envs,
+                    depth=proc.envs_depth or 1,
+                )
 
             for key in (
                 "cache",

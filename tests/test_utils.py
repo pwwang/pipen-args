@@ -51,7 +51,7 @@ def test_dump_dict():
     proc2group = {}
     procgroups = set()
     prefix = None
-    result = _dump_dict(parsed_dict, parser, proc2group, procgroups, prefix)
+    result = _dump_dict(parsed_dict, parser, proc2group, procgroups, {}, prefix)
     assert result == ["# Argument 1\n", 'arg1 = "value1"\n', "\n"]
 
     # Case 2: Namespace argument
@@ -60,12 +60,34 @@ def test_dump_dict():
     ns_arg = MagicMock(dest="ns.arg2", help="Argument 2")
     parser._actions.append(ns_arg)
     parsed_dict = {"ns": Namespace(arg2="value2")}
-    result = _dump_dict(parsed_dict, parser, proc2group, procgroups, prefix)
+    result = _dump_dict(parsed_dict, parser, proc2group, procgroups, {}, prefix)
     assert result == [
         "# Namespace\n",
         "[ns]\n",
         "# Argument 2\n",
         'arg2 = "value2"\n',
+        "\n",
+    ]
+
+    # Case 2.1: Namespace argument (envs)
+    action2_1 = MagicMock(
+        dest="envs",
+        spec=_NamespaceArgumentGroup,
+        help="Envs",
+    )
+    action2_1.name = "envs"
+    parser._actions.append(action2_1)
+    env_arg = MagicMock(
+        dest="envs.arg2", help="Argument 2", type="json", default={"a": 1, "b": 2}
+    )
+    parser._actions.append(env_arg)
+    parsed_dict = {"envs": Namespace(arg2={"a": 3})}
+    name2proc = {"Process": MagicMock(envs_depth=2)}
+    result = _dump_dict(parsed_dict, parser, {}, {}, name2proc, None)
+    assert result == [
+        "[envs]\n",
+        "# Argument 2\n",
+        "[envs.arg2]\na = 3\nb = 2\n",
         "\n",
     ]
 
@@ -84,9 +106,9 @@ def test_dump_dict():
         "z": Path("/tmp"),
     }
     procgroups = {"group1"}
-    result = _dump_dict(parsed_dict, parser, proc2group, procgroups, prefix)
+    result = _dump_dict(parsed_dict, parser, {}, procgroups, {}, None)
     assert result == [
-        "z = \"/tmp\"\n",
+        'z = "/tmp"\n',
         "\n",
         "[x]\ny = 1\n",
         "\n",
@@ -122,7 +144,7 @@ def test_dump_dict():
         "dirsig": False,
     }
     procgroups = set()
-    result = _dump_dict(parsed_dict, parser, {"proc1": None}, procgroups, prefix)
+    result = _dump_dict(parsed_dict, parser, {"proc1": None}, procgroups, {}, None)
     assert result == [
         "# +----------------------------------------------------------------------------+\n",  # noqa: E501
         "# | Arguments for process: proc1                                               |\n",  # noqa: E501
@@ -135,8 +157,41 @@ def test_dump_dict():
         "## cache = None\n",
         "\n",
         # '# Envs\n',  # proc.envs not defined as an action
-        '[proc1.envs]\na = 1\n',
-        '\n',
+        "[proc1.envs]\na = 1\n",
+        "\n",
+    ]
+
+    # Case 4.1: _NamespaceArgumentGroup (proc)
+    parser = ArgumentParser()
+    parser._actions = [MagicMock(dest="help", spec=HelpAction)]
+    parser._action_groups = []
+    action4_1 = MagicMock(spec=_NamespaceArgumentGroup)
+    action4_1.name = "proc1"
+    parser._action_groups.append(action4_1)
+    proc_envs = MagicMock(dest="proc1.envs", help="Argument envs", spec=NamespaceAction)
+    parser._actions.append(proc_envs)
+    parser._actions.append(
+        MagicMock(
+            dest="proc1.envs.a", help="Env a", type="json", default={"a": 0, "b": 2}
+        )
+    )
+
+    parsed_dict = {
+        "proc1": Namespace(envs=Namespace(a={"a": 1})),
+        "proc1.envs.a": {"a": 1},
+    }
+    name2proc = {"proc1": MagicMock(envs_depth=2)}
+    result = _dump_dict(parsed_dict, parser, {"proc1": None}, set(), name2proc, None)
+    assert result == [
+        "# +----------------------------------------------------------------------------+\n",  # noqa: E501
+        "# | Arguments for process: proc1                                               |\n",  # noqa: E501
+        "# +----------------------------------------------------------------------------+\n",  # noqa: E501
+        "[proc1]\n",
+        "# Argument envs\n",
+        "[proc1.envs]\n",
+        "# Env a\n",
+        "[proc1.envs.a]\na = 1\nb = 2\n",
+        "\n",
     ]
 
 

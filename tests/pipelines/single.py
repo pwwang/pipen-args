@@ -20,19 +20,29 @@ class Process(Proc):
         w (ns): line4
             - a: item a
             - b: item b
+        t (type=json): line4, a json object
         <more>: line5
     """
-    input = 'a'
-    output = 'b:file:b.txt'
+
+    input = "a"
+    output = "b:file:b.txt"
     input_data = range(10)
-    script = 'echo x={{envs.x}} y={{envs.y}} > {{out.b}}'
-    envs = {'f': True, 'x': 'a', 'y': None, "z": 1, "w": {"a": 'x', "b": 2}}
+    envs_depth = 2
+    script = "echo x={{envs.x}} y={{envs.y}} > {{out.b}}"
+    envs = {
+        "f": True,
+        "x": "a",
+        "y": None,
+        "z": 1,
+        "w": {"a": "x", "b": 2},
+        "t": {"a": 1, "b": 2},
+    }
 
 
 pipeline = Pipen(
-    desc='Pipeline description.',
+    desc="Pipeline description.",
     plugin_opts={"args_dump": True},
 ).set_start(Process)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pipeline.run()

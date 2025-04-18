@@ -5,7 +5,7 @@ from diot import Diot
 from argx import Namespace
 from argx.parser import _NamespaceArgumentGroup
 from argx.action import HelpAction, NamespaceAction
-from pipen.utils import get_marked
+from pipen.utils import get_marked, update_dict
 
 from .defaults import PIPEN_ARGS
 
@@ -57,6 +57,7 @@ def _dump_dict(
     parser: ArgumentParser,
     proc2group: dict[str, str | None],
     procgroups: set[str],
+    name2proc: dict[str, Proc],
     prefix: str | None,
 ) -> list[str]:
     """Dump the parsed arguments into a dictionary
@@ -96,6 +97,7 @@ def _dump_dict(
                     parser,
                     proc2group,
                     procgroups,
+                    name2proc,
                     fullkey,
                 )
             )
@@ -123,6 +125,7 @@ def _dump_dict(
                     parser,
                     proc2group,
                     procgroups,
+                    name2proc,
                     fullkey,
                 )
             )
@@ -144,6 +147,39 @@ def _dump_dict(
 
                     if key in PIPEN_ARGS:
                         help = f"(process level) {help.splitlines()[0]}" if help else ""
+
+                if (
+                    isinstance(value, dict)
+                    and not isinstance(value, Namespace)
+                    and action
+                    and action.type == "json"
+                    and isinstance(action.default, dict)
+                ):
+                    proc0 = list(name2proc.values())[0]
+                    # json options, make sure envs_depth applied
+                    if (
+                        # flattened
+                        isinstance(paction, _NamespaceArgumentGroup)
+                        and prefix == paction.name == "envs"
+                        and proc0.envs_depth > 1
+                    ):
+                        value = update_dict(action.default, value, proc0.envs_depth - 1)
+                    elif (
+                        isinstance(paction, NamespaceAction)
+                        and paction.dest.count(".") == 1
+                        and paction.dest.endswith(".envs")
+                    ):
+                        pname = paction.dest.split(".")[0]
+                        if (
+                            pname in name2proc
+                            and name2proc[pname].envs_depth
+                            and name2proc[pname].envs_depth > 1
+                        ):
+                            value = update_dict(
+                                action.default,
+                                value,
+                                name2proc[pname].envs_depth - 1,
+                            )
 
             for line in help.splitlines():
                 out.append(f"# {line}\n")
@@ -190,10 +226,12 @@ def dump_args(
     parsed_dict = vars(parsed)
     proc2group = {}
     procgroups = set()
+    name2proc = {}
     for proc in procs:
         pg = get_marked(proc, "procgroup")
         pg = pg.name if pg else None
         proc2group[proc.name] = pg
+        name2proc[proc.name] = proc
         if pg:
             procgroups.add(pg)
 
@@ -202,6 +240,7 @@ def dump_args(
         parser,
         proc2group,
         procgroups,
+        name2proc,
         prefix=None,
     )
 
