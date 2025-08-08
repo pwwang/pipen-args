@@ -23,7 +23,7 @@ PIPEN_ARGS = Diot(
     ),
     outdir=Diot(
         help="The output directory of the pipeline [default: ./<name>-output]",
-        type="path",
+        type="anypath",
     ),
     loglevel=Diot(
         help=(
@@ -113,7 +113,7 @@ PIPEN_ARGS = Diot(
     workdir=Diot(
         help="The working directory of the pipeline",
         show=False,
-        type="path",
+        type="anypath",
     ),
     order=Diot(
         help="The order of the process, larger number means later [default: 0]",
