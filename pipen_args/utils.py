@@ -245,5 +245,5 @@ def dump_args(
     )
 
     dumped_file.parent.mkdir(parents=True, exist_ok=True)
-    with open(dumped_file, "w") as f:
+    with dumped_file.open("w") as f:
         f.writelines(out)
