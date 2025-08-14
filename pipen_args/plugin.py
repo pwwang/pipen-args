@@ -201,7 +201,8 @@ class ArgsPlugin:
             action = parser.get_action(key)
 
             value = getattr(parsed, key) or {}
-            old = copy_dict(config[key] or {}, 99)
+            old = copy_dict(pipen.config[key] or {}, 99)
+            old.update(config.get(key, {}))
             default = action.default if action else None
             default = default or config[key] or {}
             old.update(value)
