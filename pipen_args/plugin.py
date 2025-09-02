@@ -33,7 +33,7 @@ class ArgsPlugin:
     version = __version__
 
     @plugin.impl
-    async def on_init(pipen: Pipen) -> None:
+    async def on_init(pipen: Pipen) -> None:  # type: ignore[misc]
         """Parse and update the config"""
         if is_loading_pipeline():  # pragma: no cover
             return
@@ -225,7 +225,7 @@ class ArgsPlugin:
         args_dump = pipen.config.plugin_opts.get("args_dump", DUMP_ARGS)
 
         if args_dump:
-            args_dump_file = pipen.outdir / "args.toml"
+            args_dump_file = pipen.outdir / "args.toml"  # type: ignore
             dump_args(
                 parser,
                 parsed,
@@ -307,7 +307,7 @@ class ArgsPlugin:
                         getattr(proc, key).update(proc_args[key])
 
     @plugin.impl
-    async def on_start(pipen: Pipen) -> None:
+    async def on_start(pipen: Pipen) -> None:  # type: ignore[misc]
         """Print warnings"""
         for wn in warns:
             logger.warning(wn)

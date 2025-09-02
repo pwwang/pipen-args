@@ -6,8 +6,11 @@ import sys
 from typing import TYPE_CHECKING, Any, Sequence, Type, Mapping
 
 from argx import ArgumentParser, Namespace
+from argx.parser import _ArgumentGroup
+from argx.utils import format_title
 from diot import Diot
-from pipen.utils import is_loading_pipeline
+
+# from pipen.utils import is_loading_pipeline
 from pipen_annotate import annotate
 
 from .defaults import PIPELINE_ARGS_GROUP, FLATTEN_PROC_ARGS, PIPEN_ARGS
@@ -83,31 +86,42 @@ class Parser(ArgumentParser, metaclass=ParserMeta):
         self._cli_args = None
         self._pipeline_args_group = None
         self._parsed = None
-        self._extra_arg_fallbacks = FallbackNamespace()
+        # A separate parser to hold extra arguments only
+        self._extra_parser = ArgumentParser(add_help=False, fromfile_prefix_chars="@")
+        # Registry of explicitly created extra-argument groups by title
+        self._extra_groups: dict[str, _ArgumentGroup] = {}
 
-    def add_extra_argument(self, *args, fallback: Any = Any, **kwargs) -> Action:
+    def add_extra_argument(
+        self,
+        *args,
+        group: str | None = None,
+        **kwargs,
+    ) -> Action:
         """Add an extra argument (other than the pipeline arguments).
 
         Args:
             *args: The argument flags
-            fallback: The fallback value for the argument.
-                This is required when required is True to avoid the program to
-                terminate when called before the pipeline arguments are parsed.
-            **kwargs: The keyword arguments for `add_argument`
+            group: The title of the extra-argument group to add this argument into.
+                If None, the argument is added to the default extra-argument group.
+            **kwargs: The keyword arguments for `add_argument`.
+                You may optionally pass `group` (str) to add the argument into a
+                titled extra-argument group.
 
         Returns:
             The added action
         """
-        if fallback is Any:
-            if kwargs.get("required", False):
-                raise ValueError(
-                    f"Fallback value is required for required arguments ({args})"
-                )
-            fallback = kwargs.get("default", None)
+        if kwargs.get("required", False) is True:
+            raise ValueError("Extra arguments cannot be required.")
 
-        action = super().add_argument(*args, **kwargs)
-        self._extra_arg_fallbacks[action.dest] = fallback
-        return action
+        # Support assigning to a named extra group via `group="Title"`
+        group = f"{group} (extra options)" if group else "Extra Options"
+        if group not in self._extra_groups:
+            grp = self._extra_parser.add_argument_group(group)
+            self._extra_groups[group] = grp
+        else:
+            grp = self._extra_groups[group]
+
+        return grp.add_argument(*args, **kwargs)
 
     def set_cli_args(self, args: Any) -> None:
         """Set cli arguments, allows externals to set arguments to parse
@@ -117,8 +131,11 @@ class Parser(ArgumentParser, metaclass=ParserMeta):
         """
         self._cli_args = args
 
-    def parse_args(
-        self, args: Any = None, _internal: bool = False, namespace: Any = None
+    def parse_args(  # type: ignore[override]
+        self,
+        args: Any = None,
+        _internal: bool = False,
+        namespace: Any = None,
     ) -> Namespace:
         """Parse the pipeline arguments.
 
@@ -172,21 +189,23 @@ class Parser(ArgumentParser, metaclass=ParserMeta):
             `sys.argv`, a `FallbackNamespace` is returned with the default values in
             `kwargs`.
         """
-        help_args = ("-h", "--help", "-h+", "--help+")
-        if args is not None and is_loading_pipeline(
-            *help_args, argv=[sys.argv[0], *(args or [])]
-        ):
-            return self._extra_arg_fallbacks
+        args = args or self._cli_args or sys.argv[1:]
 
-        if not args and is_loading_pipeline(*help_args):
-            return self._extra_arg_fallbacks
-
-        return self.parse_known_args(args, fromfile_parse=fromfile_parse)[0]
+        # Parse only the extra arguments, leave the rest to the main parser later
+        ns, remaining = self._extra_parser.parse_known_args(
+            args, fromfile_parse=fromfile_parse
+        )
+        # Save remaining args so the main parser can consume them
+        self._cli_args = remaining  # type: ignore[assignment]
+        return ns
 
     def init(self, pipen: Pipen) -> None:
         """Define arguments"""
-        self._pipeline_args_group = self.add_argument_group(
-            pipen._kwargs["plugin_opts"].get("args_group", PIPELINE_ARGS_GROUP),
+        self._pipeline_args_group = self.add_argument_group(  # type: ignore[assignment]
+            pipen._kwargs["plugin_opts"].get(
+                "args_group",
+                PIPELINE_ARGS_GROUP,
+            ),
             order=-99,
         )
         self.flatten_proc_args = pipen._kwargs["plugin_opts"].get(
@@ -236,7 +255,10 @@ class Parser(ArgumentParser, metaclass=ParserMeta):
                 in_procgroup = bool(proc.__meta__["procgroup"])
                 self._add_proc_args(
                     proc,
-                    is_start=proc in pipen.starts and not in_procgroup,
+                    is_start=(
+                        (proc in pipen.starts)  # type: ignore[operator]
+                        and not in_procgroup
+                    ),
                     hide=(
                         in_procgroup
                         if not proc.plugin_opts
@@ -357,7 +379,7 @@ class Parser(ArgumentParser, metaclass=ParserMeta):
             )
 
         self._add_envs_arguments(
-            self,
+            self,  # type: ignore[arg-type]
             anno.Envs,
             proc.envs or {},
             flatten,
@@ -430,3 +452,29 @@ class Parser(ArgumentParser, metaclass=ParserMeta):
                     proc_name=proc_name,
                     key=f"{key}.{kk}",
                 )
+
+    # Compose help from main parser plus extra parser's actions/groups
+    def format_help(self, plus: bool = True) -> str:
+        main_help = super().format_help(plus=plus)
+
+        if not self._extra_groups:
+            return main_help
+
+        formatter = self._get_formatter()
+        for action_group in sorted(
+            self._extra_groups.values(),
+            key=lambda x: (x.order, x.title),  # type: ignore[return-value]
+        ):
+            formatter.start_section(
+                "\033[1m\033[4m"
+                f"{format_title(action_group.title)}"  # type: ignore[arg-type]
+                "\033[0m\033[0m"
+            )
+            formatter.add_text(action_group.description)
+            formatter.add_arguments(  # type: ignore[call-arg]
+                action_group._group_actions,
+                plus,  # type: ignore[arg-type]
+            )
+            formatter.end_section()
+
+        return main_help + "\n" + formatter.format_help()

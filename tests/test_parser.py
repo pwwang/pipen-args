@@ -23,17 +23,16 @@ def test_fallbacknamespace():
 
 def test_add_extra_argument():
     parser = Parser()
-    with pytest.raises(ValueError, match='Fallback value is required'):
+    with pytest.raises(ValueError, match='Extra arguments cannot be required'):
         parser.add_extra_argument('-x', required=True)
 
 
 def test_parse_args_externally():
     parser = Parser()
-    x = parser.add_extra_argument('-x', required=True, fallback=1)
+    parser.add_extra_argument('-x', default=1)
     with pytest.raises(ValueError):
         parser.parse_args()
 
     with with_argv([LOADING_ARGV0]):
         p = parser.parse_extra_args()
     assert p.x == 1
-    parser._actions.remove(x)

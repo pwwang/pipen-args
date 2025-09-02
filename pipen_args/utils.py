@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Type
 
 from diot import Diot
 from argx import Namespace
@@ -57,7 +57,7 @@ def _dump_dict(
     parser: ArgumentParser,
     proc2group: dict[str, str | None],
     procgroups: set[str],
-    name2proc: dict[str, Proc],
+    name2proc: dict[str, Type[Proc]],
     prefix: str | None,
 ) -> list[str]:
     """Dump the parsed arguments into a dictionary
@@ -213,7 +213,7 @@ def dump_args(
     parser: ArgumentParser,
     parsed: Namespace,
     dumped_file: Path,
-    procs: list[Proc],
+    procs: list[Type[Proc]],
 ) -> None:
     """Dump the parsed arguments into a dictionary
 

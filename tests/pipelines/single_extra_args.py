@@ -3,9 +3,10 @@ from pipen import Proc, Pipen
 from pipen_args import parser
 
 parser.add_extra_argument('-x', choices=['a', 'b'], default='a')
-parser.add_extra_argument('-yy', type=int, required=True, fallback=1)
+parser.add_extra_argument('-yy', type=int, default=1)
+parser.add_extra_argument('-z', default=None, show=False)
 parsed = parser.parse_extra_args()
-parsed_args = parser.parse_extra_args(args=sys.argv)
+parsed_args = parser.parse_extra_args(args=sys.argv[1:])
 assert parsed.x == 'a'
 assert parsed_args == parsed
 
