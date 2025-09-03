@@ -20,21 +20,6 @@ if TYPE_CHECKING:  # pragma: no cover
     from pipen import Pipen, Proc
 
 
-class FallbackNamespace(Namespace):
-    """When an argument is not found, return None"""
-
-    def __getattr__(self, name: str) -> Any:
-        """Get attribute"""
-        try:
-            return super().__getattr__(name)
-        except AttributeError:
-            return None
-
-    def __setitem__(self, key: str, value: Any) -> None:
-        """Set item"""
-        setattr(self, key, value)
-
-
 class ParserMeta(type):
     """Meta class for Proc"""
 
@@ -185,9 +170,7 @@ class Parser(ArgumentParser, metaclass=ParserMeta):
                 when we are not just loading the pipeline.
 
         Returns:
-            The parsed namespace. If `-h`, `-h+`, `--help` or `--help+` is in
-            `sys.argv`, a `FallbackNamespace` is returned with the default values in
-            `kwargs`.
+            The parsed namespace.
         """
         args = args or self._cli_args or sys.argv[1:]
 
