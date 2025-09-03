@@ -154,6 +154,7 @@ class Parser(ArgumentParser, metaclass=ParserMeta):
         self,
         args: Sequence[str] | None = None,
         fromfile_parse: bool = True,
+        fromfile_keep: bool = True,
     ) -> Namespace:
         """Parse extra arguments.
 
@@ -168,6 +169,7 @@ class Parser(ArgumentParser, metaclass=ParserMeta):
             args: The arguments to parse
             fromfile_parse: Whether to parse the extra arguments from file (`@file`)
                 when we are not just loading the pipeline.
+            fromfile_keep: Whether to keep the `@file` arguments in the remaining args.
 
         Returns:
             The parsed namespace.
@@ -176,7 +178,9 @@ class Parser(ArgumentParser, metaclass=ParserMeta):
 
         # Parse only the extra arguments, leave the rest to the main parser later
         ns, remaining = self._extra_parser.parse_known_args(
-            args, fromfile_parse=fromfile_parse
+            args,
+            fromfile_parse=fromfile_parse,
+            fromfile_keep=fromfile_keep,
         )
         # Save remaining args so the main parser can consume them
         self._cli_args = remaining  # type: ignore[assignment]
