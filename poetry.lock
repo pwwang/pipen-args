@@ -915,14 +915,14 @@ executing = ">=2.0,<3.0"
 
 [[package]]
 name = "pipen"
-version = "0.17.22"
+version = "0.17.23"
 description = "A pipeline framework for python"
 optional = false
 python-versions = "<4.0,>=3.9"
 groups = ["main", "dev"]
 files = [
-    {file = "pipen-0.17.22-py3-none-any.whl", hash = "sha256:30fce062a85aba446cf5261fdbac31f657a94b2c3d90b4ed11fbec1a7aff3004"},
-    {file = "pipen-0.17.22.tar.gz", hash = "sha256:fe91851d755b1676e7801e661bdb14fdd1f8ed45eef35230c09739c0db072609"},
+    {file = "pipen-0.17.23-py3-none-any.whl", hash = "sha256:c5a292638160a98df35b1f86f81923a51205ec32f092d52ffe4416567ec7d77c"},
+    {file = "pipen-0.17.23.tar.gz", hash = "sha256:bbaf20d40af8463d3df8c6b71b5d55fef78cbc978436c7acdfd7f9a50adf13dd"},
 ]
 
 [package.dependencies]
