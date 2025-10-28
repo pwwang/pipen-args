@@ -15,34 +15,21 @@ def run_pipeline(
     flatten: Union[str, bool] = "auto",
 ) -> str:
     """Run a pipeline with `args`"""
+    cmd = [
+        sys.executable,
+        str(TEST_DIR / "run_pipeline.py"),
+        f"{pipeline}:pipeline",
+        "++flatten",
+        str(flatten).lower(),
+        "++args",
+        *args,
+        "++gets",
+        *gets,
+    ]
     try:
-        Path('/tmp/x.txt').write_text(' '.join([
-            sys.executable,
-            str(TEST_DIR / "run_pipeline.py"),
-            f"{pipeline}:pipeline",
-            "++flatten",
-            str(flatten).lower(),
-            "++args",
-            *args,
-            "++gets",
-            *gets,
-        ]))
-        return check_output(
-            [
-                sys.executable,
-                str(TEST_DIR / "run_pipeline.py"),
-                f"{pipeline}:pipeline",
-                "++flatten",
-                str(flatten).lower(),
-                "++args",
-                *args,
-                "++gets",
-                *gets,
-            ],
-            encoding="utf-8",
-        )
+        return check_output(cmd, encoding="utf-8")
     except Exception as e:
-        return str(e)
+        return f"Error: {e}\n\nCommand:\n  " + " ".join(cmd)
 
 
 @contextmanager
