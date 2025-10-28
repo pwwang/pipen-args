@@ -242,3 +242,25 @@ def test_required_with_default():
     p = run([sys.executable, str(plfile)], stderr=STDOUT, stdout=PIPE)
     # Should succeed
     assert p.returncode == 0
+
+
+@pytest.mark.forked
+def test_passing_plugins():
+    plfile = Path(__file__).parent / "pipelines" / "single.py"
+    out = check_output(
+        [sys.executable, str(plfile), "--plugins=-args"],
+        encoding="utf-8",
+    )
+    assert "args v" not in out
+
+
+@pytest.mark.forked
+def test_passing_plugins_in_config(tmp_path):
+    config_file = tmp_path / "config.toml"
+    config_file.write_text("plugins = ['-args']\n")
+    plfile = Path(__file__).parent / "pipelines" / "single.py"
+    out = check_output(
+        [sys.executable, str(plfile), f"@{config_file}"],
+        encoding="utf-8",
+    )
+    assert "args v" not in out

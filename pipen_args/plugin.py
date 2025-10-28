@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from pathlib import Path
 
 from argx import Namespace
-from simpleconf import ProfileConfig
+from simpleconf import ProfileConfig, Config
 from pipen import plugin
 from pipen.defaults import CONFIG_FILES
 from pipen.utils import copy_dict, get_logger, is_loading_pipeline, update_dict
@@ -31,6 +31,43 @@ class ArgsPlugin:
     name = "args"
     priority = -9
     version = __version__
+
+    @plugin.impl
+    def on_setup(pipen: Pipen) -> None:  # type: ignore[misc]
+        # Try to make --plugins or plugins from config file work with pipen-args
+        # Import sys here in case sys.argv is patched somewhere else
+        # Do a rough parse of sys.argv to get the plugins
+        import sys
+        flag_eq = [cmd.startswith("--plugins=") for cmd in sys.argv]
+        flag_space = [
+            cmd == "--plugins" and 1 < i + 1 < len(sys.argv)
+            for i, cmd in enumerate(sys.argv)
+        ]
+        plugins = []
+        for i, (eq, sp) in enumerate(zip(flag_eq, flag_space)):
+            plug = (
+                sys.argv[i].split("=", 1)[1]
+                if eq
+                else sys.argv[i + 1]
+                if sp
+                else None
+            )
+            if plug:
+                plugins.append(plug)
+
+        if not plugins:
+            flag_cfg = [cmd.startswith("@") for cmd in sys.argv[1:]]
+            if any(flag_cfg):
+                cfg_path = sys.argv[flag_cfg.index(True) + 1][1:]
+                cfg = Config.load_one(cfg_path, ignore_nonexist=True)
+                if cfg.get("plugins"):
+                    plugins = cfg.plugins
+
+        if plugins:
+            pipen.plugin_context.__exit__()
+            pipen.plugin_context = plugin.plugins_context(plugins)
+            pipen.plugin_context.__enter__()
+            plugin.get_plugin("core").enable()
 
     @plugin.impl
     async def on_init(pipen: Pipen) -> None:  # type: ignore[misc]
