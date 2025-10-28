@@ -19,5 +19,5 @@ class Pipeline2(Pipen):
 
 
 if __name__ == '__main__':
-    Pipeline1().run()
-    Pipeline2().run()
+    Pipeline1(plugins=["args"]).run()
+    Pipeline2(plugins=["args"]).run()
