@@ -22,6 +22,7 @@ pytest-asyncio = "^1"
 pytest-xdist = "^3"
 pytest-forked = "^1"
 pipen-verbose = "^1.1"
+backports-asyncio-runner = {version = "^1.1.0", python = "<3.11"}
 
 [tool.poetry.plugins.pipen]
 args = "pipen_args.plugin:ArgsPlugin"
