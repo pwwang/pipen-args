@@ -209,7 +209,7 @@ def _dump_dict(
     return out
 
 
-def dump_args(
+async def dump_args(
     parser: ArgumentParser,
     parsed: Namespace,
     dumped_file: Path,
@@ -244,6 +244,6 @@ def dump_args(
         prefix=None,
     )
 
-    dumped_file.parent.mkdir(parents=True, exist_ok=True)
-    with dumped_file.open("w") as f:
-        f.writelines(out)
+    await dumped_file.parent.a_mkdir(parents=True, exist_ok=True)
+    async with dumped_file.a_open("w") as f:
+        await f.writelines(out)
