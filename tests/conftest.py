@@ -1,10 +1,10 @@
 import sys
 from contextlib import contextmanager
 from subprocess import check_output
-from pathlib import Path
+from panpath import PanPath
 from typing import List, Union
 
-TEST_DIR = Path(__file__).parent.resolve()
+TEST_DIR = PanPath(__file__).parent.resolve()
 CONFIGS_DIR = TEST_DIR / "configs"
 
 

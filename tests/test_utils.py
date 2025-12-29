@@ -1,3 +1,4 @@
+from panpath import PanPath
 import pytest  # noqa: F401
 from unittest.mock import MagicMock
 from argx.action import NamespaceAction, HelpAction
@@ -195,7 +196,7 @@ def test_dump_dict():
     ]
 
 
-def test_dump_args(tmp_path: Path):
+async def test_dump_args(tmp_path: Path):
     """Test the dump_args function"""
     # Mock the parser
     parser = MagicMock()
@@ -227,13 +228,14 @@ def test_dump_args(tmp_path: Path):
     )
 
     # Create a temporary file
+    tmp_path = PanPath(tmp_path)
     dumped_file = tmp_path / "args.toml"
 
     proc = MagicMock(name="proc")
     proc.__meta__ = {"procgroup": MagicMock()}
 
     # Call the dump_args function
-    dump_args(parser, parsed_args, dumped_file, [proc])
+    await dump_args(parser, parsed_args, dumped_file, [proc])
 
     # Check if the file exists
     assert dumped_file.exists()

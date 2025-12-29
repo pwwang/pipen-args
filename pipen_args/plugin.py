@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from argparse import ArgumentError
 from typing import TYPE_CHECKING
-from pathlib import Path
 
 from argx import Namespace
+from panpath import PanPath
 from simpleconf import ProfileConfig, Config
 from pipen import plugin
 from pipen.defaults import CONFIG_FILES
@@ -38,6 +38,7 @@ class ArgsPlugin:
         # Import sys here in case sys.argv is patched somewhere else
         # Do a rough parse of sys.argv to get the plugins
         import sys
+
         flag_eq = [cmd.startswith("--plugins=") for cmd in sys.argv]
         flag_space = [
             cmd == "--plugins" and 1 < i + 1 < len(sys.argv)
@@ -46,11 +47,7 @@ class ArgsPlugin:
         plugins = []
         for i, (eq, sp) in enumerate(zip(flag_eq, flag_space)):
             plug = (
-                sys.argv[i].split("=", 1)[1]
-                if eq
-                else sys.argv[i + 1]
-                if sp
-                else None
+                sys.argv[i].split("=", 1)[1] if eq else sys.argv[i + 1] if sp else None
             )
             if plug:
                 plugins.append(plug)
@@ -92,8 +89,12 @@ class ArgsPlugin:
         plugin_opts_action = parser.get_action("plugin_opts")
         plugin_opts_default = plugin_opts_action.default if plugin_opts_action else {}
         # Warn if args_hide, args_group, args_flatten are passed
-        if parsed.plugin_opts and "args_hide" in parsed.plugin_opts and (
-            parsed.plugin_opts["args_hide"] != plugin_opts_default.get("args_hide")
+        if (
+            parsed.plugin_opts
+            and "args_hide" in parsed.plugin_opts
+            and (
+                parsed.plugin_opts["args_hide"] != plugin_opts_default.get("args_hide")
+            )
         ):
             warns.append(
                 "[red](!)[/red] `plugin_opts.args_hide` should not be passed "
@@ -101,8 +102,13 @@ class ArgsPlugin:
             )
             del parsed.plugin_opts["args_hide"]
 
-        if parsed.plugin_opts and "args_group" in parsed.plugin_opts and (
-            parsed.plugin_opts["args_group"] != plugin_opts_default.get("args_group")
+        if (
+            parsed.plugin_opts
+            and "args_group" in parsed.plugin_opts
+            and (
+                parsed.plugin_opts["args_group"]
+                != plugin_opts_default.get("args_group")
+            )
         ):
             warns.append(
                 "[red](!)[/red] `plugin_opts.args_group` should not be passed "
@@ -110,9 +116,13 @@ class ArgsPlugin:
             )
             del parsed.plugin_opts["args_group"]
 
-        if parsed.plugin_opts and "args_flatten" in parsed.plugin_opts and (
-            parsed.plugin_opts["args_flatten"]
-            != plugin_opts_default.get("args_flatten")
+        if (
+            parsed.plugin_opts
+            and "args_flatten" in parsed.plugin_opts
+            and (
+                parsed.plugin_opts["args_flatten"]
+                != plugin_opts_default.get("args_flatten")
+            )
         ):
             warns.append(
                 "[red](!)[/red] `plugin_opts.args_flatten` should not be passed "
@@ -176,9 +186,9 @@ class ArgsPlugin:
         # The original name
         pipen_name = pipen.name
         # The default outdir
-        pipen_outdir = Path(f"./{pipen_name}-output").absolute()
+        pipen_outdir = PanPath(f"./{pipen_name}-output").absolute()
         # The default workdir
-        pipen_workdir = Path(f"./{pipen.config['workdir']}/{pipen_name}").absolute()
+        pipen_workdir = PanPath(f"./{pipen.config['workdir']}/{pipen_name}").absolute()
 
         # Update the name
         if parsed.name not in (None, pipen_name):
@@ -192,7 +202,9 @@ class ArgsPlugin:
             if parsed.outdir == pipen.outdir:
                 # if outdir is not passed from cli,
                 # use the name to infer the outdir
-                parsed.outdir = pipen.outdir = Path(f"./{pipen.name}-output").absolute()
+                parsed.outdir = pipen.outdir = PanPath(
+                    f"./{pipen.name}-output"
+                ).absolute()
             else:
                 # otherwise, use it
                 pipen.outdir = parsed.outdir.absolute()
@@ -218,10 +230,10 @@ class ArgsPlugin:
                 workdir = parsed.workdir
             else:
                 # Otherwise, use the name to infer the workdir
-                workdir = Path(pipen.config["workdir"])
+                workdir = PanPath(pipen.config["workdir"])
 
             parsed.workdir = pipen.workdir = workdir.joinpath(pipen.name).absolute()
-            pipen.workdir.mkdir(parents=True, exist_ok=True)
+            await pipen.workdir.a_mkdir(parents=True, exist_ok=True)
 
         elif parsed.workdir is not None and parsed.workdir != pipen.workdir:
             # The workdir is set by higher priority, and a value is passed by
@@ -263,7 +275,7 @@ class ArgsPlugin:
 
         if args_dump:
             args_dump_file = pipen.outdir / "args.toml"  # type: ignore
-            dump_args(
+            await dump_args(
                 parser,
                 parsed,
                 args_dump_file,
