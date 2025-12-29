@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pipen-args"
-version = "1.0.0"
+version = "1.1.0"
 description = "Command-line argument parser for pipen."
 authors = ["pwwang <pwwang@pwwang.com>"]
 license = "MIT"
