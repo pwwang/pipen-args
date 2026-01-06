@@ -23,6 +23,7 @@ class Process(Proc):
 
 pipeline = Pipen(
     desc='Pipeline description.',
+    forks=10,
 ).set_start(Process)
 
 if __name__ == '__main__':
