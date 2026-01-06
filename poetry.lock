@@ -27,21 +27,22 @@ files = [
 
 [[package]]
 name = "argx"
-version = "0.4.0"
+version = "0.4.2"
 description = "Super-charged argparse for python"
 optional = false
 python-versions = "<4.0,>=3.9"
 groups = ["main", "dev"]
 files = [
-    {file = "argx-0.4.0-py3-none-any.whl", hash = "sha256:0856b7af4728a6c6d21162172612ef3a316a44eafe41859b94adba1d6d2e2676"},
-    {file = "argx-0.4.0.tar.gz", hash = "sha256:20892280b7386ab540f0e39a4c380cbef53a899d8b3c79c9528c79e7e7c560c2"},
+    {file = "argx-0.4.2-py3-none-any.whl", hash = "sha256:fd1fdde7b5ae72faa74cd9bce20caa017e4589d69bdf4c33ed57bc4df49ffb3f"},
+    {file = "argx-0.4.2.tar.gz", hash = "sha256:30688135adbf5fa179619731e9525d31fbb1da4db3dd6a8505d475162e93c8f4"},
 ]
 
 [package.dependencies]
-python-simpleconf = ">=0.7,<0.8"
+python-simpleconf = ">=0.8,<0.9"
 
 [package.extras]
 anypath = ["panpath (>=0.4,<0.5)"]
+panpath = ["panpath (>=0.4,<0.5)"]
 
 [[package]]
 name = "backports-asyncio-runner"
@@ -905,14 +906,14 @@ xml = ["lxml (>=4.9.2)"]
 
 [[package]]
 name = "panpath"
-version = "0.4.8"
+version = "0.4.9"
 description = "Universal sync/async local/cloud path library with pathlib-compatible interface"
 optional = false
 python-versions = "<4.0,>=3.9"
 groups = ["main", "dev"]
 files = [
-    {file = "panpath-0.4.8-py3-none-any.whl", hash = "sha256:d3dffda701b4503dccb437fe845a9882c4e3d35c38c26accfbd69d4b924a2dab"},
-    {file = "panpath-0.4.8.tar.gz", hash = "sha256:d6db046824a0924e37bea19afa88eca17fe4c3d8909bea05948ae4ac8f193315"},
+    {file = "panpath-0.4.9-py3-none-any.whl", hash = "sha256:566e5964c80f22a17f8cb9a99fa75aed98ab962e0fed377ea7842e1889c36cf3"},
+    {file = "panpath-0.4.9.tar.gz", hash = "sha256:9a623d65bcd1415e97b776dd59bbb89e43fb20846899e86daf6b2eb1332e2aaa"},
 ]
 
 [package.dependencies]
@@ -946,14 +947,14 @@ executing = ">=2.0,<3.0"
 
 [[package]]
 name = "pipen"
-version = "1.1.0rc3"
+version = "1.1.2"
 description = "A pipeline framework for python"
 optional = false
 python-versions = "<4.0,>=3.9"
 groups = ["main", "dev"]
 files = [
-    {file = "pipen-1.1.0rc3-py3-none-any.whl", hash = "sha256:dcf2d0bc79f2927979c00df2f6c01d5b97ac88dd1103d990ce5b9186b018e6e2"},
-    {file = "pipen-1.1.0rc3.tar.gz", hash = "sha256:43fbc14417a21f29ecb13c8f04d3e600a80bc29188cddcb4ee632d17a4465b70"},
+    {file = "pipen-1.1.2-py3-none-any.whl", hash = "sha256:7a2f2bfb671c817ba7cf65c4bc7f495960c579de5f4943843d5731cbf977fe06"},
+    {file = "pipen-1.1.2.tar.gz", hash = "sha256:2d6f35933992e5b8061dde917ceadded2f9ec7fb0c456337575b8ec43bf33f5a"},
 ]
 
 [package.dependencies]
@@ -962,7 +963,7 @@ enlighten = ">=1,<2"
 liquidpy = ">=0.8,<0.9"
 pandas = ">=2.0,<3.0"
 pipda = ">=0.13,<0.14"
-python-simpleconf = {version = ">=0.7,<0.8", extras = ["toml"]}
+python-simpleconf = {version = ">=0.8,<0.9", extras = ["toml"]}
 varname = ">=0.15,<0.16"
 xqute = ">=2.0,<3.0"
 
@@ -1192,24 +1193,25 @@ six = ">=1.5"
 
 [[package]]
 name = "python-simpleconf"
-version = "0.7.2"
+version = "0.8.0"
 description = "Simple configuration management with python."
 optional = false
 python-versions = "<4.0,>=3.9"
 groups = ["main", "dev"]
 files = [
-    {file = "python_simpleconf-0.7.2-py3-none-any.whl", hash = "sha256:7d0ce8febd1e0826084ad32c96ffa531c1ec40e7632b2abb67c02c41157bd4ab"},
-    {file = "python_simpleconf-0.7.2.tar.gz", hash = "sha256:03b01c6235f5f288f00ba590564b6bda56c0c1baba71fcf4612caa7c9e63de6f"},
+    {file = "python_simpleconf-0.8.0-py3-none-any.whl", hash = "sha256:2f8b550aa7d9b871516a8264541870036492367d2907c265aa8297d4297558cd"},
+    {file = "python_simpleconf-0.8.0.tar.gz", hash = "sha256:c96d51fd635a410f295c65ddccf5023a24cb1d35df69654a98874a0d37a67791"},
 ]
 
 [package.dependencies]
 diot = ">=0.3.2,<0.4.0"
+panpath = ">=0.4.8,<0.5.0"
 rtoml = {version = ">=0.12,<0.13", optional = true, markers = "sys_platform == \"linux\" and (extra == \"toml\" or extra == \"all\")"}
 tomli = {version = ">=2.0,<3.0", optional = true, markers = "sys_platform != \"linux\" and (extra == \"toml\" or extra == \"all\")"}
 
 [package.extras]
 all = ["iniconfig (>=2.0,<3.0)", "python-dotenv (>=1.1,<2.0)", "pyyaml (>=6,<7)", "rtoml (>=0.12,<0.13) ; sys_platform == \"linux\"", "tomli (>=2.0,<3.0) ; sys_platform != \"linux\""]
-cloud = ["yunpath (>=0.0.4,<0.0.5)"]
+async = ["aiofiles (>=23.0.0)"]
 env = ["python-dotenv (>=1.1,<2.0)"]
 ini = ["iniconfig (>=2.0,<3.0)"]
 toml = ["rtoml (>=0.12,<0.13) ; sys_platform == \"linux\"", "tomli (>=2.0,<3.0) ; sys_platform != \"linux\""]
@@ -1522,14 +1524,14 @@ files = [
 
 [[package]]
 name = "xqute"
-version = "2.0.2"
+version = "2.0.3"
 description = "A job management system for python"
 optional = false
 python-versions = "<4.0,>=3.9"
 groups = ["main", "dev"]
 files = [
-    {file = "xqute-2.0.2-py3-none-any.whl", hash = "sha256:e6c4f41ab16dd8c2046a17069683c4ac5ed6c7220a133f6ce186d2a0c3b829ba"},
-    {file = "xqute-2.0.2.tar.gz", hash = "sha256:6b23ee9c4d992e19d301e13bc154423db6b669b4fcff1b7067d0157a7a3b5bd0"},
+    {file = "xqute-2.0.3-py3-none-any.whl", hash = "sha256:7e1d232b60bf32734f103f0d50222ec5c8adb80792828504adbd6536179334de"},
+    {file = "xqute-2.0.3.tar.gz", hash = "sha256:89c3b29cc6907ec62f5645f7bd289e9d79a93f7632ca2d200660b929811a8b3f"},
 ]
 
 [package.dependencies]
