@@ -1,3 +1,5 @@
+import sys
+from hashlib import sha256
 from pipen import Proc, Pipen
 
 
@@ -40,6 +42,7 @@ class Process(Proc):
 
 
 pipeline = Pipen(
+    name=f"Pipeline{sha256(str(sys.argv).encode()).hexdigest()[:6]}",
     desc="Pipeline description.",
     plugin_opts={"args_dump": True},
 ).set_start(Process)
