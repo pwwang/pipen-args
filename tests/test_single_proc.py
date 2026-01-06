@@ -1,4 +1,4 @@
-import pytest
+import pytest  # noqa: F401
 import re
 import sys
 from pathlib import Path
@@ -6,7 +6,6 @@ from subprocess import check_output, run, PIPE, STDOUT
 from .conftest import run_pipeline
 
 
-@pytest.mark.forked
 def test_name_changes_outdir():
     """Test single proc"""
     out = run_pipeline(
@@ -24,7 +23,6 @@ def test_name_changes_outdir():
     assert re.search(r"outdir = .+/single-output", out)
 
 
-@pytest.mark.forked
 def test_pipeline_with_default_profile():
     """Test single proc with default profile"""
     out = run_pipeline(
@@ -35,7 +33,6 @@ def test_pipeline_with_default_profile():
     assert "scheduler_opts = {}" in out
 
 
-@pytest.mark.forked
 def test_warning_about_profile():
     """Test single proc warning about profile"""
     pipeline_file = Path(__file__).parent / "pipelines" / "single_sched_config.py"
@@ -45,7 +42,6 @@ def test_warning_about_profile():
     assert "`profile` is given by a higher priority" in out
 
 
-@pytest.mark.forked
 def test_sheduler_opts_reserved():
     """Test scheduler options are reserved"""
     pipeline_file = Path(__file__).parent / "pipelines" / "single_sched_config.py"
@@ -57,7 +53,6 @@ def test_sheduler_opts_reserved():
     assert "server2" in out
 
 
-@pytest.mark.forked
 def test_single_proc_files():
     """Test single proc"""
     out = run_pipeline(
@@ -77,7 +72,6 @@ def test_single_proc_files():
     assert "Process.in.a = [['1', '2', '3'], ['4', '5', '6']]" in out
 
 
-@pytest.mark.forked
 def test_single_proc_choices():
     """Test single proc"""
     out = run_pipeline(
@@ -108,7 +102,6 @@ def test_single_proc_choices():
     assert "Process.envs.w.a = A" in out
 
 
-@pytest.mark.forked
 def test_single_proc_list_option():
     """Test single proc"""
     out = run_pipeline(
@@ -119,7 +112,6 @@ def test_single_proc_list_option():
     assert "Process.envs.x = ['b', 'c']" in out
 
 
-@pytest.mark.forked
 def test_single_proc_with_namespace():
     """Test single proc"""
     out = run_pipeline(
@@ -131,7 +123,6 @@ def test_single_proc_with_namespace():
     assert "Process.envs.x = ['b', 'c']" in out
 
 
-@pytest.mark.forked
 def test_single_extra_args():
     """Test single proc"""
     out = run_pipeline(
@@ -150,7 +141,6 @@ def test_single_extra_args():
     assert "Process.envs.y = b" in out
 
 
-@pytest.mark.forked
 def test_single_extra_args_help():
     """Test single proc with --help"""
     pipeline_file = Path(__file__).parent / "pipelines" / "single_extra_args.py"
@@ -167,7 +157,6 @@ def test_single_extra_args_help():
     assert "--out.b" in out
 
 
-@pytest.mark.forked
 def test_warns_when_data_is_set():
     """Test single proc"""
     # W args    (!) [Process] `input_data` is given, ignore input from cli arguments
@@ -179,7 +168,6 @@ def test_warns_when_data_is_set():
     assert "Process.in = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]" in out
 
 
-@pytest.mark.forked
 def test_scalar_input(tmp_path):
     """Test single proc"""
     configfile = tmp_path / "config.toml"
@@ -191,7 +179,6 @@ def test_scalar_input(tmp_path):
     )
 
 
-@pytest.mark.forked
 def test_outdir_workdir_using_name(tmp_path):
     """Test single proc"""
     out = run_pipeline(
@@ -203,7 +190,6 @@ def test_outdir_workdir_using_name(tmp_path):
     assert "xyz-output" in out
 
 
-@pytest.mark.forked
 def test_outdir(tmp_path):
     """Test single proc"""
     out = run_pipeline(
@@ -214,7 +200,6 @@ def test_outdir(tmp_path):
     assert "xyz" in out
 
 
-@pytest.mark.forked
 def test_outdir_workdir(tmp_path):
     """Test single proc"""
     out = run_pipeline(
@@ -226,7 +211,6 @@ def test_outdir_workdir(tmp_path):
     assert "workdir = /tmp/single_outdir_workdir_workdir/Pipen" in out
 
 
-@pytest.mark.forked
 def test_used_in_two_pipelines():
     """Test single proc"""
     plfile = Path(__file__).parent / "pipelines" / "two_pipelines.py"
@@ -235,7 +219,6 @@ def test_used_in_two_pipelines():
     assert "can only be used in one pipeline at a time" in p.stdout.decode()
 
 
-@pytest.mark.forked
 def test_required_with_default():
     """Test single proc"""
     plfile = Path(__file__).parent / "pipelines" / "single_required_with_default.py"
@@ -244,17 +227,15 @@ def test_required_with_default():
     assert p.returncode == 0
 
 
-@pytest.mark.forked
 def test_passing_plugins():
     plfile = Path(__file__).parent / "pipelines" / "single.py"
     out = check_output(
-        [sys.executable, str(plfile), "--plugins=-args"],
+        [sys.executable, str(plfile), "--plugins=-args", "--name"],
         encoding="utf-8",
     )
     assert "args v" not in out
 
 
-@pytest.mark.forked
 def test_passing_plugins_in_config(tmp_path):
     config_file = tmp_path / "config.toml"
     config_file.write_text("plugins = ['-args']\n")

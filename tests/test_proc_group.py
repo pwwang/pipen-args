@@ -1,4 +1,4 @@
-import pytest
+import pytest  # noqa: F401
 
 import sys
 from pathlib import Path
@@ -6,7 +6,6 @@ from subprocess import run
 from .conftest import run_pipeline
 
 
-@pytest.mark.forked
 def test_integrate():
     out = run_pipeline(
         "proc_group_integrate",
@@ -25,7 +24,6 @@ def test_integrate():
     assert "x = 3" in out
 
 
-@pytest.mark.forked
 def test_as_pipen():
     out = run_pipeline(
         "proc_group_as_pipen",
@@ -39,7 +37,6 @@ def test_as_pipen():
     assert "Process <PG/Process2>" in out
 
 
-@pytest.mark.forked
 def test_real_run(tmp_path):
     pipeline_file = Path(__file__).parent / "pipelines" / "proc_group_integrate.py"
     run(

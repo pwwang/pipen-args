@@ -1,9 +1,8 @@
-import pytest
+import pytest  # noqa: F401
 
 from .conftest import run_pipeline
 
 
-@pytest.mark.forked
 def test_multi_proc():
     """Test multi proc"""
     out = run_pipeline(
@@ -15,7 +14,6 @@ def test_multi_proc():
     assert "Process2.forks = 4" in out
 
 
-@pytest.mark.forked
 def test_multi_proc_help():
     """Test multi proc"""
     out = run_pipeline("multiprocesses", gets=["help"])
@@ -26,7 +24,6 @@ def test_multi_proc_help():
     assert "--cache {True,False,force}" in out
 
 
-@pytest.mark.forked
 def test_multi_proc_plugin_opts():
     out = run_pipeline(
         "multiprocesses",
@@ -36,7 +33,6 @@ def test_multi_proc_plugin_opts():
     assert "Process2.plugin_opts.plugin_a = True" in out
 
 
-@pytest.mark.forked
 def test_multi_proc_args_hide():
     """Test multi proc"""
     out = run_pipeline(
