@@ -28,6 +28,15 @@ def __getattr__(name: str) -> Diot | Parser:
                 return Config.load(arg[1:])
         return Diot()
 
+    if name == "config_file":
+        # Allow
+        # from pipen_args import config_file
+        # to get the config file path
+        for arg in sys.argv[1:]:
+            if arg.startswith("@"):
+                return arg[1:]
+        return None
+
     if name == "parser":
         # Allow
         # from pipen_args import parser
