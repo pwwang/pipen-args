@@ -144,7 +144,7 @@ class ArgsPlugin:
 
         if profile and profile != "default":
             pipen.profile = profile
-            init_config = ProfileConfig.load(
+            init_config = await ProfileConfig.a_load(
                 {"default": pipen.config},
                 *CONFIG_FILES,
                 ignore_nonexist=True,
