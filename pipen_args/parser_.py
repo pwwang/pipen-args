@@ -383,6 +383,7 @@ class Parser(ArgumentParser, metaclass=ParserMeta):
                 "scheduler",
                 "forks",
                 "order",
+                "output_flatten",
             ):
                 attrs = PIPEN_ARGS[key].copy()
                 proc_default = getattr(proc, key, None)

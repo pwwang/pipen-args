@@ -343,6 +343,7 @@ class ArgsPlugin:
                 "forks",
                 "scheduler",
                 "submission_batch",
+                "output_flatten",
             ):
                 if proc_args.get(key) is not None:
                     setattr(proc, key, proc_args[key])

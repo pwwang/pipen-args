@@ -120,6 +120,14 @@ PIPEN_ARGS = Diot(
         show=False,
         default=0,
     ),
+    output_flatten=Diot(
+        help=(
+            "Whether to flatten the output from jobs of the process (without creating "
+            "subdirectories with job indexes)."
+        ),
+        action="store_true",
+        default=None,
+    ),
 )
 
 PIPELINE_ARGS_GROUP = "pipeline options"
