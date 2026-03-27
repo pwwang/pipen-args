@@ -102,6 +102,31 @@ def test_single_proc_choices():
     assert "Process.envs.w.a = A" in out
 
 
+def test_single_pre_parse_args():
+    """Test single proc with pre_parse_args"""
+    out = run_pipeline(
+        "single",
+        gets=["Process.envs.x", "Process.envs.t", "Process.envs.t2"],
+        args=[
+            "--envs.t.c[1]=1",
+            "--envs.t.d.e",
+            "2",
+            "--envs.x",
+            "b",
+            "--envs.t2.a",
+            "-1",
+            "--envs.t.flag",
+            "--envs.t2.flag",
+        ],
+    )
+    assert "Process.envs.x = b" in out
+    assert (
+        "Process.envs.t = "
+        "{'a': 1, 'b': 2, 'c': [None, 1], 'd': Diot({'e': 2}), 'flag': True}"
+    ) in out
+    assert "Process.envs.t2 = {'a': -1.0, 'flag': True}" in out
+
+
 def test_single_proc_list_option():
     """Test single proc"""
     out = run_pipeline(

@@ -23,6 +23,7 @@ class Process(Proc):
             - a: item a
             - b: item b
         t (type=json): line4, a json object
+        t2 (type=json): line5, a json object
         <more>: line5
     """
 
@@ -38,6 +39,7 @@ class Process(Proc):
         "z": 1,
         "w": {"a": "x", "b": 2},
         "t": {"a": 1, "b": 2},
+        "t2": {},
     }
 
 

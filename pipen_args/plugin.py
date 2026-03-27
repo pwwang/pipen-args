@@ -74,7 +74,7 @@ class ArgsPlugin:
 
         config: dict = {"plugin_opts": {}, "template_opts": {}, "scheduler_opts": {}}
         config["plugin_opts"]["args_hide"] = False
-        parser = Parser()
+        parser = Parser(description=pipen.desc)
         # Init the parser
         try:
             parser.init(pipen)

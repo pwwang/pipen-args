@@ -6,9 +6,12 @@ import sys
 from typing import TYPE_CHECKING, Any, Sequence, Type, Mapping
 
 from argx import ArgumentParser, Namespace
+from argx.action import NamespaceAction, StoreAction
+from argx.type_ import auto
 from argx.parser import _ArgumentGroup
 from argx.utils import format_title
 from diot import Diot
+from pipen.utils import update_dict
 
 # from pipen.utils import is_loading_pipeline
 from pipen_annotate import annotate
@@ -18,6 +21,107 @@ from .defaults import PIPELINE_ARGS_GROUP, FLATTEN_PROC_ARGS, PIPEN_ARGS
 if TYPE_CHECKING:  # pragma: no cover
     from argparse import Action
     from pipen import Pipen, Proc
+
+
+def _pre_parse(psr: Parser, args: Sequence[str], ns: Namespace):
+    """Pre-parse the arguments to support nested arguments like `--arg.b[0].x 1`"""
+    prefix = "-"
+    actions = sorted(
+        [
+            action
+            for action in psr._actions
+            if (
+                isinstance(action, NamespaceAction)
+                or (isinstance(action, StoreAction) and action.type == "json")
+            )
+        ],
+        key=lambda a: max((len(s) for s in a.option_strings), default=0),
+        reverse=True,
+    )
+    matched_args = {}  # index => value_used
+    for i, arg in enumerate(args):
+        if (
+            # if it is not an option
+            not arg.startswith(prefix)
+            # if it matches any of the option strings of the existing actions
+            or any(
+                arg == opt or arg.startswith(f"{opt}=")
+                for a in psr._actions
+                for opt in a.option_strings
+            )
+        ):
+            continue
+
+        action = None
+        for act in actions:
+            if any(arg.startswith(f"{opt}.") for opt in act.option_strings):
+                action = act
+                matched_args[i] = False
+                break
+
+        if action is None:
+            continue
+
+        key = arg
+        for opt in action.option_strings:
+            if arg.startswith(f"{opt}."):
+                key = arg[len(opt) + 1 :]
+                break
+
+        if '=' in key:
+            key, value_str = key.split('=', 1)
+            value = auto(value_str)
+        elif i == len(args) - 1:
+            value = True
+        else:
+            next_arg = args[i + 1]
+            if next_arg.startswith(prefix):
+                try:
+                    # -1.2
+                    value = float(next_arg)
+                    matched_args[i] = True
+                except ValueError:
+                    value = True
+            else:
+                value = auto(next_arg)
+                matched_args[i] = True
+
+        # The idea is to:
+        # make --arg.b[0].x 1 into
+        # --arg '{"b": [{"x": 1}]}'
+        # now key = 'b[0].x' and value = 1
+        # we need to convert it into a nested dict
+        # {'b': [{'x': 1}]}
+        parts = key.split(".")
+        nested = value
+        for part in reversed(parts):
+            if part.endswith("]") and "[" in part:
+                # if it is like b[0]
+                name, index = part[:-1].split("[", 1)
+                nested = {name: [None] * (int(index) + 1)}
+                nested[name][int(index)] = value
+            else:
+                nested = {part: nested}
+
+        if not action.default:
+            action.default = nested
+        else:
+            action.default = update_dict(action.default, nested)
+
+    # remove the matched args and their values from args
+    new_args = []
+    skip_next = False
+    for i, arg in enumerate(args):
+        if skip_next:
+            skip_next = False
+            continue
+        if i in matched_args:
+            if matched_args[i]:
+                skip_next = True
+            continue
+        new_args.append(arg)
+
+    return new_args
 
 
 class ParserMeta(type):
@@ -65,6 +169,7 @@ class Parser(ArgumentParser, metaclass=ParserMeta):
         kwargs["fromfile_prefix_chars"] = "@"
         kwargs["usage"] = "%(prog)s [-h | -h+] [options]"
         kwargs["allow_abbrev"] = False
+        kwargs["pre_parse"] = _pre_parse
         super().__init__(*args, **kwargs)
 
         self.flatten_proc_args: bool | str | None = None
