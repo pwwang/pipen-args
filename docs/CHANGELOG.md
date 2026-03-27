@@ -1,6 +1,11 @@
 
 # CHANGELOG
 
+## 1.2.0
+
+- feat: implement pre-parsing for nested arguments in parser and update tests
+- chore: update xqute (2.0.7 -> 2.0.8)
+
 ## 1.1.3
 
 - feat: add Makefile to manage versioning and changelog updates
