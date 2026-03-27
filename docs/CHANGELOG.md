@@ -1,6 +1,10 @@
 
 # CHANGELOG
 
+## 1.2.1
+
+- fix: improve handling of nested arguments in pre-parser
+
 ## 1.2.0
 
 - feat: implement pre-parsing for nested arguments in parser and update tests
