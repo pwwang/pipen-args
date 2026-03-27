@@ -68,8 +68,8 @@ def _pre_parse(psr: Parser, args: Sequence[str], ns: Namespace):
                 key = arg[len(opt) + 1 :]
                 break
 
-        if '=' in key:
-            key, value_str = key.split('=', 1)
+        if "=" in key:
+            key, value_str = key.split("=", 1)
             value = auto(value_str)
         elif i == len(args) - 1:
             value = True
@@ -98,15 +98,20 @@ def _pre_parse(psr: Parser, args: Sequence[str], ns: Namespace):
             if part.endswith("]") and "[" in part:
                 # if it is like b[0]
                 name, index = part[:-1].split("[", 1)
-                nested = {name: [None] * (int(index) + 1)}
-                nested[name][int(index)] = value
+                list_values = [None] * (int(index) + 1)
+                list_values[int(index)] = nested
+                nested = {name: list_values}
             else:
                 nested = {part: nested}
 
         if not action.default:
             action.default = nested
         else:
-            action.default = update_dict(action.default, nested)
+            action.default = update_dict(
+                action.default,
+                nested,
+                try_list=True,
+            )
 
     # remove the matched args and their values from args
     new_args = []
