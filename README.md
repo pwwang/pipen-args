@@ -1,6 +1,7 @@
-# pipen-args
-
-Command line argument parser for [pipen][1]
+<div align="center">
+    <img src="./logo.png" width="240px" alt="pipen-args logo" />
+    <p style="font-weight:bold;">Command line argument parser for <a href="https://github.com/pwwang/pipen">pipen</a></p>
+</div>
 
 ## Usage
 
@@ -81,5 +82,3 @@ class Process(Proc):
 The metadata could be key-value pairs separated by `;`. The separator `:` or `=` is used to
 separate the key and value. The value is optional. If the value is not specified, it
 will be set to `True`. The keys are valid arguments of `argx.ArgumentParser.add_argument`, except that `hidden` will be interpreted as `show=False` in `argx.ArgumentParser.add_argument`. If the value of `choices` is not specified, the subkeys of the env item will be used as the choices.
-
-[1]: https://github.com/pwwang/pipen
