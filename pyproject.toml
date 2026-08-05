@@ -52,3 +52,6 @@ allow_redefinition = true
 disable_error_code = ["attr-defined", "no-redef", "union-attr", "import"]
 show_error_codes = true
 strict_optional = false
+
+[tool.uv]
+prerelease = "allow"

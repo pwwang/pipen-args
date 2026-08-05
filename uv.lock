@@ -15,6 +15,9 @@ resolution-markers = [
     "python_full_version < '3.10'",
 ]
 
+[options]
+prerelease-mode = "allow"
+
 [[package]]
 name = "aiofiles"
 version = "25.1.0"
@@ -1024,7 +1027,7 @@ wheels = [
 
 [[package]]
 name = "pipen"
-version = "1.1.19"
+version = "1.2.0a4"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "argx" },
@@ -1037,9 +1040,9 @@ dependencies = [
     { name = "varname" },
     { name = "xqute" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/17/74/de19b19ee05e9ff14f80272cca840274a471fbf2a52699a53308cf6f06e0/pipen-1.1.19.tar.gz", hash = "sha256:cd28efb0718ea9764d12eb14efeefbee76e9e3783b9e61c08696ccadad3956ae", size = 805016, upload-time = "2026-07-28T00:36:13.284Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/e5/9f/ad1a0491bdb0fee4d3a9d56895879f403c81557757f8b94baaee81b7aec6/pipen-1.2.0a4.tar.gz", hash = "sha256:b9a89c1ff19ca81ea90fb0f082eba0b66beaadf5a6d6365380a198fdeb4dcd24", size = 732625, upload-time = "2026-08-05T19:30:45.79Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/61/49/cfab9949af42c1e0c64bb9708b47ddeef8ac00785d79b18a744cb31585aa/pipen-1.1.19-py3-none-any.whl", hash = "sha256:e39a5063aaeeca9a324d29d13a557aa65f30eff56f830c30177bd9b90a0e8ee7", size = 59133, upload-time = "2026-07-28T00:36:12.089Z" },
+    { url = "https://files.pythonhosted.org/packages/7b/8b/9b29ca32a1191500c04fe71a78458222b7db68ddfbaa0bfe0b7cb250377e/pipen-1.2.0a4-py3-none-any.whl", hash = "sha256:f39b067908ff9aa75863450c4b38cdffba63287f3dad660405a2480b1a451593", size = 58776, upload-time = "2026-08-05T19:30:47.129Z" },
 ]
 
 [[package]]
@@ -1602,7 +1605,7 @@ wheels = [
 
 [[package]]
 name = "xqute"
-version = "2.1.2"
+version = "2.2.0a6"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiofiles" },
@@ -1612,7 +1615,7 @@ dependencies = [
     { name = "simplug" },
     { name = "uvloop" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/25/05/c343c557712b66a157951042f1ce118db9c98c1e72a6e53255d675fffdff/xqute-2.1.2.tar.gz", hash = "sha256:cda892710129b272143ec91cff6f0c7d9e9625941607419798050ab3766a98d6", size = 656251, upload-time = "2026-07-23T22:30:18.193Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/0b/0f/6770df3a290473931d7597fb87b87e8de2db6fb9a4a0c1640a41bdad8022/xqute-2.2.0a6.tar.gz", hash = "sha256:c72a31085a5419d6ca48fbbdac23445399fc9464cf1f85768feb066b8bf9e6e0", size = 612752, upload-time = "2026-08-05T15:59:22.757Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/76/30/6fbd24ccb7a1450ca46402ffba141b1a4059c8d72a780c58e92ab3ad23cd/xqute-2.1.2-py3-none-any.whl", hash = "sha256:67a5a76b3832a4ba28b2a4c6da808b7f0e498db9425eefc3d9c70dc9d8888634", size = 44604, upload-time = "2026-07-23T22:30:16.887Z" },
+    { url = "https://files.pythonhosted.org/packages/52/af/134289c3590eb9dd7b1d3b5f93f075c53b428377dc47e86955baee4ea0c8/xqute-2.2.0a6-py3-none-any.whl", hash = "sha256:9c31b4da251a84543e3cc2eaa773f2624a0e3a658e717c4ae5c4884e09b8ccc0", size = 46410, upload-time = "2026-08-05T15:59:20.524Z" },
 ]

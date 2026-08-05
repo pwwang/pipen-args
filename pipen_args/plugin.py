@@ -186,9 +186,9 @@ class ArgsPlugin:
         # The original name
         pipen_name = pipen.name
         # The default outdir
-        pipen_outdir = PanPath(f"./{pipen_name}-output").absolute()
+        pipen_outdir = PanPath(f"./{pipen_name}-output")
         # The default workdir
-        pipen_workdir = PanPath(f"./{pipen.config['workdir']}/{pipen_name}").absolute()
+        pipen_workdir = PanPath(f"./{pipen.config['workdir']}/{pipen_name}")
 
         # Update the name
         if parsed.name not in (None, pipen_name):
@@ -202,12 +202,10 @@ class ArgsPlugin:
             if parsed.outdir == pipen.outdir:
                 # if outdir is not passed from cli,
                 # use the name to infer the outdir
-                parsed.outdir = pipen.outdir = PanPath(
-                    f"./{pipen.name}-output"
-                ).absolute()
+                parsed.outdir = pipen.outdir = PanPath(f"./{pipen.name}-output")
             else:
                 # otherwise, use it
-                pipen.outdir = parsed.outdir.absolute()
+                pipen.outdir = parsed.outdir
 
         elif parsed.outdir is not None and parsed.outdir != pipen.outdir:
             # The outdir is set by higher priority, and a value is passed by
@@ -221,7 +219,11 @@ class ArgsPlugin:
             parsed.outdir = pipen.outdir
 
         # Update the workdir
-        if pipen.workdir is None or pipen.workdir.absolute() == pipen_workdir:
+        if (
+            pipen.workdir is None
+            or parsed.workdir is None
+            or pipen.workdir.absolute() == pipen_workdir
+        ):
             # The workdir is still some default values, that means it is not set
             # by higher priority (Pipen.workdir, or Pipen(workdir=...))
             # So we can use the value from arguments
@@ -232,8 +234,8 @@ class ArgsPlugin:
                 # Otherwise, use the name to infer the workdir
                 workdir = PanPath(pipen.config["workdir"])
 
-            parsed.workdir = pipen.workdir = workdir.joinpath(pipen.name).absolute()
-            await pipen.workdir.a_mkdir(parents=True, exist_ok=True)
+            parsed.workdir = pipen.workdir = workdir.joinpath(pipen.name)
+            # await pipen.workdir.a_mkdir(parents=True, exist_ok=True)
 
         elif parsed.workdir is not None and parsed.workdir != pipen.workdir:
             # The workdir is set by higher priority, and a value is passed by

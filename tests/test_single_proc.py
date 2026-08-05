@@ -20,7 +20,7 @@ def test_name_changes_outdir():
     )
     assert "name = single" in out
     assert "forks = 2" in out
-    assert re.search(r"outdir = .+/single-output", out)
+    assert re.search(r"outdir = single-output", out)
 
 
 def test_pipeline_with_default_profile():
