@@ -6,7 +6,7 @@ from subprocess import check_output, run, PIPE, STDOUT
 from .conftest import run_pipeline
 
 
-def test_name_changes_outdir():
+def test_name_changes_outdir(tmp_path):
     """Test single proc"""
     out = run_pipeline(
         "single",
@@ -16,44 +16,76 @@ def test_name_changes_outdir():
             "single",
             "--forks",
             "2",
+            "--workdir",
+            str(tmp_path / "workdir"),
+            "--outdir",
+            str(tmp_path / "outdir"),
         ],
     )
     assert "name = single" in out
     assert "forks = 2" in out
-    assert re.search(r"outdir = single-output", out)
+    assert re.search(r"outdir = /tmp/.+/outdir", out)
 
 
-def test_pipeline_with_default_profile():
+def test_pipeline_with_default_profile(tmp_path):
     """Test single proc with default profile"""
     out = run_pipeline(
         "single",
         gets=["scheduler_opts"],
-        args=["--name", "single", "--profile", "default"],
+        args=[
+            "--name",
+            "single",
+            "--profile",
+            "default",
+            "--workdir",
+            str(tmp_path / "workdir"),
+            "--outdir",
+            str(tmp_path / "outdir"),
+        ],
     )
     assert "scheduler_opts = {}" in out
 
 
-def test_warning_about_profile():
+def test_warning_about_profile(tmp_path):
     """Test single proc warning about profile"""
     pipeline_file = Path(__file__).parent / "pipelines" / "single_sched_config.py"
     out = check_output(
-        [sys.executable, str(pipeline_file), "--profile", "local"], encoding="utf-8"
+        [
+            sys.executable,
+            str(pipeline_file),
+            "--profile",
+            "local",
+            "--workdir",
+            str(tmp_path / "workdir"),
+            "--outdir",
+            str(tmp_path / "outdir"),
+        ],
+        encoding="utf-8",
     )
     assert "`profile` is given by a higher priority" in out
 
 
-def test_sheduler_opts_reserved():
+def test_sheduler_opts_reserved(tmp_path):
     """Test scheduler options are reserved"""
     pipeline_file = Path(__file__).parent / "pipelines" / "single_sched_config.py"
     out = check_output(
-        [sys.executable, str(pipeline_file), "--name", "another_name"],
+        [
+            sys.executable,
+            str(pipeline_file),
+            "--name",
+            "another_name",
+            "--workdir",
+            str(tmp_path / "workdir"),
+            "--outdir",
+            str(tmp_path / "outdir"),
+        ],
         encoding="utf-8",
     )
     assert "server1" in out
     assert "server2" in out
 
 
-def test_single_proc_files():
+def test_single_proc_files(tmp_path):
     """Test single proc"""
     out = run_pipeline(
         "single_files",
@@ -67,16 +99,26 @@ def test_single_proc_files():
             "4",
             "5",
             "6",
+            "--workdir",
+            str(tmp_path / "workdir"),
+            "--outdir",
+            str(tmp_path / "outdir"),
         ],
     )
     assert "Process.in.a = [['1', '2', '3'], ['4', '5', '6']]" in out
 
 
-def test_single_proc_choices():
+def test_single_proc_choices(tmp_path):
     """Test single proc"""
     out = run_pipeline(
         "single",
         gets=["help"],
+        args=[
+            "--workdir",
+            str(tmp_path / "workdir"),
+            "--outdir",
+            str(tmp_path / "outdir"),
+        ],
     )
     assert "--envs.x {a,b}" in out
     assert "--envs.z {1,2,3}" in out
@@ -95,6 +137,10 @@ def test_single_proc_choices():
             "1",
             "--envs.w.a",
             "A",
+            "--workdir",
+            str(tmp_path / "workdir"),
+            "--outdir",
+            str(tmp_path / "outdir"),
         ],
     )
     assert "Process.envs.x = a" in out
@@ -102,7 +148,7 @@ def test_single_proc_choices():
     assert "Process.envs.w.a = A" in out
 
 
-def test_single_pre_parse_args():
+def test_single_pre_parse_args(tmp_path):
     """Test single proc with pre_parse_args"""
     out = run_pipeline(
         "single",
@@ -117,6 +163,10 @@ def test_single_pre_parse_args():
             "-1",
             "--envs.t.flag",
             "--envs.t2.flag",
+            "--workdir",
+            str(tmp_path / "workdir"),
+            "--outdir",
+            str(tmp_path / "outdir"),
         ],
     )
     assert "Process.envs.x = b" in out
@@ -127,28 +177,44 @@ def test_single_pre_parse_args():
     assert "Process.envs.t2 = {'a': -1.0, 'flag': True}" in out
 
 
-def test_single_proc_list_option():
+def test_single_proc_list_option(tmp_path):
     """Test single proc"""
     out = run_pipeline(
         "single_list_option",
         gets=["Process.envs.x"],
-        args=["--envs.x", "b", "c"],
+        args=[
+            "--envs.x",
+            "b",
+            "c",
+            "--workdir",
+            str(tmp_path / "workdir"),
+            "--outdir",
+            str(tmp_path / "outdir"),
+        ],
     )
     assert "Process.envs.x = ['b', 'c']" in out
 
 
-def test_single_proc_with_namespace():
+def test_single_proc_with_namespace(tmp_path):
     """Test single proc"""
     out = run_pipeline(
         "single_list_option",
         flatten=False,
         gets=["Process.envs.x"],
-        args=["--Process.envs.x", "b", "c"],
+        args=[
+            "--Process.envs.x",
+            "b",
+            "c",
+            "--workdir",
+            str(tmp_path / "workdir"),
+            "--outdir",
+            str(tmp_path / "outdir"),
+        ],
     )
     assert "Process.envs.x = ['b', 'c']" in out
 
 
-def test_single_extra_args():
+def test_single_extra_args(tmp_path):
     """Test single proc"""
     out = run_pipeline(
         "single_extra_args",
@@ -160,13 +226,17 @@ def test_single_extra_args():
             "b",
             "-yy",
             "2",
+            "--workdir",
+            str(tmp_path / "workdir"),
+            "--outdir",
+            str(tmp_path / "outdir"),
         ],
     )
     assert "Process.envs.x = a" in out
     assert "Process.envs.y = b" in out
 
 
-def test_single_extra_args_help():
+def test_single_extra_args_help(tmp_path):
     """Test single proc with --help"""
     pipeline_file = Path(__file__).parent / "pipelines" / "single_extra_args.py"
     out = check_output([sys.executable, str(pipeline_file), "--help"], encoding="utf-8")
@@ -176,19 +246,37 @@ def test_single_extra_args_help():
         encoding="utf-8",
     )
     assert "-z Z" in out
-    out = run_pipeline("single_extra_args", args=["-yy", "1"], gets=["help"])
+    out = run_pipeline(
+        "single_extra_args",
+        args=[
+            "-yy",
+            "1",
+            "--workdir",
+            str(tmp_path / "workdir"),
+            "--outdir",
+            str(tmp_path / "outdir"),
+        ],
+        gets=["help"],
+    )
     assert "-x" in out
     assert "--envs.x" in out
     assert "--out.b" in out
 
 
-def test_warns_when_data_is_set():
+def test_warns_when_data_is_set(tmp_path):
     """Test single proc"""
     # W args    (!) [Process] `input_data` is given, ignore input from cli arguments
     out = run_pipeline(
         "single",
         gets=["Process.in"],
-        args=["--in.a", "a"],
+        args=[
+            "--in.a",
+            "a",
+            "--workdir",
+            str(tmp_path / "workdir"),
+            "--outdir",
+            str(tmp_path / "outdir"),
+        ],
     )
     assert "Process.in = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]" in out
 
@@ -200,7 +288,13 @@ def test_scalar_input(tmp_path):
     run_pipeline(
         "single_files",
         gets=["Process.in"],
-        args=[f"@{configfile}", "--workdir", str(tmp_path / "workdir")],
+        args=[
+            f"@{configfile}",
+            "--workdir",
+            str(tmp_path / "workdir"),
+            "--outdir",
+            str(tmp_path / "outdir"),
+        ],
     )
 
 
@@ -236,26 +330,54 @@ def test_outdir_workdir(tmp_path):
     assert "workdir = /tmp/single_outdir_workdir_workdir/Pipen" in out
 
 
-def test_used_in_two_pipelines():
+def test_used_in_two_pipelines(tmp_path):
     """Test single proc"""
     plfile = Path(__file__).parent / "pipelines" / "two_pipelines.py"
-    p = run([sys.executable, str(plfile)], stderr=STDOUT, stdout=PIPE)
+    p = run(
+        [
+            sys.executable,
+            str(plfile),
+            "--workdir",
+            str(tmp_path / "workdir"),
+            "--outdir",
+            str(tmp_path / "outdir"),
+        ],
+        stderr=STDOUT,
+        stdout=PIPE,
+    )
     assert p.returncode == 1
     assert "can only be used in one pipeline at a time" in p.stdout.decode()
 
 
-def test_required_with_default():
+def test_required_with_default(tmp_path):
     """Test single proc"""
     plfile = Path(__file__).parent / "pipelines" / "single_required_with_default.py"
-    p = run([sys.executable, str(plfile)], stderr=STDOUT, stdout=PIPE)
+    p = run(
+        [
+            sys.executable,
+            str(plfile),
+            "--workdir",
+            str(tmp_path / "workdir"),
+            "--outdir",
+            str(tmp_path / "outdir"),
+        ],
+        stderr=STDOUT,
+        stdout=PIPE,
+    )
     # Should succeed
     assert p.returncode == 0
 
 
-def test_passing_plugins():
-    plfile = Path(__file__).parent / "pipelines" / "single.py"
+def test_passing_plugins(tmp_path):
+    plfile = Path(__file__).parent / "pipelines" / "single_with_dir.py"
     out = check_output(
-        [sys.executable, str(plfile), "--plugins=-args", "--name"],
+        [
+            sys.executable,
+            str(plfile),
+            "--plugins=-args",
+            "--name",
+            "xyz",
+        ],
         encoding="utf-8",
     )
     assert "args v" not in out
@@ -264,7 +386,7 @@ def test_passing_plugins():
 def test_passing_plugins_in_config(tmp_path):
     config_file = tmp_path / "config.toml"
     config_file.write_text("plugins = ['-args']\n")
-    plfile = Path(__file__).parent / "pipelines" / "single.py"
+    plfile = Path(__file__).parent / "pipelines" / "single_with_dir.py"
     out = check_output(
         [sys.executable, str(plfile), f"@{config_file}"],
         encoding="utf-8",

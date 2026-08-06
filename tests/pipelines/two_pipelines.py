@@ -4,10 +4,10 @@ from pipen import Proc, Pipen
 
 
 class Process(Proc):
-    input = 'a'
-    output = 'b:file:b.txt'
+    input = "a"
+    output = "b:file:b.txt"
     input_data = [0]
-    script = 'echo {{in.a}} > {{out.b}}'
+    script = "echo {{in.a}} > {{out.b}}"
 
 
 class Pipeline1(Pipen):
@@ -18,6 +18,14 @@ class Pipeline2(Pipen):
     starts = Process
 
 
-if __name__ == '__main__':
-    Pipeline1(plugins=["args"]).run()
-    Pipeline2(plugins=["args"]).run()
+if __name__ == "__main__":
+    Pipeline1(
+        plugins=["args"],
+        workdir="/tmp/pipen-args-tests/two_pipelinse_workdir",
+        outdir="/tmp/pipen-args-tests/two_pipelinse_outdir",
+    ).run()
+    Pipeline2(
+        plugins=["args"],
+        workdir="/tmp/pipen-args-tests/two_pipelinse_workdir",
+        outdir="/tmp/pipen-args-tests/two_pipelinse_outdir",
+    ).run()

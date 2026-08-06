@@ -6,10 +6,17 @@ from subprocess import run
 from .conftest import run_pipeline
 
 
-def test_integrate():
+def test_integrate(tmp_path):
     out = run_pipeline(
         "proc_group_integrate",
-        args=["--PG.x", "3"],
+        args=[
+            "--PG.x",
+            "3",
+            "--workdir",
+            str(tmp_path / "workdir"),
+            "--outdir",
+            str(tmp_path / "outdir"),
+        ],
         gets=["help+"],
     )
     assert "Process Group <PG>" in out
@@ -18,16 +25,29 @@ def test_integrate():
 
     out = run_pipeline(
         "proc_group_integrate",
-        args=["--PG.x", "3"],
+        args=[
+            "--PG.x",
+            "3",
+            "--workdir",
+            str(tmp_path / "workdir"),
+            "--outdir",
+            str(tmp_path / "outdir"),
+        ],
         gets=["Process.envs.x"],
     )
     assert "x = 3" in out
 
 
-def test_as_pipen():
+def test_as_pipen(tmp_path):
     out = run_pipeline(
         "proc_group_as_pipen",
-        args=["--help+"],
+        args=[
+            "--help+",
+            "--workdir",
+            str(tmp_path / "workdir"),
+            "--outdir",
+            str(tmp_path / "outdir"),
+        ],
         gets=["help+"],
     )
     # No annotation, so no help

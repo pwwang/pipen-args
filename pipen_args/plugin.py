@@ -221,8 +221,7 @@ class ArgsPlugin:
         # Update the workdir
         if (
             pipen.workdir is None
-            or parsed.workdir is None
-            or pipen.workdir.absolute() == pipen_workdir
+            or pipen.workdir.absolute() == pipen_workdir.absolute()
         ):
             # The workdir is still some default values, that means it is not set
             # by higher priority (Pipen.workdir, or Pipen(workdir=...))
