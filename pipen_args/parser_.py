@@ -1,5 +1,6 @@
 """Command line argument parser for pipen"""
-
+# pyright: reportCallIssue=false
+# pyright: reportArgumentType=false
 from __future__ import annotations
 
 import sys

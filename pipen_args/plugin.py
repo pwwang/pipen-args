@@ -1,3 +1,6 @@
+# pyright: reportAttributeAccessIssue=false
+# pyright: reportArgumentType=false
+# pyright: reportCallIssue=false
 from __future__ import annotations
 
 from argparse import ArgumentError

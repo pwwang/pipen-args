@@ -55,3 +55,12 @@ strict_optional = false
 
 [tool.uv]
 prerelease = "allow"
+
+[tool.pyright]
+ignore = ["tests/"]
+reportOptionalSubscript = false
+reportOptionalMemberAccess = false
+reportOptionalIterable = false
+reportOptionalOperand = false
+reportIncompatibleVariableOverride = false
+reportAttributeAccessIssue = false
