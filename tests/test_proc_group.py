@@ -3,7 +3,90 @@ import pytest  # noqa: F401
 import sys
 from pathlib import Path
 from subprocess import run
-from .conftest import run_pipeline
+from pipen import Proc
+from pipen.utils import LOADING_ARGV0
+from pipen_args import ProcGroup, Parser
+
+from .conftest import fresh_parser, run_pipeline, with_argv
+
+
+class PG(ProcGroup):
+    """A proc group
+
+    Args:
+        x (type:int): x env
+        y: y env
+    """
+
+    DEFAULTS = {"x": 1, "y": 2}
+
+    def post_init(self) -> None:
+        self.post_init_done = True
+
+    @ProcGroup.add_proc
+    def p(self):
+        class Process(Proc):
+            """A process
+
+            Envs:
+                x: x env
+            """
+
+            input = "a"
+            input_data = range(3)
+            output = "b:var:{{in.a + envs.x}}"
+            script = "echo {{in.a + envs.x}}"
+            envs = {"x": self.opts.x}
+
+        return Process
+
+
+def _fresh_pg():
+    """Reset the singleton instance of the `PG` proc group"""
+    if "_INST" in PG.__dict__:
+        delattr(PG, "_INST")
+
+
+def test_in_proc_parse():
+    """Parse arguments in-process and load the proc group"""
+    fresh_parser()
+    _fresh_pg()
+    with with_argv(["pipeline.py", "--PG.x", "3"]):
+        pg = PG()
+    assert pg.opts.x == 3
+    assert pg.opts.y == 2
+    assert pg.post_init_done
+    assert "Process" in pg.procs
+    assert pg.starts == [pg.procs["Process"]]
+    assert Parser().get_action("PG.y") is not None
+
+
+def test_in_proc_help():
+    """Skip parsing when -h is in sys.argv"""
+    fresh_parser()
+    _fresh_pg()
+    with with_argv(["pipeline.py", "-h"]):
+        pg = PG()
+    assert pg.opts.x == 1
+    assert pg.post_init_done
+
+
+def test_in_proc_loading():
+    """Skip parsing when loading the pipeline"""
+    fresh_parser()
+    _fresh_pg()
+    with with_argv([LOADING_ARGV0, "--PG.x", "3"]):
+        pg = PG()
+    assert pg.opts.x == 1
+
+
+def test_in_proc_opts():
+    """Update opts from the constructor arguments"""
+    fresh_parser()
+    _fresh_pg()
+    with with_argv(["pipeline.py"]):
+        pg = PG(y=5)
+    assert pg.opts.y == 5
 
 
 def test_integrate(tmp_path):

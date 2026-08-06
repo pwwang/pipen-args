@@ -1,6 +1,7 @@
 import pytest  # noqa: F401
 
 import contextlib
+from diot import Diot
 from .conftest import run_pipeline, CONFIGS_DIR
 
 
@@ -56,3 +57,31 @@ def test_import_config_file():
     ):
         from pipen_args import config_file
         assert config_file is None
+
+
+def test_import_config():
+    """Import config from a config file via sys.argv"""
+    with with_argv(
+        [
+            "pipeline.py",
+            f"@{CONFIGS_DIR / 'bare.toml'}",
+        ]
+    ):
+        from pipen_args import config
+        assert config.a == 1
+
+    with with_argv(
+        [
+            "pipeline.py",
+        ]
+    ):
+        from pipen_args import config
+        assert config == Diot()
+
+
+def test_import_parser():
+    """Import the parser instance"""
+    from pipen_args import parser
+    from pipen_args.parser_ import Parser
+
+    assert isinstance(parser, Parser)
