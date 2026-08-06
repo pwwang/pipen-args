@@ -1,6 +1,6 @@
 [project]
 name = "pipen-args"
-version = "1.2.1"
+dynamic = ["version"]
 description = "Command-line argument parser for pipen."
 authors = [{ name = "pwwang", email = "pwwang@pwwang.com" }]
 license = "MIT"
@@ -9,6 +9,9 @@ requires-python = ">=3.9"
 dependencies = [
     "pipen-annotate>=1.0",
 ]
+
+[tool.hatch.version]
+path = "pipen_args/version.py"
 
 [project.urls]
 Homepage = "https://github.com/pwwang/pipen-args"
