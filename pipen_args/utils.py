@@ -247,3 +247,20 @@ async def dump_args(
     await dumped_file.parent.a_mkdir(parents=True, exist_ok=True)
     async with dumped_file.a_open("w") as f:
         await f.writelines(out)
+
+
+def hyphenate_arg(arg: str) -> list[str]:
+    """Convert an argument name to a list of hyphenated names if any
+
+    Args:
+        arg: The argument name
+
+    Returns:
+        A list of hyphenated names
+    """
+    no_hyphen = arg.lstrip("-")
+    leading_hyphen = arg[: len(arg) - len(no_hyphen)]
+    if "_" in no_hyphen:
+        hyphenated = no_hyphen.replace("_", "-")
+        return [f"{leading_hyphen}{no_hyphen}", f"{leading_hyphen}{hyphenated}"]
+    return [arg]

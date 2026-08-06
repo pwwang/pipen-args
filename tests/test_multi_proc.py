@@ -55,7 +55,7 @@ def test_multi_proc_plugin_opts(tmp_path):
     out = run_pipeline(
         "multiprocesses",
         args=[
-            "--Process2.plugin_opts",
+            "--Process2.plugin-opts",
             '{"plugin_a": true}',
             "--workdir",
             str(tmp_path / "workdir"),

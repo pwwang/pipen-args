@@ -1,4 +1,5 @@
 """Command line argument parser for pipen"""
+
 # pyright: reportCallIssue=false
 # pyright: reportArgumentType=false
 from __future__ import annotations
@@ -18,6 +19,7 @@ from pipen.utils import update_dict
 from pipen_annotate import annotate
 
 from .defaults import PIPELINE_ARGS_GROUP, FLATTEN_PROC_ARGS, PIPEN_ARGS
+from .utils import hyphenate_arg
 
 if TYPE_CHECKING:  # pragma: no cover
     from argparse import Action
@@ -339,7 +341,10 @@ class Parser(ArgumentParser, metaclass=ParserMeta):
                 else:
                     argopt["default"] = pipen._kwargs.get(arg, None) or {}
 
-            self._pipeline_args_group.add_argument(f"--{arg}", **argopt)
+            self._pipeline_args_group.add_argument(
+                *hyphenate_arg(f"--{arg}"),
+                **argopt,
+            )
 
         if self.flatten_proc_args is True:
             self._add_proc_args(
@@ -455,7 +460,9 @@ class Parser(ArgumentParser, metaclass=ParserMeta):
         if is_start:
             for inkey, inval in anno.Input.items():
                 self.add_argument(
-                    f"--in.{inkey}" if flatten else f"--{proc.name}.in.{inkey}",
+                    *hyphenate_arg(
+                        f"--in.{inkey}" if flatten else f"--{proc.name}.in.{inkey}"
+                    ),
                     help=inval.help or "",
                     **self._get_arg_attrs_from_anno(inval.attrs),
                 )
@@ -463,7 +470,9 @@ class Parser(ArgumentParser, metaclass=ParserMeta):
         if not proc.nexts:
             for key, val in anno.Output.items():
                 self.add_argument(
-                    f"--out.{key}" if flatten else f"--{proc.name}.out.{key}",
+                    *hyphenate_arg(
+                        f"--out.{key}" if flatten else f"--{proc.name}.out.{key}"
+                    ),
                     help=val.help or "",
                     **self._get_arg_attrs_from_anno(val.attrs),
                 )
@@ -504,11 +513,11 @@ class Parser(ArgumentParser, metaclass=ParserMeta):
                 elif pipen_default is not None:
                     attrs["default"] = pipen_default
 
-                self.add_argument(f"--{proc.name}.{key}", **attrs)
+                self.add_argument(*hyphenate_arg(f"--{proc.name}.{key}"), **attrs)
 
             for key in ("plugin_opts", "scheduler_opts"):
                 self.add_argument(
-                    f"--{proc.name}.{key}",
+                    *hyphenate_arg(f"--{proc.name}.{key}"),
                     default=getattr(proc, key),
                     **{k: v for k, v in PIPEN_ARGS[key].items() if k != "default"},
                 )
@@ -536,7 +545,9 @@ class Parser(ArgumentParser, metaclass=ParserMeta):
 
             attrs = self._get_arg_attrs_from_anno(vv.attrs, vv.terms)
             ns.add_argument(
-                f"--{key}.{kk}" if flatten else f"--{proc_name}.{key}.{kk}",
+                *hyphenate_arg(
+                    f"--{key}.{kk}" if flatten else f"--{proc_name}.{key}.{kk}"
+                ),
                 help=vv.help or "",
                 **attrs,
             )
