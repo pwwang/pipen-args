@@ -469,12 +469,26 @@ class Parser(ArgumentParser, metaclass=ParserMeta):
 
         if not proc.nexts:
             for key, val in anno.Output.items():
+                attrs = self._get_arg_attrs_from_anno(val.attrs)
+                # Do not use the declared output value as the default of the
+                # argument, otherwise we cannot tell an explicit `--out.<key>`
+                # from an absent one (`--out.<key>` is honored by the plugin
+                # by replacing the value in the output declaration).
+                # `None` therefore means the argument is not given, just like
+                # for the input arguments.
+                declared = attrs.pop("default", None)
+                help_ = val.help or ""
+                if declared and declared != "<templated>":
+                    # Keep the declared value visible to the users, since argx
+                    # won't add it to the help if it is already there
+                    help_ += f" [default: {declared}]"
+
                 self.add_argument(
                     *hyphenate_arg(
                         f"--out.{key}" if flatten else f"--{proc.name}.out.{key}"
                     ),
-                    help=val.help or "",
-                    **self._get_arg_attrs_from_anno(val.attrs),
+                    help=help_,
+                    **attrs,
                 )
 
         if proc.envs:

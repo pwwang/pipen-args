@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Any, Type
+from typing import TYPE_CHECKING, Any, Sequence, Type
 
 from diot import Diot
 from argx import Namespace
@@ -264,3 +264,82 @@ def hyphenate_arg(arg: str) -> list[str]:
         hyphenated = no_hyphen.replace("_", "-")
         return [f"{leading_hyphen}{no_hyphen}", f"{leading_hyphen}{hyphenated}"]
     return [arg]
+
+
+def _replace_output_item(item: str, key: str, value: Any) -> str | None:
+    """Replace the value of an output declaration item if it is for `key`
+
+    Args:
+        item: The output declaration item, either `name:type:value` or
+            `name:value` (the type is `var` then), as pipen parses it.
+        key: The output key
+        value: The new value for the item
+
+    Returns:
+        The new item, or None if the item is not for `key`
+    """
+    parts = item.split(":")
+    if parts[0] != key:
+        return None
+
+    if len(parts) < 3:
+        # `name:value`, the type is var
+        return f"{key}:{value}"
+
+    return f"{key}:{parts[1]}:{value}"
+
+
+def replace_output_value(
+    output: str | Sequence[str],
+    key: str,
+    value: Any,
+) -> str | list[str]:
+    """Replace the value of output `key` in an output declaration
+
+    Only the value part of the item for `key` is replaced, so that the type
+    (`file`, `dir` or `var`) and the other items are kept. Since the value is
+    put back into the declaration, which is then rendered as a template by
+    pipen (`Proc._compute_output`), it may itself contain template syntax.
+    For `file`/`dir` outputs, the value has to be a path segment relative to
+    the output directory of the job, just like a declared output value.
+
+    This is used to honor `--out.<key>` arguments.
+
+    Args:
+        output: The output declaration of a process, either a single string
+            with items separated by commas, or a sequence of item strings
+        key: The output key to replace the value of
+        value: The new value for the output
+
+    Returns:
+        The new output declaration, in the same shape as `output`
+
+    Raises:
+        ValueError: If `output` is not a string or a list of strings, or if
+            `key` is not declared in `output`
+    """
+    if isinstance(output, (list, tuple)):
+        items = list(output)
+        new_items = [_replace_output_item(item, key, value) for item in items]
+        if all(item is None for item in new_items):
+            raise ValueError(f"Output key {key!r} is not declared.")
+        return [
+            new if new is not None else old
+            for old, new in zip(items, new_items)  # type: ignore[arg-type]
+        ]
+
+    if isinstance(output, str):
+        items = [item.strip() for item in output.split(",") if item.strip()]
+        new_items = [_replace_output_item(item, key, value) for item in items]
+        if all(item is None for item in new_items):
+            raise ValueError(f"Output key {key!r} is not declared.")
+        return ",".join(
+            new if new is not None else old
+            for old, new in zip(items, new_items)  # type: ignore[arg-type]
+        )
+
+    raise ValueError(
+        f"Cannot override the value of output {key!r}: expecting the output "
+        "declaration to be a string or a list of strings, but it is a "
+        f"{type(output).__name__}."
+    )

@@ -16,7 +16,7 @@ from pipen.utils import copy_dict, get_logger, is_loading_pipeline, update_dict
 from .version import __version__
 from .defaults import DUMP_ARGS
 from .parser_ import Parser
-from .utils import dump_args
+from .utils import dump_args, replace_output_value
 
 if TYPE_CHECKING:  # pragma: no cover
     from pipen import Pipen
@@ -320,6 +320,34 @@ class ArgsPlugin:
                     # only when input data is given and not all None
                     if input_data.shape[0] > 0:
                         proc.input_data = input_data
+
+            # Honor the output values given by `--out.<key>` arguments, by
+            # replacing the values in the output declaration of the process.
+            # Note that we can't tell an absent `--out.<key>` from one given
+            # the declared value, so the parser does not set the declared
+            # value as the default of the argument (`None` means not given).
+            out_args = proc_args.get("out")
+            if out_args is not None:
+                out_values = {
+                    key: value
+                    for key, value in (
+                        vars(out_args)
+                        if isinstance(out_args, Namespace)
+                        else out_args
+                    ).items()
+                    if value is not None
+                }
+                if out_values:
+                    output = proc.output
+                    for key, value in out_values.items():
+                        try:
+                            output = replace_output_value(output, key, value)
+                        except ValueError as exc:
+                            raise ValueError(f"[{proc.name}] {exc}") from None
+
+                    # `proc.output` is read from the class when the output is
+                    # computed (`Proc._compute_output`)
+                    proc.output = output
 
             if (
                 "envs" in proc_args

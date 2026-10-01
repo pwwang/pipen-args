@@ -8,8 +8,36 @@ from pipen_args.utils import (
     _dump_dict,
     dump_args,
 )
+from pipen_args.utils import replace_output_value
 from argparse import Namespace
 from pathlib import Path
+
+
+def test_replace_output_value():
+    """Test the replace_output_value function"""
+    # a single item
+    assert replace_output_value("b:file:b.txt", "b", "c.txt") == "b:file:c.txt"
+    # only the item for the key is changed
+    assert (
+        replace_output_value("a:file:a.txt, b:file:b.txt", "b", "c.txt")
+        == "a:file:a.txt,b:file:c.txt"
+    )
+    # a list of items
+    assert replace_output_value(
+        ["a:file:a.txt", "b:var:{{in.x}}"], "b", "1"
+    ) == ["a:file:a.txt", "b:var:1"]
+    # `name:value` items (var) keep their shape
+    assert replace_output_value("b:{{in.x}}", "b", "1") == "b:1"
+    # values containing ':' are kept in one piece
+    assert (
+        replace_output_value("b:file:x:y.txt", "b", "c.txt") == "b:file:c.txt"
+    )
+    with pytest.raises(ValueError, match="Output key 'c' is not declared"):
+        replace_output_value("b:file:b.txt", "c", "c.txt")
+    with pytest.raises(ValueError, match="Output key 'x' is not declared"):
+        replace_output_value("b:file:x:y.txt, b:file:b.txt", "x", "c.txt")
+    with pytest.raises(ValueError, match="expecting the output declaration"):
+        replace_output_value({"b": "file:b.txt"}, "b", "c.txt")
 
 
 def test_sort_dict():
