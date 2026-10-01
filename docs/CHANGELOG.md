@@ -1,6 +1,12 @@
 
 # CHANGELOG
 
+## 1.3.1
+
+- fix: honor --out.<key> arguments instead of silently ignoring them
+- chore: bump up dependencies
+
+
 ## 1.2.1
 
 - fix: improve handling of nested arguments in pre-parser
