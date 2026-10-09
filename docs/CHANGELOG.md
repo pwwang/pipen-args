@@ -1,6 +1,10 @@
 
 # CHANGELOG
 
+## 1.3.2
+
+- fix: escape percent signs in help text to prevent rendering issues
+
 ## 1.3.1
 
 - fix: honor --out.<key> arguments instead of silently ignoring them
