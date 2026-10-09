@@ -481,7 +481,7 @@ class Parser(ArgumentParser, metaclass=ParserMeta):
                 if declared and declared != "<templated>":
                     # Keep the declared value visible to the users, since argx
                     # won't add it to the help if it is already there
-                    help_ += f" [default: {declared}]"
+                    help_ += f" [default: {str(declared).replace('%', '%%')}]"
 
                 self.add_argument(
                     *hyphenate_arg(
